@@ -1,0 +1,289 @@
+<?php
+require_once 'config.php';
+requireLogin();
+
+$db = getDB();
+$action = $_GET['action'] ?? 'list';
+$id = $_GET['id'] ?? null;
+$error = '';
+$success = '';
+
+// Handle form submissions
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $label = sanitizeInput($_POST['label'] ?? '');
+    $value = sanitizeInput($_POST['value'] ?? '');
+    $description = sanitizeInput($_POST['description'] ?? '');
+    $icon = sanitizeInput($_POST['icon'] ?? '');
+    $display_order = intval($_POST['display_order'] ?? 0);
+    $is_active = isset($_POST['is_active']) ? 1 : 0;
+    
+    if (empty($label) || empty($value)) {
+        $error = 'Label and value are required.';
+    } else {
+        if ($action === 'add') {
+            $stmt = $db->prepare("INSERT INTO statistics (label, value, description, icon, display_order, is_active, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("ssssiii", $label, $value, $description, $icon, $display_order, $is_active, $_SESSION['admin_id']);
+            
+            if ($stmt->execute()) {
+                logActivity('create', 'statistics', $db->insert_id, "Created statistic: {$label} - {$value}");
+                $success = 'Statistic added successfully!';
+                $action = 'list';
+            } else {
+                $error = 'Error adding statistic: ' . $stmt->error;
+            }
+        } elseif ($action === 'edit' && $id) {
+            $stmt = $db->prepare("UPDATE statistics SET label = ?, value = ?, description = ?, icon = ?, display_order = ?, is_active = ?, updated_by = ? WHERE id = ?");
+            $stmt->bind_param("ssssiiii", $label, $value, $description, $icon, $display_order, $is_active, $_SESSION['admin_id'], $id);
+            
+            if ($stmt->execute()) {
+                logActivity('update', 'statistics', $id, "Updated statistic: {$label} - {$value}");
+                $success = 'Statistic updated successfully!';
+                $action = 'list';
+            } else {
+                $error = 'Error updating statistic: ' . $stmt->error;
+            }
+        }
+    }
+}
+
+// Handle delete
+if ($action === 'delete' && $id) {
+    $stmt = $db->prepare("DELETE FROM statistics WHERE id = ?");
+    $stmt->bind_param("i", $id);
+    
+    if ($stmt->execute()) {
+        logActivity('delete', 'statistics', $id, 'Deleted statistic');
+        $success = 'Statistic deleted successfully!';
+    } else {
+        $error = 'Error deleting statistic: ' . $stmt->error;
+    }
+    $action = 'list';
+}
+
+// Get statistic for edit
+$edit_stat = null;
+if ($action === 'edit' && $id) {
+    $stmt = $db->prepare("SELECT * FROM statistics WHERE id = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $edit_stat = $result->fetch_assoc();
+    
+    if (!$edit_stat) {
+        $error = 'Statistic not found.';
+        $action = 'list';
+    }
+}
+
+// Get all statistics for list
+$all_stats = [];
+if ($action === 'list') {
+    $result = $db->query("SELECT s.*, au.username as updated_by_name FROM statistics s LEFT JOIN admin_users au ON s.updated_by = au.id ORDER BY s.display_order, s.label");
+    while ($row = $result->fetch_assoc()) {
+        $all_stats[] = $row;
+    }
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistics Management - <?php echo SITE_NAME; ?></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2c5530',
+                        secondary: '#4a7c59',
+                        accent: '#8bc34a',
+                        dark: '#1a1a1a',
+                        light: '#f8f9fa'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100">
+    <!-- Sidebar -->
+    <?php include 'includes/sidebar.php'; ?>
+    
+    <!-- Main Content -->
+    <div class="lg:ml-64 p-4 lg:p-8">
+        <!-- Page Header -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">Statistics Management</h1>
+                    <p class="text-gray-600 mt-1">Manage homepage statistics displayed on the index page</p>
+                </div>
+                <a href="?action=add" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition-colors">
+                    <i class="fas fa-plus mr-2"></i>Add New Statistic
+                </a>
+            </div>
+        </div>
+        
+        <?php if ($error): ?>
+            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+                <?php echo htmlspecialchars($error); ?>
+            </div>
+        <?php endif; ?>
+        
+        <?php if ($success): ?>
+            <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded mb-4">
+                <?php echo htmlspecialchars($success); ?>
+            </div>
+        <?php endif; ?>
+        
+        <?php if ($action === 'add' || $action === 'edit'): ?>
+            <!-- Add/Edit Form -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-bold mb-4"><?php echo $action === 'add' ? 'Add New' : 'Edit'; ?> Statistic</h2>
+                
+                <form method="POST" action="">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Label *</label>
+                            <input type="text" name="label" required 
+                                   value="<?php echo htmlspecialchars($edit_stat['label'] ?? ''); ?>"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                   placeholder="e.g., Years Experience">
+                            <p class="text-xs text-gray-500 mt-1">The label displayed below the value</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Value *</label>
+                            <input type="text" name="value" required 
+                                   value="<?php echo htmlspecialchars($edit_stat['value'] ?? ''); ?>"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                   placeholder="e.g., 25+">
+                            <p class="text-xs text-gray-500 mt-1">The main statistic value (can include +, %, etc.)</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                            <input type="text" name="description" 
+                                   value="<?php echo htmlspecialchars($edit_stat['description'] ?? ''); ?>"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                   placeholder="e.g., Years of industry experience">
+                            <p class="text-xs text-gray-500 mt-1">Optional description shown below the label</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Icon (Optional)</label>
+                            <input type="text" name="icon" 
+                                   value="<?php echo htmlspecialchars($edit_stat['icon'] ?? ''); ?>"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                   placeholder="e.g., fas fa-calendar">
+                            <p class="text-xs text-gray-500 mt-1">Font Awesome icon class (currently not displayed on homepage)</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Display Order</label>
+                            <input type="number" name="display_order" 
+                                   value="<?php echo htmlspecialchars($edit_stat['display_order'] ?? 0); ?>"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
+                            <p class="text-xs text-gray-500 mt-1">Lower numbers appear first</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="is_active" value="1" 
+                                   <?php echo ($edit_stat && $edit_stat['is_active']) || !$edit_stat ? 'checked' : ''; ?>
+                                   class="mr-2">
+                            <span class="text-sm text-gray-700">Active (visible on homepage)</span>
+                        </label>
+                    </div>
+                    
+                    <div class="mt-6 flex gap-4">
+                        <button type="submit" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-secondary transition-colors">
+                            <i class="fas fa-save mr-2"></i>Save
+                        </button>
+                        <a href="statistics.php" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+            
+        <?php else: ?>
+            <!-- List View -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="p-4 bg-gray-50 border-b">
+                    <p class="text-sm text-gray-600">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        Statistics are displayed on the homepage in the stats section. They appear in a grid layout (4 columns on desktop, 2 on tablet).
+                    </p>
+                </div>
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Value</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Label</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <?php if (empty($all_stats)): ?>
+                            <tr>
+                                <td colspan="6" class="px-6 py-4 text-center text-gray-500">No statistics found. <a href="?action=add" class="text-primary hover:underline">Add new statistic</a></td>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($all_stats as $stat): ?>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="text-lg font-bold text-primary"><?php echo htmlspecialchars($stat['value']); ?></span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($stat['label']); ?></span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="text-sm text-gray-500"><?php echo htmlspecialchars($stat['description'] ?? '-'); ?></span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="text-sm text-gray-900"><?php echo $stat['display_order']; ?></span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <?php if ($stat['is_active']): ?>
+                                            <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Active</span>
+                                        <?php else: ?>
+                                            <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">Inactive</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <a href="?action=edit&id=<?php echo $stat['id']; ?>" class="text-primary hover:text-secondary mr-3">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                        <a href="?action=delete&id=<?php echo $stat['id']; ?>" 
+                                           onclick="return confirm('Are you sure you want to delete this statistic?')"
+                                           class="text-red-600 hover:text-red-800">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </a>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h3 class="font-semibold text-blue-900 mb-2">Quick Links</h3>
+                <ul class="text-sm text-blue-800 space-y-1">
+                    <li><a href="../index.php" target="_blank" class="hover:underline"><i class="fas fa-external-link-alt mr-1"></i>View Homepage</a></li>
+                    <li><a href="index.php" class="hover:underline"><i class="fas fa-home mr-1"></i>Back to Admin Dashboard</a></li>
+                </ul>
+            </div>
+        <?php endif; ?>
+    </div>
+</body>
+</html>
+
