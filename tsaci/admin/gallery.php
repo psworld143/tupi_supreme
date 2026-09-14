@@ -127,7 +127,7 @@ if ($action === 'list') {
         <?php if ($action === 'add' || $action === 'edit'): ?>
             <div class="bg-white rounded-lg shadow-md p-6">
                 <h2 class="text-2xl font-bold mb-4"><?php echo $action === 'add' ? 'Add New' : 'Edit'; ?> Gallery Image</h2>
-                <form method="POST" action="">
+                <form method="POST" action="" onsubmit="return validateImageUpload()">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Title *</label>
@@ -165,10 +165,7 @@ if ($action === 'list') {
                                     <label for="image-file-input" class="cursor-pointer inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
                                         <i class="fas fa-upload mr-2"></i>Choose Image File
                                     </label>
-                                    <button type="button" id="upload-image-btn" onclick="uploadImage()" class="ml-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-secondary transition-colors hidden">
-                                        <i class="fas fa-cloud-upload-alt mr-2"></i>Upload
-                                    </button>
-                                    <p class="mt-2 text-xs text-gray-500">JPEG, PNG, GIF, or WebP (Max 10MB)</p>
+                                    <p class="mt-2 text-xs text-gray-500">JPEG, PNG, GIF, or WebP (Max 10MB) — file uploads automatically when selected</p>
                                 </div>
                                 <div id="upload-progress" class="hidden mt-2">
                                     <div class="bg-gray-200 rounded-full h-2">
@@ -178,18 +175,21 @@ if ($action === 'list') {
                                 </div>
                             </div>
                             
-                            <!-- URL Input -->
-                            <input type="url" name="image_url" id="image-url-input" required value="<?php echo htmlspecialchars($edit_image['image_url'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Image URL or upload a file above">
-                            <p class="mt-1 text-sm text-gray-500">Enter image URL manually or upload a file using the file picker above</p>
+                            <!-- URL Input (hidden, auto-filled by upload) -->
+                            <input type="hidden" name="image_url" id="image-url-input" value="<?php echo htmlspecialchars($edit_image['image_url'] ?? ''); ?>">
                             
                             <script>
                             let selectedFile = null;
+                            // Upload state: 'idle' | 'uploading' | 'success' | 'failed'
+                            let uploadState = 'idle';
+                            // Remember the original URL when editing so we know if the user picked a new file
+                            const originalImageUrl = document.getElementById('image-url-input').value;
                             
                             document.getElementById('image-file-input').addEventListener('change', function(e) {
                                 const file = e.target.files[0];
                                 if (file) {
                                     selectedFile = file;
-                                    document.getElementById('upload-image-btn').classList.remove('hidden');
+                                    uploadState = 'idle';
                                     
                                     const reader = new FileReader();
                                     reader.onload = function(e) {
@@ -198,6 +198,9 @@ if ($action === 'list') {
                                         document.getElementById('image-preview-container').classList.remove('hidden');
                                     };
                                     reader.readAsDataURL(file);
+                                    
+                                    // Auto-upload immediately after selection
+                                    uploadImage();
                                 }
                             });
                             
@@ -210,14 +213,19 @@ if ($action === 'list') {
                                 const formData = new FormData();
                                 formData.append('image', selectedFile);
                                 
-                                const uploadBtn = document.getElementById('upload-image-btn');
                                 const progressContainer = document.getElementById('upload-progress');
                                 const progressBar = document.getElementById('upload-progress-bar');
                                 const statusText = document.getElementById('upload-status');
+                                const fileLabel = document.querySelector('label[for="image-file-input"]');
                                 
-                                uploadBtn.disabled = true;
+                                uploadState = 'uploading';
                                 progressContainer.classList.remove('hidden');
                                 statusText.textContent = 'Uploading...';
+                                statusText.classList.remove('text-green-600', 'text-red-600');
+                                progressBar.classList.remove('bg-green-500');
+                                progressBar.style.width = '0%';
+                                fileLabel.style.pointerEvents = 'none';
+                                fileLabel.style.opacity = '0.6';
                                 
                                 const xhr = new XMLHttpRequest();
                                 
@@ -236,26 +244,35 @@ if ($action === 'list') {
                                             statusText.textContent = 'Upload successful!';
                                             statusText.classList.add('text-green-600');
                                             progressBar.classList.add('bg-green-500');
+                                            uploadState = 'success';
                                             setTimeout(() => {
                                                 progressContainer.classList.add('hidden');
-                                                uploadBtn.classList.add('hidden');
                                             }, 2000);
                                         } else {
-                                            alert('Upload failed: ' + response.error);
-                                            progressContainer.classList.add('hidden');
+                                            statusText.textContent = 'Upload failed: ' + response.error;
+                                            statusText.classList.add('text-red-600');
+                                            progressContainer.classList.remove('hidden');
+                                            uploadState = 'failed';
                                         }
                                     } else {
-                                        const response = JSON.parse(xhr.responseText);
-                                        alert('Upload failed: ' + (response.error || 'Server error'));
-                                        progressContainer.classList.add('hidden');
+                                        let errMsg = 'Server error';
+                                        try { errMsg = JSON.parse(xhr.responseText).error || errMsg; } catch (_) {}
+                                        statusText.textContent = 'Upload failed: ' + errMsg;
+                                        statusText.classList.add('text-red-600');
+                                        progressContainer.classList.remove('hidden');
+                                        uploadState = 'failed';
                                     }
-                                    uploadBtn.disabled = false;
+                                    fileLabel.style.pointerEvents = '';
+                                    fileLabel.style.opacity = '';
                                 });
                                 
                                 xhr.addEventListener('error', function() {
-                                    alert('Upload failed: Network error');
-                                    progressContainer.classList.add('hidden');
-                                    uploadBtn.disabled = false;
+                                    statusText.textContent = 'Upload failed: Network error';
+                                    statusText.classList.add('text-red-600');
+                                    progressContainer.classList.remove('hidden');
+                                    uploadState = 'failed';
+                                    fileLabel.style.pointerEvents = '';
+                                    fileLabel.style.opacity = '';
                                 });
                                 
                                 xhr.open('POST', 'api/upload_image.php');
@@ -267,7 +284,8 @@ if ($action === 'list') {
                                 document.getElementById('image-url-input').value = '';
                                 document.getElementById('image-file-input').value = '';
                                 selectedFile = null;
-                                document.getElementById('upload-image-btn').classList.add('hidden');
+                                uploadState = 'idle';
+                                document.getElementById('upload-progress').classList.add('hidden');
                             }
                             
                             document.getElementById('image-url-input').addEventListener('input', function(e) {
@@ -286,6 +304,30 @@ if ($action === 'list') {
                                     document.getElementById('image-preview-container').classList.add('hidden');
                                 }
                             });
+                            
+                            function validateImageUpload() {
+                                const urlInput = document.getElementById('image-url-input');
+                                
+                                // Block save while an upload is still in progress
+                                if (uploadState === 'uploading') {
+                                    alert('Please wait for the image upload to finish before saving.');
+                                    return false;
+                                }
+                                
+                                // User picked a new file but the upload failed
+                                if (selectedFile && uploadState === 'failed') {
+                                    alert('The image upload failed. Please try again or pick a different file.');
+                                    return false;
+                                }
+                                
+                                // No image at all (new record with no upload, or image was cleared)
+                                if (!urlInput.value.trim()) {
+                                    alert('Please choose and upload an image file first.');
+                                    return false;
+                                }
+                                
+                                return true;
+                            }
                             </script>
                         </div>
                         <div class="md:col-span-2">

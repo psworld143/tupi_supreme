@@ -252,8 +252,8 @@ $subject_options = getContactSubjectOptions(); // Get contact form subject optio
                         </div>
                         <h4 class="text-2xl font-bold text-gray-900 mb-4">Call Us</h4>
                         <div class="text-gray-600">
-                            <?php foreach ($contact_phones as $phone): ?>
-                                <?php echo htmlspecialchars_safe($phone['label'] ?: 'Phone'); ?>: <?php echo htmlspecialchars_safe($phone['value']); ?><br>
+                            <?php foreach ($contact_phones as $contact_phone): ?>
+                                <?php echo htmlspecialchars_safe($contact_phone['label'] ?: 'Phone'); ?>: <?php echo htmlspecialchars_safe($contact_phone['value']); ?><br>
                             <?php endforeach; ?>
                         </div>
                     </div>
@@ -266,8 +266,8 @@ $subject_options = getContactSubjectOptions(); // Get contact form subject optio
                         </div>
                         <h4 class="text-2xl font-bold text-gray-900 mb-4">Email Us</h4>
                         <div class="text-gray-600">
-                            <?php foreach ($contact_emails as $email): ?>
-                                <?php echo htmlspecialchars_safe($email['label'] ?: 'Email'); ?>: <a href="mailto:<?php echo htmlspecialchars_safe($email['value']); ?>" class="text-primary hover:underline"><?php echo htmlspecialchars_safe($email['value']); ?></a><br>
+                            <?php foreach ($contact_emails as $contact_email): ?>
+                                <?php echo htmlspecialchars_safe($contact_email['label'] ?: 'Email'); ?>: <a href="mailto:<?php echo htmlspecialchars_safe($contact_email['value']); ?>" class="text-primary hover:underline"><?php echo htmlspecialchars_safe($contact_email['value']); ?></a><br>
                             <?php endforeach; ?>
                         </div>
                     </div>

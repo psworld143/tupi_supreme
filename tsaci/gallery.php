@@ -291,11 +291,21 @@ function isValidImageUrl($url) {
                         $isPlaceholderService = strpos($imageUrlFromDb, 'via.placeholder.com') !== false || 
                                                strpos($imageUrlFromDb, 'placeholder.com') !== false;
                         
+                        // Resolve root-relative URLs (e.g. /tupi_supreme/tsaci/uploads/...) to a real filesystem path
+                        $resolvedPath = $imageUrlFromDb;
+                        if (strpos($imageUrlFromDb, '/') === 0) {
+                            // Strip leading slash and try to map to the document root
+                            $docRoot = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/\\');
+                            $resolvedPath = $docRoot . '/' . ltrim($imageUrlFromDb, '/');
+                        }
+                        
                         $hasValidImage = !empty($imageUrlFromDb) && 
                                         $imageUrlFromDb !== '#' && 
                                         $imageUrlFromDb !== null &&
                                         !$isPlaceholderService &&
-                                        (filter_var($imageUrlFromDb, FILTER_VALIDATE_URL) || file_exists($imageUrlFromDb));
+                                        (filter_var($imageUrlFromDb, FILTER_VALIDATE_URL) || 
+                                         strpos($imageUrlFromDb, '/') === 0 ||
+                                         file_exists($resolvedPath));
                         
                         // Use placeholder if no valid image URL or if it's a placeholder service URL
                         $imageUrl = $hasValidImage ? $imageUrlFromDb : $placeholderUrl;
@@ -372,11 +382,20 @@ function isValidImageUrl($url) {
             $isPlaceholderService = strpos($imageUrlFromDb, 'via.placeholder.com') !== false || 
                                    strpos($imageUrlFromDb, 'placeholder.com') !== false;
             
+            // Resolve root-relative URLs to a real filesystem path for the file_exists check
+            $resolvedPath = $imageUrlFromDb;
+            if (strpos($imageUrlFromDb, '/') === 0) {
+                $docRoot = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/\\');
+                $resolvedPath = $docRoot . '/' . ltrim($imageUrlFromDb, '/');
+            }
+            
             $hasValidImage = !empty($imageUrlFromDb) && 
                             $imageUrlFromDb !== '#' && 
                             $imageUrlFromDb !== null &&
                             !$isPlaceholderService &&
-                            (filter_var($imageUrlFromDb, FILTER_VALIDATE_URL) || file_exists($imageUrlFromDb));
+                            (filter_var($imageUrlFromDb, FILTER_VALIDATE_URL) || 
+                             strpos($imageUrlFromDb, '/') === 0 ||
+                             file_exists($resolvedPath));
             $imageUrl = $hasValidImage ? $imageUrlFromDb : $placeholderUrl;
             
             $galleryData[] = [
