@@ -22,6 +22,7 @@ $nav_items = [
     ['statistics.php',     'fa-chart-bar',      'Statistics'],
     ['carousel.php',       'fa-images',         'Carousel'],
     ['products.php',       'fa-cube',           'Products'],
+    ['product-tabs.php',   'fa-folder',         'Product Tabs'],
     ['services.php',       'fa-concierge-bell', 'Services'],
     ['case-studies.php',   'fa-book',           'Case Studies'],
     ['gallery.php',        'fa-photo-video',    'Gallery'],
@@ -30,7 +31,6 @@ $nav_items = [
 ];
 
 $account_items = [
-    ['profile.php',  'fa-user',         'Profile'],
     ['settings.php', 'fa-cog',          'Settings'],
     ['logout.php',   'fa-sign-out-alt', 'Logout'],
 ];

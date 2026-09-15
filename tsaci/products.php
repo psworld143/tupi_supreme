@@ -18,6 +18,20 @@ $cta_button_1_link = getPageContent('products', 'cta_button_1_link', 'contact.ph
 $cta_button_2_text = getPageContent('products', 'cta_button_2_text', 'Download Technical Specs');
 $cta_button_2_link = getPageContent('products', 'cta_button_2_link', 'resources.php');
 
+// "All Products" grid section copy (editable via page_content)
+$all_products_title = getPageContent('products', 'all_products_title', 'All Products');
+$all_products_subtitle = getPageContent('products', 'all_products_subtitle', 'Browse our complete product catalog');
+
+// Tab labels (editable via page_content)
+$tab_granulated_label = getPageContent('products', 'tab_granulated_label', 'Granulated Activated Carbon');
+$tab_husk_label = getPageContent('products', 'tab_husk_label', 'Coconut Husk Products');
+$tab_custom_label = getPageContent('products', 'tab_custom_label', 'Custom Formulations');
+
+// Product tab definitions (from product_tabs table; fail-soft defaults)
+$product_tabs = getProductTabs();
+// System tab keys (rendered with their own rich hard-coded panes)
+$system_tab_keys = ['granulated', 'husk', 'custom'];
+
 // Get products from database
 $all_products = getProducts();
 $granulated_products = array_filter($all_products, function($p) { return stripos($p['slug'], 'granulated') !== false || stripos($p['name'], 'Granulated') !== false; });
@@ -278,15 +292,11 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
             
             <!-- Navigation Pills -->
             <div class="flex flex-wrap justify-center gap-3 mb-12 reveal">
-                <button class="nav-pill active border-2 border-[#d6ded9] text-[#23332c] px-6 py-3 rounded-full font-medium text-sm" onclick="showTab('granulated', this)">
-                    <i class="fas fa-cubes mr-2"></i>Granulated Activated Carbon
-                </button>
-                <button class="nav-pill border-2 border-[#d6ded9] text-[#23332c] px-6 py-3 rounded-full font-medium text-sm" onclick="showTab('husk', this)">
-                    <i class="fas fa-seedling mr-2"></i>Coconut Husk Products
-                </button>
-                <button class="nav-pill border-2 border-[#d6ded9] text-[#23332c] px-6 py-3 rounded-full font-medium text-sm" onclick="showTab('custom', this)">
-                    <i class="fas fa-cogs mr-2"></i>Custom Formulations
-                </button>
+                <?php foreach ($product_tabs as $ti => $tab): ?>
+                    <button class="nav-pill border-2 border-[#d6ded9] text-[#23332c] px-6 py-3 rounded-full font-medium text-sm <?php echo $ti === 0 ? 'active' : ''; ?>" onclick="showTab('<?php echo htmlspecialchars_safe($tab['tab_key']); ?>', this)">
+                        <i class="fas <?php echo htmlspecialchars_safe($tab['icon'] ?? 'fa-cube'); ?> mr-2"></i><?php echo htmlspecialchars_safe($tab['label']); ?>
+                    </button>
+                <?php endforeach; ?>
             </div>
 
             <!-- Tab Content -->
@@ -663,7 +673,156 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
                         </div>
                     </div>
                 </div>
+
+                <?php
+                // Render panes for custom (non-system) tabs — each lists products
+                // whose name/slug matches the tab's keywords.
+                foreach ($product_tabs as $tab):
+                    $key = $tab['tab_key'];
+                    if (in_array($key, $system_tab_keys, true)) continue;
+                    $tab_products = filterProductsByKeywords($all_products, $tab['keywords'] ?? '');
+                ?>
+                <div id="<?php echo htmlspecialchars_safe($key); ?>" class="tab-pane hidden">
+                    <div class="bg-[#60796e] text-white rounded-2xl p-8 lg:p-10 mb-12 text-center relative overflow-hidden reveal">
+                        <div class="orb orb-1" style="background: #8bc34a; opacity: 0.25;"></div>
+                        <div class="relative">
+                            <span class="eyebrow bg-white/15 text-white/90 mb-4">
+                                <i class="fas <?php echo htmlspecialchars_safe($tab['icon'] ?? 'fa-cube'); ?> text-xs"></i> Products
+                            </span>
+                            <h3 class="text-3xl lg:text-4xl font-bold mb-4 mt-3"><?php echo htmlspecialchars_safe($tab['label']); ?></h3>
+                        </div>
+                    </div>
+                    <?php if (!empty($tab_products)): ?>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <?php foreach ($tab_products as $pi => $product): ?>
+                                <div class="product-card bg-white border border-[#e6ece8] rounded-2xl overflow-hidden flex flex-col reveal <?php echo 'reveal-delay-' . ((($pi % 3) + 1)); ?>">
+                                    <?php if (!empty($product['image_url'])): ?>
+                                        <div class="aspect-video bg-[#f7faf8] flex items-center justify-center overflow-hidden">
+                                            <img src="<?php echo htmlspecialchars_safe($product['image_url']); ?>" alt="<?php echo htmlspecialchars_safe($product['name']); ?>" class="w-full h-full object-cover">
+                                        </div>
+                                    <?php else: ?>
+                                        <div class="aspect-video bg-gradient-to-br from-[#3d7a66] to-[#60796e] flex items-center justify-center">
+                                            <i class="fas fa-box text-5xl text-white/80"></i>
+                                        </div>
+                                    <?php endif; ?>
+                                    <div class="p-6 flex flex-col flex-1">
+                                        <h4 class="text-xl font-semibold text-[#23332c] mb-2"><?php echo htmlspecialchars_safe($product['name']); ?></h4>
+                                        <?php if (!empty($product['description'])): ?>
+                                            <div class="text-[#7d8b84] text-sm leading-relaxed mb-4 prose prose-sm max-w-none"><?php echo htmlspecialchars_decode($product['description'], ENT_QUOTES); ?></div>
+                                        <?php endif; ?>
+                                        <?php if (!empty($product['features'])): ?>
+                                            <ul class="text-sm text-[#5a6b62] space-y-1 mb-4">
+                                                <?php
+                                                $feats = array_map('trim', explode('•', $product['features']));
+                                                $feats = array_filter($feats);
+                                                foreach ($feats as $feat):
+                                                ?>
+                                                    <li class="flex items-start"><i class="fas fa-check text-[#3d7a66] mt-1 mr-2 text-xs"></i><?php echo htmlspecialchars_safe($feat); ?></li>
+                                                <?php endforeach; ?>
+                                            </ul>
+                                        <?php endif; ?>
+                                        <div class="mt-auto pt-4">
+                                            <a href="contact.php" class="inline-flex items-center gap-2 bg-[#23332c] hover:bg-[#3a4a41] text-white font-medium py-2.5 px-5 rounded-full transition-colors text-sm">
+                                                <i class="fas fa-quote-left text-xs"></i>Request Quote
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="text-center py-12 reveal">
+                            <div class="w-16 h-16 rounded-full bg-[#eef3f0] flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-box text-2xl text-[#60796e]"></i>
+                            </div>
+                            <p class="text-[#7d8b84]">No products match this category yet.</p>
+                        </div>
+                    <?php endif; ?>
+                </div>
+                <?php endforeach; ?>
             </div>
+        </div>
+    </section>
+
+    <!-- All Products (dynamic catalog grid — every active product appears here) -->
+    <section id="all-products" class="bg-[#f5f7f5] py-20 lg:py-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal">
+                <span class="eyebrow mb-4">
+                    <i class="fas fa-th text-xs"></i> Catalog
+                </span>
+                <h2 class="text-3xl lg:text-4xl font-bold text-[#23332c] mb-4 mt-4"><?php echo htmlspecialchars_safe($all_products_title); ?></h2>
+                <p class="text-lg text-[#7d8b84] max-w-2xl mx-auto"><?php echo htmlspecialchars_safe($all_products_subtitle); ?></p>
+            </div>
+            <?php if (!empty($all_products)): ?>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <?php foreach ($all_products as $i => $product): ?>
+                        <div class="product-card bg-white border border-[#e6ece8] rounded-2xl overflow-hidden flex flex-col reveal <?php echo 'reveal-delay-' . ((($i % 3) + 1)); ?>">
+                            <?php if (!empty($product['image_url'])): ?>
+                                <div class="aspect-video bg-[#f7faf8] flex items-center justify-center overflow-hidden">
+                                    <img src="<?php echo htmlspecialchars_safe($product['image_url']); ?>" alt="<?php echo htmlspecialchars_safe($product['name']); ?>" class="w-full h-full object-cover">
+                                </div>
+                            <?php else: ?>
+                                <div class="aspect-video bg-gradient-to-br from-[#3d7a66] to-[#60796e] flex items-center justify-center">
+                                    <i class="fas fa-box text-5xl text-white/80"></i>
+                                </div>
+                            <?php endif; ?>
+                            <div class="p-6 flex flex-col flex-1">
+                                <h3 class="text-xl font-semibold text-[#23332c] mb-2"><?php echo htmlspecialchars_safe($product['name']); ?></h3>
+                                <?php if (!empty($product['description'])): ?>
+                                    <div class="text-[#7d8b84] text-sm leading-relaxed mb-4 prose prose-sm max-w-none"><?php echo htmlspecialchars_decode($product['description'], ENT_QUOTES); ?></div>
+                                <?php endif; ?>
+                                <?php if (!empty($product['specifications'])): ?>
+                                    <div class="mb-4">
+                                        <h4 class="text-xs font-semibold text-[#3d7a66] uppercase tracking-wide mb-2">Specifications</h4>
+                                        <ul class="text-sm text-[#5a6b62] space-y-1">
+                                            <?php
+                                            $specs = array_map('trim', explode('•', $product['specifications']));
+                                            $specs = array_filter($specs);
+                                            foreach ($specs as $spec):
+                                            ?>
+                                                <li class="flex items-start"><i class="fas fa-circle text-[6px] text-[#3d7a66] mt-2 mr-2"></i><?php echo htmlspecialchars_safe($spec); ?></li>
+                                            <?php endforeach; ?>
+                                        </ul>
+                                    </div>
+                                <?php endif; ?>
+                                <?php if (!empty($product['features'])): ?>
+                                    <div class="mb-4">
+                                        <h4 class="text-xs font-semibold text-[#3d7a66] uppercase tracking-wide mb-2">Key Features</h4>
+                                        <ul class="text-sm text-[#5a6b62] space-y-1">
+                                            <?php
+                                            $feats = array_map('trim', explode('•', $product['features']));
+                                            $feats = array_filter($feats);
+                                            foreach ($feats as $feat):
+                                            ?>
+                                                <li class="flex items-start"><i class="fas fa-check text-[#3d7a66] mt-1 mr-2 text-xs"></i><?php echo htmlspecialchars_safe($feat); ?></li>
+                                            <?php endforeach; ?>
+                                        </ul>
+                                    </div>
+                                <?php endif; ?>
+                                <?php if (!empty($product['applications'])): ?>
+                                    <div class="mb-4">
+                                        <h4 class="text-xs font-semibold text-[#3d7a66] uppercase tracking-wide mb-2">Applications</h4>
+                                        <p class="text-sm text-[#5a6b62] leading-relaxed"><?php echo htmlspecialchars_safe(str_replace('•', ',', $product['applications'])); ?></p>
+                                    </div>
+                                <?php endif; ?>
+                                <div class="mt-auto pt-4">
+                                    <a href="contact.php" class="inline-flex items-center gap-2 bg-[#23332c] hover:bg-[#3a4a41] text-white font-medium py-2.5 px-5 rounded-full transition-colors text-sm">
+                                        <i class="fas fa-quote-left text-xs"></i>Request Quote
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php else: ?>
+                <div class="text-center py-12 reveal">
+                    <div class="w-16 h-16 rounded-full bg-[#eef3f0] flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-box text-2xl text-[#60796e]"></i>
+                    </div>
+                    <p class="text-[#7d8b84]">No products available at this time.</p>
+                </div>
+            <?php endif; ?>
         </div>
     </section>
 
@@ -866,6 +1025,21 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
             navPills.forEach(pill => pill.classList.remove('active'));
             btn.classList.add('active');
         }
+
+        // Activate the first tab on load so the visible pane matches the
+        // first tab button (order may differ from the default "granulated").
+        (function () {
+            var firstPill = document.querySelector('.nav-pill');
+            if (firstPill) {
+                var firstKey = firstPill.getAttribute('onclick').match(/showTab\('([^']+)'/);
+                if (firstKey) {
+                    // Hide all panes first, then show the first
+                    document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
+                    var firstPane = document.getElementById(firstKey[1]);
+                    if (firstPane) firstPane.classList.remove('hidden');
+                }
+            }
+        })();
 
         // Scroll-triggered reveal animations
         (function() {

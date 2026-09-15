@@ -263,6 +263,15 @@ $view_url = '../products.php#main';
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Image</label>
 
+                            <!-- Image source mode selector -->
+                            <div class="mb-3">
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Image source</label>
+                                <select id="image-source-mode" onchange="switchImageMode()" class="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm">
+                                    <option value="upload">Upload from file</option>
+                                    <option value="url">Enter image URL</option>
+                                </select>
+                            </div>
+
                             <!-- Image Preview -->
                             <div id="image-preview-container" class="mb-3 <?php echo empty($edit_product['image_url'] ?? '') ? 'hidden' : ''; ?>">
                                 <img id="image-preview" src="<?php echo htmlspecialchars($edit_product['image_url'] ?? ''); ?>" alt="Preview" class="max-w-full h-48 object-contain border border-gray-300 rounded-lg p-2 bg-gray-50">
@@ -271,17 +280,14 @@ $view_url = '../products.php#main';
                                 </button>
                             </div>
 
-                            <!-- File Picker -->
-                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 mb-3">
+                            <!-- File Picker (upload mode) -->
+                            <div id="file-picker-block" class="border-2 border-dashed border-gray-300 rounded-lg p-4 mb-3">
                                 <div class="text-center">
                                     <input type="file" id="image-file-input" accept="image/jpeg,image/png,image/gif,image/webp" class="hidden">
                                     <label for="image-file-input" class="cursor-pointer inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
                                         <i class="fas fa-upload mr-2"></i>Choose Image File
                                     </label>
-                                    <button type="button" id="upload-image-btn" onclick="uploadImage()" class="ml-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-secondary transition-colors hidden">
-                                        <i class="fas fa-cloud-upload-alt mr-2"></i>Upload
-                                    </button>
-                                    <p class="mt-2 text-xs text-gray-500">JPEG, PNG, GIF, or WebP (Max 10MB)</p>
+                                    <p class="mt-2 text-xs text-gray-500">JPEG, PNG, GIF, or WebP (Max 10MB) — file uploads automatically when selected</p>
                                 </div>
                                 <div id="upload-progress" class="hidden mt-2">
                                     <div class="bg-gray-200 rounded-full h-2">
@@ -291,20 +297,65 @@ $view_url = '../products.php#main';
                                 </div>
                             </div>
 
-                            <!-- URL Input -->
-                            <input type="url" name="image_url" id="image-url-input"
-                                   value="<?php echo htmlspecialchars($edit_product['image_url'] ?? ''); ?>"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary" placeholder="Image URL or upload a file above">
-                            <p class="mt-1 text-xs text-gray-400">Enter an image URL manually or upload a file using the picker above.</p>
+                            <!-- URL Input (url mode — visible text field for manual entry) -->
+                            <div id="url-input-block" class="hidden mb-3">
+                                <input type="url" id="image-url-visible" value="<?php echo htmlspecialchars($edit_product['image_url'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary" placeholder="https://example.com/image.jpg" oninput="syncUrlInput(this.value)">
+                                <p class="mt-1 text-xs text-gray-500">Paste a full image URL (https://...).</p>
+                            </div>
+
+                            <!-- Hidden field: the actual value submitted with the form -->
+                            <input type="hidden" name="image_url" id="image-url-input" value="<?php echo htmlspecialchars($edit_product['image_url'] ?? ''); ?>">
 
                             <script>
                             let selectedFile = null;
+                            // Upload state: 'idle' | 'uploading' | 'success' | 'failed'
+                            let uploadState = 'idle';
+                            // Current image source mode: 'upload' | 'url'
+                            let imageMode = 'upload';
+
+                            function switchImageMode() {
+                                const mode = document.getElementById('image-source-mode').value;
+                                imageMode = mode;
+                                const fileBlock = document.getElementById('file-picker-block');
+                                const urlBlock = document.getElementById('url-input-block');
+                                if (mode === 'url') {
+                                    fileBlock.classList.add('hidden');
+                                    urlBlock.classList.remove('hidden');
+                                    // Carry the current value into the visible URL field
+                                    document.getElementById('image-url-visible').value = document.getElementById('image-url-input').value;
+                                } else {
+                                    urlBlock.classList.add('hidden');
+                                    fileBlock.classList.remove('hidden');
+                                    // Reset any failed upload state when switching back to upload mode
+                                    if (uploadState === 'failed') {
+                                        uploadState = 'idle';
+                                        document.getElementById('upload-progress').classList.add('hidden');
+                                    }
+                                }
+                            }
+
+                            // Keep the hidden submitted field in sync with the visible URL text box
+                            function syncUrlInput(value) {
+                                document.getElementById('image-url-input').value = value;
+                                // Update the preview live
+                                const preview = document.getElementById('image-preview');
+                                if (value.trim()) {
+                                    preview.src = value;
+                                    preview.onerror = function() { this.style.display = 'none'; };
+                                    preview.onload = function() {
+                                        this.style.display = 'block';
+                                        document.getElementById('image-preview-container').classList.remove('hidden');
+                                    };
+                                } else {
+                                    document.getElementById('image-preview-container').classList.add('hidden');
+                                }
+                            }
 
                             document.getElementById('image-file-input').addEventListener('change', function(e) {
                                 const file = e.target.files[0];
                                 if (file) {
                                     selectedFile = file;
-                                    document.getElementById('upload-image-btn').classList.remove('hidden');
+                                    uploadState = 'idle';
 
                                     const reader = new FileReader();
                                     reader.onload = function(e) {
@@ -313,6 +364,9 @@ $view_url = '../products.php#main';
                                         document.getElementById('image-preview-container').classList.remove('hidden');
                                     };
                                     reader.readAsDataURL(file);
+
+                                    // Auto-upload immediately after selection
+                                    uploadImage();
                                 }
                             });
 
@@ -325,14 +379,19 @@ $view_url = '../products.php#main';
                                 const formData = new FormData();
                                 formData.append('image', selectedFile);
 
-                                const uploadBtn = document.getElementById('upload-image-btn');
                                 const progressContainer = document.getElementById('upload-progress');
                                 const progressBar = document.getElementById('upload-progress-bar');
                                 const statusText = document.getElementById('upload-status');
+                                const fileLabel = document.querySelector('label[for="image-file-input"]');
 
-                                uploadBtn.disabled = true;
+                                uploadState = 'uploading';
                                 progressContainer.classList.remove('hidden');
                                 statusText.textContent = 'Uploading...';
+                                statusText.classList.remove('text-green-600', 'text-red-600');
+                                progressBar.classList.remove('bg-green-500');
+                                progressBar.style.width = '0%';
+                                fileLabel.style.pointerEvents = 'none';
+                                fileLabel.style.opacity = '0.6';
 
                                 const xhr = new XMLHttpRequest();
 
@@ -351,26 +410,35 @@ $view_url = '../products.php#main';
                                             statusText.textContent = 'Upload successful!';
                                             statusText.classList.add('text-green-600');
                                             progressBar.classList.add('bg-green-500');
+                                            uploadState = 'success';
                                             setTimeout(() => {
                                                 progressContainer.classList.add('hidden');
-                                                uploadBtn.classList.add('hidden');
                                             }, 2000);
                                         } else {
-                                            alert('Upload failed: ' + response.error);
-                                            progressContainer.classList.add('hidden');
+                                            statusText.textContent = 'Upload failed: ' + response.error;
+                                            statusText.classList.add('text-red-600');
+                                            progressContainer.classList.remove('hidden');
+                                            uploadState = 'failed';
                                         }
                                     } else {
-                                        const response = JSON.parse(xhr.responseText);
-                                        alert('Upload failed: ' + (response.error || 'Server error'));
-                                        progressContainer.classList.add('hidden');
+                                        let errMsg = 'Server error';
+                                        try { errMsg = JSON.parse(xhr.responseText).error || errMsg; } catch (_) {}
+                                        statusText.textContent = 'Upload failed: ' + errMsg;
+                                        statusText.classList.add('text-red-600');
+                                        progressContainer.classList.remove('hidden');
+                                        uploadState = 'failed';
                                     }
-                                    uploadBtn.disabled = false;
+                                    fileLabel.style.pointerEvents = '';
+                                    fileLabel.style.opacity = '';
                                 });
 
                                 xhr.addEventListener('error', function() {
-                                    alert('Upload failed: Network error');
-                                    progressContainer.classList.add('hidden');
-                                    uploadBtn.disabled = false;
+                                    statusText.textContent = 'Upload failed: Network error';
+                                    statusText.classList.add('text-red-600');
+                                    progressContainer.classList.remove('hidden');
+                                    uploadState = 'failed';
+                                    fileLabel.style.pointerEvents = '';
+                                    fileLabel.style.opacity = '';
                                 });
 
                                 xhr.open('POST', 'api/upload_image.php');
@@ -380,27 +448,12 @@ $view_url = '../products.php#main';
                             function clearImagePreview() {
                                 document.getElementById('image-preview-container').classList.add('hidden');
                                 document.getElementById('image-url-input').value = '';
+                                document.getElementById('image-url-visible').value = '';
                                 document.getElementById('image-file-input').value = '';
                                 selectedFile = null;
-                                document.getElementById('upload-image-btn').classList.add('hidden');
+                                uploadState = 'idle';
+                                document.getElementById('upload-progress').classList.add('hidden');
                             }
-
-                            document.getElementById('image-url-input').addEventListener('input', function(e) {
-                                const url = e.target.value;
-                                if (url) {
-                                    const preview = document.getElementById('image-preview');
-                                    preview.src = url;
-                                    preview.onerror = function() {
-                                        this.style.display = 'none';
-                                    };
-                                    preview.onload = function() {
-                                        this.style.display = 'block';
-                                        document.getElementById('image-preview-container').classList.remove('hidden');
-                                    };
-                                } else {
-                                    document.getElementById('image-preview-container').classList.add('hidden');
-                                }
-                            });
                             </script>
                         </div>
 

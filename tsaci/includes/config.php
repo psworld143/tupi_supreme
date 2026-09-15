@@ -151,6 +151,66 @@ function getProducts($limit = null, $featured_only = false) {
     return $products;
 }
 
+/**
+ * Fetch the product tab definitions shown on the public Products page.
+ * Each tab has: tab_key, label, icon (FA class), keywords (comma-separated,
+ * matched against product slug/name), display_order, is_active, is_system.
+ *
+ * Fail-soft: if the product_tabs table doesn't exist or is empty, returns the
+ * three built-in tabs so the page always renders.
+ *
+ * @return array
+ */
+function getProductTabs() {
+    $db = getDB();
+    if (!$db) return [];
+
+    // Fail-soft: tolerate a missing table (e.g. before the admin page seeds it)
+    $result = $db->query("SELECT * FROM product_tabs WHERE is_active = 1 ORDER BY display_order, id");
+    $tabs = [];
+    if ($result) {
+        while ($row = $result->fetch_assoc()) {
+            $tabs[] = $row;
+        }
+    }
+    if (!empty($tabs)) {
+        return $tabs;
+    }
+
+    // Defaults (table missing or empty)
+    return [
+        ['tab_key' => 'granulated', 'label' => 'Granulated Activated Carbon', 'icon' => 'fa-cubes',   'keywords' => 'granulated',           'is_system' => 1, 'display_order' => 1],
+        ['tab_key' => 'husk',       'label' => 'Coconut Husk Products',       'icon' => 'fa-seedling', 'keywords' => 'husk,coconut',         'is_system' => 1, 'display_order' => 2],
+        ['tab_key' => 'custom',     'label' => 'Custom Formulations',        'icon' => 'fa-cogs',     'keywords' => 'custom',               'is_system' => 1, 'display_order' => 3],
+    ];
+}
+
+/**
+ * Filter a list of products by a comma-separated keyword string.
+ * A product matches if any keyword appears (case-insensitive) in its slug or name.
+ *
+ * @param array $products List of product rows.
+ * @param string $keywords Comma-separated keywords (e.g. "husk,coconut").
+ * @return array Matching products.
+ */
+function filterProductsByKeywords($products, $keywords) {
+    if (empty($keywords)) return [];
+    $kw = array_map('trim', explode(',', $keywords));
+    $kw = array_filter($kw);
+    if (empty($kw)) return [];
+    $matched = [];
+    foreach ($products as $p) {
+        $haystack = strtolower(($p['slug'] ?? '') . ' ' . ($p['name'] ?? ''));
+        foreach ($kw as $k) {
+            if ($k !== '' && stripos($haystack, strtolower($k)) !== false) {
+                $matched[] = $p;
+                break;
+            }
+        }
+    }
+    return $matched;
+}
+
 function getServices($limit = null) {
     $db = getDB();
     if (!$db) return [];
@@ -219,6 +279,44 @@ function getResources($category = null, $limit = null) {
         $sql .= " LIMIT " . intval($limit);
     }
     
+    $result = $db->query($sql);
+    $resources = [];
+    if ($result) {
+        while ($row = $result->fetch_assoc()) {
+            $resources[] = $row;
+        }
+    }
+    return $resources;
+}
+
+/**
+ * Fetch active resources whose category is NOT one of the three "known"
+ * categories shown in dedicated sections on the public Resources page.
+ * These are surfaced in the catch-all "Other Resources" section so that
+ * resources saved with a custom category still appear on the site.
+ *
+ * @param array $exclude Category strings to exclude (the known sections).
+ * @param int|null $limit Optional row limit.
+ * @return array
+ */
+function getOtherResources($exclude = ['Technical Data Sheets', 'Product Catalogs', 'Application Guides'], $limit = null) {
+    $db = getDB();
+    if (!$db) return [];
+
+    $excluded = [];
+    foreach ($exclude as $c) {
+        $excluded[] = "'" . $db->real_escape_string($c) . "'";
+    }
+    $excluded_sql = implode(',', $excluded);
+
+    $sql = "SELECT * FROM resources WHERE is_active = 1"
+         . " AND category IS NOT NULL AND category != ''"
+         . " AND category NOT IN ($excluded_sql)"
+         . " ORDER BY category, display_order, title";
+    if ($limit) {
+        $sql .= " LIMIT " . intval($limit);
+    }
+
     $result = $db->query($sql);
     $resources = [];
     if ($result) {

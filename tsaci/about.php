@@ -446,7 +446,7 @@ $company_full_name = getSiteSetting('company_name', 'Tupi Supreme Activated Carb
                         <div class="timeline-content bg-white border border-[#e6ece8] p-6 rounded-2xl relative">
                             <span class="eyebrow mb-3 <?php echo ($index % 2 === 0) ? '' : ''; ?>"><?php echo htmlspecialchars_safe($event['year']); ?></span>
                             <h4 class="text-xl font-semibold text-[#23332c] mb-2 mt-2"><?php echo htmlspecialchars_safe($event['title']); ?></h4>
-                            <p class="text-[#7d8b84] leading-relaxed text-sm"><?php echo htmlspecialchars_safe($event['description']); ?></p>
+                            <div class="text-[#7d8b84] leading-relaxed text-sm"><?php echo $event['description']; ?></div>
                         </div>
                     </div>
                 <?php endforeach; ?>

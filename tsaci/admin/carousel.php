@@ -377,6 +377,15 @@ $view_url = '../index.php#hero';
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Image <span class="text-red-500">*</span></label>
 
+                            <!-- Image source mode selector -->
+                            <div class="mb-3">
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Image source</label>
+                                <select id="image-source-mode" onchange="switchImageMode()" class="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm">
+                                    <option value="upload">Upload from file</option>
+                                    <option value="url">Enter image URL</option>
+                                </select>
+                            </div>
+
                             <!-- Image Preview -->
                             <div id="image-preview-container" class="mb-3 <?php echo empty($slide['image_url'] ?? '') ? 'hidden' : ''; ?>">
                                 <img id="image-preview" src="<?php echo htmlspecialchars($slide['image_url'] ?? ''); ?>" alt="Preview" class="max-w-full h-48 object-contain border border-gray-300 rounded-lg p-2 bg-gray-50">
@@ -385,8 +394,8 @@ $view_url = '../index.php#hero';
                                 </button>
                             </div>
 
-                            <!-- File Picker -->
-                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 mb-3">
+                            <!-- File Picker (upload mode) -->
+                            <div id="file-picker-block" class="border-2 border-dashed border-gray-300 rounded-lg p-4 mb-3">
                                 <div class="text-center">
                                     <input type="file" id="image-file-input" accept="image/jpeg,image/png,image/gif,image/webp" class="hidden">
                                     <label for="image-file-input" class="cursor-pointer inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
@@ -402,7 +411,13 @@ $view_url = '../index.php#hero';
                                 </div>
                             </div>
 
-                            <!-- URL Input (hidden, auto-filled by upload) -->
+                            <!-- URL Input (url mode — visible text field for manual entry) -->
+                            <div id="url-input-block" class="hidden mb-3">
+                                <input type="url" id="image-url-visible" value="<?php echo htmlspecialchars($slide['image_url'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary" placeholder="https://example.com/image.jpg" oninput="syncUrlInput(this.value)">
+                                <p class="mt-1 text-xs text-gray-500">Paste a full image URL (https://...).</p>
+                            </div>
+
+                            <!-- Hidden field: the actual value submitted with the form -->
                             <input type="hidden" name="image_url" id="image-url-input" value="<?php echo htmlspecialchars($slide['image_url'] ?? ''); ?>">
                         </div>
 
@@ -410,8 +425,48 @@ $view_url = '../index.php#hero';
                         let selectedFile = null;
                         // Upload state: 'idle' | 'uploading' | 'success' | 'failed'
                         let uploadState = 'idle';
+                        // Current image source mode: 'upload' | 'url'
+                        let imageMode = 'upload';
                         // Remember the original URL when editing so we know if the user picked a new file
                         const originalImageUrl = document.getElementById('image-url-input').value;
+
+                        function switchImageMode() {
+                            const mode = document.getElementById('image-source-mode').value;
+                            imageMode = mode;
+                            const fileBlock = document.getElementById('file-picker-block');
+                            const urlBlock = document.getElementById('url-input-block');
+                            if (mode === 'url') {
+                                fileBlock.classList.add('hidden');
+                                urlBlock.classList.remove('hidden');
+                                // Carry the current value into the visible URL field
+                                document.getElementById('image-url-visible').value = document.getElementById('image-url-input').value;
+                            } else {
+                                urlBlock.classList.add('hidden');
+                                fileBlock.classList.remove('hidden');
+                                // Reset any failed upload state when switching back to upload mode
+                                if (uploadState === 'failed') {
+                                    uploadState = 'idle';
+                                    document.getElementById('upload-progress').classList.add('hidden');
+                                }
+                            }
+                        }
+
+                        // Keep the hidden submitted field in sync with the visible URL text box
+                        function syncUrlInput(value) {
+                            document.getElementById('image-url-input').value = value;
+                            // Update the preview live
+                            const preview = document.getElementById('image-preview');
+                            if (value.trim()) {
+                                preview.src = value;
+                                preview.onerror = function() { this.style.display = 'none'; };
+                                preview.onload = function() {
+                                    this.style.display = 'block';
+                                    document.getElementById('image-preview-container').classList.remove('hidden');
+                                };
+                            } else {
+                                document.getElementById('image-preview-container').classList.add('hidden');
+                            }
+                        }
 
                         document.getElementById('image-file-input').addEventListener('change', function(e) {
                             const file = e.target.files[0];
@@ -510,6 +565,7 @@ $view_url = '../index.php#hero';
                         function clearImagePreview() {
                             document.getElementById('image-preview-container').classList.add('hidden');
                             document.getElementById('image-url-input').value = '';
+                            document.getElementById('image-url-visible').value = '';
                             document.getElementById('image-file-input').value = '';
                             selectedFile = null;
                             uploadState = 'idle';
@@ -519,6 +575,16 @@ $view_url = '../index.php#hero';
                         function validateImageUpload() {
                             const urlInput = document.getElementById('image-url-input');
 
+                            // In URL mode, just require a non-empty URL
+                            if (imageMode === 'url') {
+                                if (!urlInput.value.trim()) {
+                                    alert('Please enter an image URL.');
+                                    return false;
+                                }
+                                return true;
+                            }
+
+                            // Upload mode validations
                             // Block save while an upload is still in progress
                             if (uploadState === 'uploading') {
                                 alert('Please wait for the image upload to finish before saving.');

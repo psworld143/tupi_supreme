@@ -678,6 +678,26 @@ CREATE TABLE `resources` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
+-- Table structure for table `product_tabs`
+--
+
+CREATE TABLE `product_tabs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tab_key` varchar(50) NOT NULL,
+  `label` varchar(100) NOT NULL,
+  `icon` varchar(50) DEFAULT 'fa-cube',
+  `keywords` varchar(200) DEFAULT '',
+  `display_order` int(11) DEFAULT 0,
+  `is_active` tinyint(1) DEFAULT 1,
+  `is_system` tinyint(1) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `updated_by` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `tab_key` (`tab_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
 -- Dumping data for table `resources`
 --
 

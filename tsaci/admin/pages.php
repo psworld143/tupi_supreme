@@ -137,6 +137,68 @@ if ($res) {
     }
 }
 
+// Known/available section names per page (not all may exist as rows yet).
+// Surfacing these in the datalist makes it obvious which keys a page reads,
+// so editors can create content for sections that aren't seeded yet.
+$known_section_names = [
+    'index' => [
+        'hero_title', 'hero_subtitle', 'hero_badge', 'hero_button_1_text', 'hero_button_1_link',
+        'hero_button_2_text', 'hero_button_2_link', 'features_title', 'features_subtitle',
+        'stats_title', 'stats_subtitle', 'featured_products_title', 'featured_products_subtitle',
+        'cta_title', 'cta_description', 'cta_button_1_text', 'cta_button_1_link',
+        'cta_button_2_text', 'cta_button_2_link', 'meta_description',
+    ],
+    'about' => [
+        'page_header_title', 'page_header_subtitle', 'story_title', 'story_content',
+        'mission_title', 'mission_content', 'vision_title', 'vision_content', 'vision_icon',
+        'timeline_title', 'timeline_subtitle', 'values_title', 'values_subtitle',
+        'team_title', 'team_subtitle', 'meta_description',
+    ],
+    'products' => [
+        'page_header_title', 'page_header_subtitle', 'section_title', 'section_subtitle',
+        'tab_granulated_label', 'tab_husk_label', 'tab_custom_label',
+        'specifications_title', 'specifications_subtitle', 'applications_title', 'applications_subtitle',
+        'all_products_title', 'all_products_subtitle',
+        'cta_title', 'cta_description', 'cta_button_1_text', 'cta_button_1_link',
+        'cta_button_2_text', 'cta_button_2_link', 'meta_description',
+    ],
+    'services' => [
+        'page_header_title', 'page_header_subtitle', 'section_title', 'section_subtitle',
+        'process_title', 'process_subtitle', 'testimonials_title', 'testimonials_subtitle',
+        'cta_title', 'cta_description', 'cta_button_1_text', 'cta_button_1_link',
+        'cta_button_2_text', 'cta_button_2_link', 'meta_description',
+    ],
+    'case-studies' => [
+        'page_header_title', 'page_header_subtitle', 'section_title', 'section_subtitle',
+        'cta_title', 'cta_description', 'cta_button_1_text', 'cta_button_1_link',
+        'cta_button_2_text', 'cta_button_2_link', 'meta_description',
+    ],
+    'gallery' => [
+        'page_header_title', 'page_header_subtitle', 'section_title', 'section_subtitle',
+        'meta_description',
+    ],
+    'resources' => [
+        'page_header_title', 'page_header_subtitle', 'data_sheets_title', 'data_sheets_subtitle',
+        'catalogs_title', 'catalogs_subtitle', 'guides_title', 'guides_subtitle',
+        'other_title', 'other_subtitle', 'faqs_title', 'faqs_subtitle',
+        'download_button_text', 'download_guide_text',
+        'cta_title', 'cta_description', 'cta_button_1_text', 'cta_button_1_link',
+        'cta_button_2_text', 'cta_button_2_link', 'meta_description',
+    ],
+    'certifications' => [
+        'page_header_title', 'page_header_subtitle', 'section_title', 'section_subtitle',
+        'meta_description',
+    ],
+    'contact' => [
+        'page_header_title', 'page_header_subtitle', 'contact_section_title', 'contact_section_subtitle',
+        'form_title', 'form_subtitle', 'map_title', 'map_url',
+        'office_hours_title', 'contact_info_title', 'meta_description',
+    ],
+];
+// Merge known names into the suggestions (deduped, sorted)
+$section_suggestions = array_unique(array_merge($section_suggestions, ...array_values($known_section_names)));
+sort($section_suggestions);
+
 // Get all content for list (with pagination + filtering + search)
 $all_content = [];
 $total_content = 0;
@@ -322,6 +384,7 @@ $content_types = [
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Section Name <span class="text-red-500">*</span></label>
                             <input type="text" name="section_name" required list="section_suggestions"
+                                   id="section_name_input"
                                    value="<?php echo htmlspecialchars($edit_content['section_name'] ?? ''); ?>"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                                    placeholder="e.g., hero_title, about_description">
@@ -330,7 +393,7 @@ $content_types = [
                                     <option value="<?php echo htmlspecialchars($s); ?>">
                                 <?php endforeach; ?>
                             </datalist>
-                            <p class="text-xs text-gray-400 mt-1">A unique label identifying this section (snake_case recommended).</p>
+                            <p class="text-xs text-gray-400 mt-1">A unique label identifying this section (snake_case recommended). Suggestions update based on the selected page.</p>
                         </div>
 
                         <div>
@@ -392,6 +455,37 @@ $content_types = [
             </div>
 
             <script>
+            (function () {
+                // Per-page known section names (for context-aware datalist filtering)
+                var knownSections = <?php echo json_encode($known_section_names); ?>;
+                var pageSelect = document.querySelector('select[name="page_name"]');
+                var sectionInput = document.getElementById('section_name_input');
+                var datalist = document.getElementById('section_suggestions');
+
+                function rebuildDatalist() {
+                    var page = pageSelect.value;
+                    // Clear current options
+                    datalist.innerHTML = '';
+                    var names = knownSections[page] || [];
+                    names.forEach(function (name) {
+                        var opt = document.createElement('option');
+                        opt.value = name;
+                        datalist.appendChild(opt);
+                    });
+                }
+
+                if (pageSelect && sectionInput && datalist) {
+                    pageSelect.addEventListener('change', rebuildDatalist);
+                    // Initialize for edit mode (only if section name not already in the list)
+                    rebuildDatalist();
+                    // Preserve the current value when editing
+                    var current = sectionInput.value;
+                    if (current) {
+                        sectionInput.value = current;
+                    }
+                }
+            })();
+
             (function () {
                 var typeSelect = document.getElementById('content_type');
                 var textarea = document.getElementById('content');

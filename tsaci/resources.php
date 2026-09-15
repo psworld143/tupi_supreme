@@ -24,6 +24,12 @@ $cta_button_2_link = getPageContent('resources', 'cta_button_2_link', 'contact.p
 $data_sheets = getResources('Technical Data Sheets');
 $catalogs = getResources('Product Catalogs');
 $guides = getResources('Application Guides');
+// Catch-all: resources with a custom (non-known) category
+$other_resources = getOtherResources();
+
+// Other Resources section copy (editable via page_content)
+$other_title = getPageContent('resources', 'other_title', 'Other Resources');
+$other_subtitle = getPageContent('resources', 'other_subtitle', 'Additional downloadable resources and documents');
 
 // Get FAQs
 $faqs = getFAQs();
@@ -365,6 +371,58 @@ $faqs = getFAQs();
                         <i class="fas fa-map-signs text-2xl text-[#60796e]"></i>
                     </div>
                     <p class="text-[#7d8b84]">No application guides available at this time.</p>
+                </div>
+            <?php endif; ?>
+        </div>
+    </section>
+
+    <!-- Other Resources (catch-all for custom categories) -->
+    <section id="other-resources" class="bg-[#f5f7f5] py-20 lg:py-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal">
+                <span class="eyebrow mb-4">
+                    <i class="fas fa-folder-open text-xs"></i> More
+                </span>
+                <h2 class="text-3xl lg:text-4xl font-bold text-[#23332c] mb-4 mt-4"><?php echo htmlspecialchars_safe($other_title); ?></h2>
+                <p class="text-lg text-[#7d8b84] max-w-2xl mx-auto"><?php echo htmlspecialchars_safe($other_subtitle); ?></p>
+            </div>
+            <?php if (!empty($other_resources)): ?>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <?php foreach ($other_resources as $i => $resource): ?>
+                        <div class="resource-card bg-white border border-[#e6ece8] rounded-2xl p-8 reveal <?php echo 'reveal-delay-' . ((($i % 3) + 1)); ?>">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="download-icon w-14 h-14 rounded-2xl flex items-center justify-center">
+                                    <i class="fas fa-file-alt text-xl text-white"></i>
+                                </div>
+                                <?php if ($resource['category']): ?>
+                                    <span class="text-xs font-semibold text-[#3d7a66] bg-[#eef3f0] px-3 py-1 rounded-full"><?php echo htmlspecialchars_safe($resource['category']); ?></span>
+                                <?php endif; ?>
+                            </div>
+                            <h3 class="text-lg font-semibold text-[#23332c] mb-2"><?php echo htmlspecialchars_safe($resource['title']); ?></h3>
+                            <?php if ($resource['file_type']): ?>
+                                <p class="text-[#8a978f] mb-2 text-sm"><?php echo htmlspecialchars_safe($resource['file_type']); ?></p>
+                            <?php endif; ?>
+                            <?php if ($resource['description']): ?>
+                                <p class="text-[#7d8b84] mb-6 text-sm leading-relaxed"><?php echo nl2br_safe($resource['description']); ?></p>
+                            <?php endif; ?>
+                            <?php
+                            $downloadOtherText = getPageContent('resources', 'download_button_text', 'Download');
+                            $otherFileType = $resource['file_type'] ?: 'File';
+                            ?>
+                            <a href="<?php echo htmlspecialchars_safe($resource['file_url'] ?: '#'); ?>"
+                               class="inline-flex items-center gap-2 bg-[#23332c] hover:bg-[#3a4a41] text-white font-medium py-2.5 px-5 rounded-full transition-colors text-sm"
+                               <?php if ($resource['file_url'] && $resource['file_url'] !== '#'): ?>download<?php endif; ?>>
+                                <i class="fas fa-download text-xs"></i><?php echo htmlspecialchars_safe($downloadOtherText); ?> <?php echo htmlspecialchars_safe($otherFileType); ?>
+                            </a>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php else: ?>
+                <div class="text-center py-12 reveal">
+                    <div class="w-16 h-16 rounded-full bg-[#eef3f0] flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-folder-open text-2xl text-[#60796e]"></i>
+                    </div>
+                    <p class="text-[#7d8b84]">No additional resources at this time.</p>
                 </div>
             <?php endif; ?>
         </div>

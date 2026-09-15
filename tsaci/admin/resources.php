@@ -32,6 +32,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['delete_id'] ?? '') === '')
 
     if (empty($title) || empty($file_url)) {
         $error = 'Title and file URL are required.';
+    } elseif (empty($category)) {
+        $error = 'Category is required. Please choose a category or enter a custom one.';
     } else {
         if ($action === 'add') {
             $stmt = $db->prepare("INSERT INTO resources (title, description, file_url, file_type, category, display_order, is_active, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
@@ -174,8 +176,8 @@ if ($cat_result) {
 // Helper: build the "View on site" URL for a given category
 function resourceViewUrl($category) {
     global $category_anchors;
-    $anchor = $category_anchors[$category] ?? null;
-    return '../resources.php' . ($anchor ? '#' . $anchor : '');
+    $anchor = $category_anchors[$category] ?? 'other-resources';
+    return '../resources.php#' . $anchor;
 }
 ?>
 <!DOCTYPE html>
@@ -260,7 +262,7 @@ function resourceViewUrl($category) {
                 <h2 class="text-2xl font-bold mb-1"><?php echo $action === 'add' ? 'Add New' : 'Edit'; ?> Resource</h2>
                 <p class="text-sm text-gray-500 mb-6">Fields marked <span class="text-red-500">*</span> are required.</p>
 
-                <form method="POST" action="">
+                <form method="POST" action="" onsubmit="return validateFileUpload()">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Title <span class="text-red-500">*</span></label>
@@ -272,22 +274,56 @@ function resourceViewUrl($category) {
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                            <input type="text" name="category" list="category-list"
-                                   value="<?php echo htmlspecialchars($edit_resource['category'] ?? ''); ?>"
-                                   placeholder="e.g., Technical Data Sheets"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
-                            <datalist id="category-list">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Category <span class="text-red-500">*</span></label>
+                            <?php
+                            $current_category = $edit_resource['category'] ?? '';
+                            $is_known_category = isset($category_anchors[$current_category]);
+                            // For new records, default to the first known category
+                            if (!$edit_resource && $current_category === '' && !empty($category_anchors)) {
+                                $current_category = array_key_first($category_anchors);
+                                $is_known_category = true;
+                            }
+                            ?>
+                            <input type="hidden" name="category" id="category-value"
+                                   value="<?php echo htmlspecialchars($current_category); ?>">
+                            <select id="category-select"
+                                    onchange="onCategoryChange()"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
                                 <?php foreach ($category_anchors as $cat => $anchor): ?>
-                                    <option value="<?php echo htmlspecialchars($cat); ?>"></option>
+                                    <option value="<?php echo htmlspecialchars($cat); ?>"
+                                        <?php echo ($is_known_category && $current_category === $cat) ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($cat); ?>
+                                    </option>
                                 <?php endforeach; ?>
-                                <?php foreach ($db_categories as $cat): ?>
-                                    <?php if (!isset($category_anchors[$cat])): ?>
-                                    <option value="<?php echo htmlspecialchars($cat); ?>"></option>
-                                    <?php endif; ?>
-                                <?php endforeach; ?>
-                            </datalist>
-                            <p class="text-xs text-gray-400 mt-1">Known categories: <strong>Technical Data Sheets</strong>, <strong>Product Catalogs</strong>, <strong>Application Guides</strong>. These map to sections on the public Resources page.</p>
+                                <option value="__other__"
+                                    <?php echo (!$is_known_category && $current_category !== '') ? 'selected' : ''; ?>>
+                                    Other…
+                                </option>
+                            </select>
+                            <input type="text" id="category-custom"
+                                   value="<?php echo !$is_known_category ? htmlspecialchars($current_category) : ''; ?>"
+                                   placeholder="Enter custom category name"
+                                   oninput="syncCategoryCustom(this.value)"
+                                   class="w-full mt-2 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary <?php echo ($is_known_category || $current_category === '') ? 'hidden' : ''; ?>">
+                            <p class="text-xs text-gray-400 mt-1">Selecting <strong>Technical Data Sheets</strong>, <strong>Product Catalogs</strong>, or <strong>Application Guides</strong> places the resource in that section on the public Resources page. Choose <strong>Other…</strong> to enter a custom category — those appear under the "Other Resources" section.</p>
+                            <script>
+                            function onCategoryChange() {
+                                const select = document.getElementById('category-select');
+                                const custom = document.getElementById('category-custom');
+                                const hidden = document.getElementById('category-value');
+                                if (select.value === '__other__') {
+                                    custom.classList.remove('hidden');
+                                    hidden.value = custom.value.trim();
+                                    custom.focus();
+                                } else {
+                                    custom.classList.add('hidden');
+                                    hidden.value = select.value;
+                                }
+                            }
+                            function syncCategoryCustom(value) {
+                                document.getElementById('category-value').value = value;
+                            }
+                            </script>
                         </div>
 
                         <div>
@@ -300,12 +336,211 @@ function resourceViewUrl($category) {
                         </div>
 
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">File URL <span class="text-red-500">*</span></label>
-                            <input type="url" name="file_url" required
-                                   value="<?php echo htmlspecialchars($edit_resource['file_url'] ?? ''); ?>"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
-                                   placeholder="https://example.com/datasheet.pdf">
-                            <p class="text-xs text-gray-400 mt-1">Direct link to the downloadable file. Use <code>uploads/documents/…</code> for files stored on this site.</p>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">File <span class="text-red-500">*</span></label>
+
+                            <!-- File source mode selector -->
+                            <div class="mb-3">
+                                <label class="block text-xs font-medium text-gray-500 mb-1">File source</label>
+                                <select id="file-source-mode" onchange="switchFileMode()" class="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm">
+                                    <option value="upload">Upload from file</option>
+                                    <option value="url">Enter file URL</option>
+                                </select>
+                            </div>
+
+                            <!-- File Picker (upload mode) -->
+                            <div id="file-picker-block" class="border-2 border-dashed border-gray-300 rounded-lg p-4 mb-3">
+                                <div class="text-center">
+                                    <input type="file" id="document-file-input" accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.pdf,.doc,.docx" class="hidden">
+                                    <label for="document-file-input" class="cursor-pointer inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
+                                        <i class="fas fa-upload mr-2"></i>Choose Document File
+                                    </label>
+                                    <p class="mt-2 text-xs text-gray-500">PDF, DOC, or DOCX (Max 10MB) — file uploads automatically when selected</p>
+                                </div>
+                                <div id="upload-progress" class="hidden mt-2">
+                                    <div class="bg-gray-200 rounded-full h-2">
+                                        <div id="upload-progress-bar" class="bg-primary h-2 rounded-full transition-all" style="width: 0%"></div>
+                                    </div>
+                                    <p id="upload-status" class="text-sm text-gray-600 mt-1"></p>
+                                </div>
+                            </div>
+
+                            <!-- URL Input (url mode — visible text field for manual entry) -->
+                            <div id="url-input-block" class="hidden mb-3">
+                                <input type="url" id="file-url-visible" value="<?php echo htmlspecialchars($edit_resource['file_url'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary" placeholder="https://example.com/datasheet.pdf" oninput="syncUrlInput(this.value)">
+                                <p class="mt-1 text-xs text-gray-500">Direct link to the downloadable file. Use <code>uploads/documents/…</code> for files stored on this site.</p>
+                            </div>
+
+                            <!-- Hidden field: the actual value submitted with the form -->
+                            <input type="hidden" name="file_url" id="file-url-input" value="<?php echo htmlspecialchars($edit_resource['file_url'] ?? ''); ?>">
+
+                            <script>
+                            let selectedDocFile = null;
+                            // Upload state: 'idle' | 'uploading' | 'success' | 'failed'
+                            let uploadState = 'idle';
+                            // Current file source mode: 'upload' | 'url'
+                            let fileMode = 'upload';
+
+                            function switchFileMode() {
+                                const mode = document.getElementById('file-source-mode').value;
+                                fileMode = mode;
+                                const fileBlock = document.getElementById('file-picker-block');
+                                const urlBlock = document.getElementById('url-input-block');
+                                if (mode === 'url') {
+                                    fileBlock.classList.add('hidden');
+                                    urlBlock.classList.remove('hidden');
+                                    // Carry the current value into the visible URL field
+                                    document.getElementById('file-url-visible').value = document.getElementById('file-url-input').value;
+                                } else {
+                                    urlBlock.classList.add('hidden');
+                                    fileBlock.classList.remove('hidden');
+                                    // Reset any failed upload state when switching back to upload mode
+                                    if (uploadState === 'failed') {
+                                        uploadState = 'idle';
+                                        document.getElementById('upload-progress').classList.add('hidden');
+                                    }
+                                }
+                            }
+
+                            // Keep the hidden submitted field in sync with the visible URL text box
+                            function syncUrlInput(value) {
+                                document.getElementById('file-url-input').value = value;
+                            }
+
+                            document.getElementById('document-file-input').addEventListener('change', function(e) {
+                                const file = e.target.files[0];
+                                if (file) {
+                                    selectedDocFile = file;
+                                    uploadState = 'idle';
+                                    // Auto-upload immediately after selection
+                                    uploadDocument();
+                                }
+                            });
+
+                            function uploadDocument() {
+                                if (!selectedDocFile) {
+                                    alert('Please select a document file first');
+                                    return;
+                                }
+
+                                const formData = new FormData();
+                                formData.append('document', selectedDocFile);
+
+                                const progressContainer = document.getElementById('upload-progress');
+                                const progressBar = document.getElementById('upload-progress-bar');
+                                const statusText = document.getElementById('upload-status');
+                                const fileLabel = document.querySelector('label[for="document-file-input"]');
+
+                                uploadState = 'uploading';
+                                progressContainer.classList.remove('hidden');
+                                statusText.textContent = 'Uploading...';
+                                statusText.classList.remove('text-green-600', 'text-red-600');
+                                progressBar.classList.remove('bg-green-500');
+                                progressBar.style.width = '0%';
+                                fileLabel.style.pointerEvents = 'none';
+                                fileLabel.style.opacity = '0.6';
+
+                                const xhr = new XMLHttpRequest();
+
+                                xhr.upload.addEventListener('progress', function(e) {
+                                    if (e.lengthComputable) {
+                                        const percentComplete = (e.loaded / e.total) * 100;
+                                        progressBar.style.width = percentComplete + '%';
+                                    }
+                                });
+
+                                xhr.addEventListener('load', function() {
+                                    if (xhr.status === 200) {
+                                        const response = JSON.parse(xhr.responseText);
+                                        if (response.success) {
+                                            document.getElementById('file-url-input').value = response.url;
+                                            statusText.textContent = 'Upload successful!';
+                                            statusText.classList.add('text-green-600');
+                                            progressBar.classList.add('bg-green-500');
+                                            uploadState = 'success';
+                                            setTimeout(() => {
+                                                progressContainer.classList.add('hidden');
+                                            }, 2000);
+                                        } else {
+                                            statusText.textContent = 'Upload failed: ' + response.error;
+                                            statusText.classList.add('text-red-600');
+                                            progressContainer.classList.remove('hidden');
+                                            uploadState = 'failed';
+                                        }
+                                    } else {
+                                        let errMsg = 'Server error';
+                                        try { errMsg = JSON.parse(xhr.responseText).error || errMsg; } catch (_) {}
+                                        statusText.textContent = 'Upload failed: ' + errMsg;
+                                        statusText.classList.add('text-red-600');
+                                        progressContainer.classList.remove('hidden');
+                                        uploadState = 'failed';
+                                    }
+                                    fileLabel.style.pointerEvents = '';
+                                    fileLabel.style.opacity = '';
+                                });
+
+                                xhr.addEventListener('error', function() {
+                                    statusText.textContent = 'Upload failed: Network error';
+                                    statusText.classList.add('text-red-600');
+                                    progressContainer.classList.remove('hidden');
+                                    uploadState = 'failed';
+                                    fileLabel.style.pointerEvents = '';
+                                    fileLabel.style.opacity = '';
+                                });
+
+                                xhr.open('POST', 'api/upload_document.php');
+                                xhr.send(formData);
+                            }
+
+                            function validateFileUpload() {
+                                // Category validation (known category via select, or custom text)
+                                const catSelect = document.getElementById('category-select');
+                                const catCustom = document.getElementById('category-custom');
+                                const catHidden = document.getElementById('category-value');
+                                if (catSelect && catSelect.value === '__other__') {
+                                    if (!catCustom.value.trim()) {
+                                        alert('Please enter a custom category name, or pick a known category.');
+                                        catCustom.focus();
+                                        return false;
+                                    }
+                                    catHidden.value = catCustom.value.trim();
+                                } else if (catHidden && !catHidden.value.trim()) {
+                                    alert('Please choose a category.');
+                                    return false;
+                                }
+
+                                const urlInput = document.getElementById('file-url-input');
+
+                                // In URL mode, just require a non-empty URL
+                                if (fileMode === 'url') {
+                                    if (!urlInput.value.trim()) {
+                                        alert('Please enter a file URL.');
+                                        return false;
+                                    }
+                                    return true;
+                                }
+
+                                // Upload mode validations
+                                // Block save while an upload is still in progress
+                                if (uploadState === 'uploading') {
+                                    alert('Please wait for the file upload to finish before saving.');
+                                    return false;
+                                }
+
+                                // User picked a new file but the upload failed
+                                if (selectedDocFile && uploadState === 'failed') {
+                                    alert('The file upload failed. Please try again or pick a different file.');
+                                    return false;
+                                }
+
+                                // No file at all (new record with no upload)
+                                if (!urlInput.value.trim()) {
+                                    alert('Please choose and upload a document file first.');
+                                    return false;
+                                }
+
+                                return true;
+                            }
+                            </script>
                         </div>
 
                         <div>
