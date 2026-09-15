@@ -54,21 +54,42 @@ if ($action === 'view' && $id) {
     }
 }
 
-// Get all messages
+// Get all messages (with pagination, respecting the active filter)
 $filter = $_GET['filter'] ?? 'all';
 $all_messages = [];
+$total_messages = 0;
+$total_pages = 1;
+$per_page = 10;
+$current_page_num = 1;
 if ($action === 'list') {
-    $query = "SELECT * FROM contact_messages WHERE 1=1";
+    // Build the filter WHERE clause (filter is whitelisted, so this is safe)
+    $where = " WHERE 1=1";
     if ($filter === 'unread') {
-        $query .= " AND is_read = 0 AND is_archived = 0";
+        $where .= " AND is_read = 0 AND is_archived = 0";
     } elseif ($filter === 'archived') {
-        $query .= " AND is_archived = 1";
+        $where .= " AND is_archived = 1";
     } else {
-        $query .= " AND is_archived = 0";
+        $where .= " AND is_archived = 0";
     }
-    $query .= " ORDER BY created_at DESC";
-    
-    $result = $db->query($query);
+
+    $per_page = 10;
+    $current_page_num = max(1, intval($_GET['page'] ?? 1));
+    $offset = ($current_page_num - 1) * $per_page;
+
+    // Total count for pagination controls
+    $count_result = $db->query("SELECT COUNT(*) as total FROM contact_messages" . $where);
+    $total_messages = $count_result->fetch_assoc()['total'];
+    $total_pages = max(1, ceil($total_messages / $per_page));
+    // Clamp current page if out of range
+    if ($current_page_num > $total_pages) {
+        $current_page_num = $total_pages;
+        $offset = ($current_page_num - 1) * $per_page;
+    }
+
+    $stmt = $db->prepare("SELECT * FROM contact_messages" . $where . " ORDER BY created_at DESC LIMIT ? OFFSET ?");
+    $stmt->bind_param("ii", $per_page, $offset);
+    $stmt->execute();
+    $result = $stmt->get_result();
     while ($row = $result->fetch_assoc()) {
         $all_messages[] = $row;
     }
@@ -101,7 +122,38 @@ if ($action === 'list') {
 <body class="bg-gray-100">
     <!-- Sidebar -->
     <?php include 'includes/sidebar.php'; ?>
-    
+
+    <!-- Page-scoped alignment: keep the main content card the exact same
+         height as the fixed sidebar so both panels align top/bottom. -->
+    <style>
+        @media (min-width: 1024px) {
+            .lg\:ml-64 {
+                height: calc(100vh - 2rem) !important;
+                overflow-y: auto !important;
+            }
+            /* Thin, themed scrollbar for the in-card scroll area */
+            .lg\:ml-64 {
+                scrollbar-width: thin;
+                scrollbar-color: #d2dcd5 transparent;
+            }
+            .lg\:ml-64::-webkit-scrollbar {
+                width: 8px;
+            }
+            .lg\:ml-64::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            .lg\:ml-64::-webkit-scrollbar-thumb {
+                background-color: #d2dcd5;
+                border-radius: 4px;
+                border: 2px solid transparent;
+                background-clip: padding-box;
+            }
+            .lg\:ml-64::-webkit-scrollbar-thumb:hover {
+                background-color: #c0ccc5;
+            }
+        }
+    </style>
+
     <!-- Main Content -->
     <div class="lg:ml-64 p-4 lg:p-8">
         <!-- Page Header -->
@@ -234,6 +286,16 @@ if ($action === 'list') {
                     <?php endif; ?>
                 </tbody>
             </table>
+            <?php
+            require_once __DIR__ . '/includes/pagination.php';
+            renderPagination([
+                'current_page' => $current_page_num,
+                'total_pages'   => $total_pages,
+                'total_items'   => $total_messages,
+                'per_page'      => $per_page,
+                'base_query'    => $_GET,
+            ]);
+            ?>
         </div>
     </div>
 </body>

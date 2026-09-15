@@ -96,10 +96,29 @@ if ($action === 'edit' && $id) {
     }
 }
 
-// Get all content for list
+// Get all content for list (with pagination)
 $all_content = [];
+$total_content = 0;
+$total_pages = 1;
 if ($action === 'list') {
-    $result = $db->query("SELECT ac.*, au.username as updated_by_name FROM about_content ac LEFT JOIN admin_users au ON ac.updated_by = au.id ORDER BY ac.display_order, ac.section_name");
+    $per_page = 10;
+    $current_page_num = max(1, intval($_GET['page'] ?? 1));
+    $offset = ($current_page_num - 1) * $per_page;
+
+    // Total count for pagination controls
+    $count_result = $db->query("SELECT COUNT(*) as total FROM about_content");
+    $total_content = $count_result->fetch_assoc()['total'];
+    $total_pages = max(1, ceil($total_content / $per_page));
+    // Clamp current page if out of range
+    if ($current_page_num > $total_pages) {
+        $current_page_num = $total_pages;
+        $offset = ($current_page_num - 1) * $per_page;
+    }
+
+    $stmt = $db->prepare("SELECT ac.*, au.username as updated_by_name FROM about_content ac LEFT JOIN admin_users au ON ac.updated_by = au.id ORDER BY ac.display_order, ac.section_name LIMIT ? OFFSET ?");
+    $stmt->bind_param("ii", $per_page, $offset);
+    $stmt->execute();
+    $result = $stmt->get_result();
     while ($row = $result->fetch_assoc()) {
         $all_content[] = $row;
     }
@@ -133,7 +152,38 @@ if ($action === 'list') {
 <body class="bg-gray-100">
     <!-- Sidebar -->
     <?php include 'includes/sidebar.php'; ?>
-    
+
+    <!-- Page-scoped alignment: keep the main content card the exact same
+         height as the fixed sidebar so both panels align top/bottom. -->
+    <style>
+        @media (min-width: 1024px) {
+            .lg\:ml-64 {
+                height: calc(100vh - 2rem) !important;
+                overflow-y: auto !important;
+            }
+            /* Thin, themed scrollbar for the in-card scroll area */
+            .lg\:ml-64 {
+                scrollbar-width: thin;
+                scrollbar-color: #d2dcd5 transparent;
+            }
+            .lg\:ml-64::-webkit-scrollbar {
+                width: 8px;
+            }
+            .lg\:ml-64::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            .lg\:ml-64::-webkit-scrollbar-thumb {
+                background-color: #d2dcd5;
+                border-radius: 4px;
+                border: 2px solid transparent;
+                background-clip: padding-box;
+            }
+            .lg\:ml-64::-webkit-scrollbar-thumb:hover {
+                background-color: #c0ccc5;
+            }
+        }
+    </style>
+
     <!-- Main Content -->
     <div class="lg:ml-64 p-4 lg:p-8">
         <!-- Page Header -->
@@ -245,8 +295,9 @@ if ($action === 'list') {
                         Manage all content sections for the About Us page. You can also manage general page content via <a href="pages.php" class="text-primary hover:underline">Page Content Management</a>.
                     </p>
                 </div>
+                <div class="overflow-auto" style="max-height: 60vh;">
                 <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
+                    <thead class="bg-gray-50 sticky top-0">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Section</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
@@ -290,13 +341,13 @@ if ($action === 'list') {
                                         <?php endif; ?>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <a href="?action=edit&id=<?php echo $content['id']; ?>" class="text-primary hover:text-secondary mr-3">
-                                            <i class="fas fa-edit"></i> Edit
+                                        <a href="?action=edit&id=<?php echo $content['id']; ?>" class="text-primary hover:text-secondary mr-3" title="Edit">
+                                            <i class="fas fa-edit"></i>
                                         </a>
-                                        <a href="?action=delete&id=<?php echo $content['id']; ?>" 
+                                        <a href="?action=delete&id=<?php echo $content['id']; ?>"
                                            onclick="return confirm('Are you sure you want to delete this content?')"
-                                           class="text-red-600 hover:text-red-800">
-                                            <i class="fas fa-trash"></i> Delete
+                                           class="text-red-600 hover:text-red-800" title="Delete">
+                                            <i class="fas fa-trash"></i>
                                         </a>
                                     </td>
                                 </tr>
@@ -304,6 +355,17 @@ if ($action === 'list') {
                         <?php endif; ?>
                     </tbody>
                 </table>
+                </div>
+                <?php
+                require_once __DIR__ . '/includes/pagination.php';
+                renderPagination([
+                    'current_page' => $current_page_num,
+                    'total_pages'   => $total_pages,
+                    'total_items'   => $total_content,
+                    'per_page'      => $per_page,
+                    'base_query'    => $_GET,
+                ]);
+                ?>
             </div>
             
             <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">

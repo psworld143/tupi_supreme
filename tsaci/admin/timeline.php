@@ -74,10 +74,29 @@ if ($action === 'edit' && $id) {
     }
 }
 
-// Get all events for list
+// Get all events for list (with pagination)
 $all_events = [];
+$total_events = 0;
+$total_pages = 1;
 if ($action === 'list') {
-    $result = $db->query("SELECT te.*, au.username as updated_by_name FROM timeline_events te LEFT JOIN admin_users au ON te.updated_by = au.id ORDER BY te.year DESC, te.display_order, te.title");
+    $per_page = 10;
+    $current_page_num = max(1, intval($_GET['page'] ?? 1));
+    $offset = ($current_page_num - 1) * $per_page;
+
+    // Total count for pagination controls
+    $count_result = $db->query("SELECT COUNT(*) as total FROM timeline_events");
+    $total_events = $count_result->fetch_assoc()['total'];
+    $total_pages = max(1, ceil($total_events / $per_page));
+    // Clamp current page if out of range
+    if ($current_page_num > $total_pages) {
+        $current_page_num = $total_pages;
+        $offset = ($current_page_num - 1) * $per_page;
+    }
+
+    $stmt = $db->prepare("SELECT te.*, au.username as updated_by_name FROM timeline_events te LEFT JOIN admin_users au ON te.updated_by = au.id ORDER BY te.year DESC, te.display_order, te.title LIMIT ? OFFSET ?");
+    $stmt->bind_param("ii", $per_page, $offset);
+    $stmt->execute();
+    $result = $stmt->get_result();
     while ($row = $result->fetch_assoc()) {
         $all_events[] = $row;
     }
@@ -111,7 +130,38 @@ if ($action === 'list') {
 <body class="bg-gray-100">
     <!-- Sidebar -->
     <?php include 'includes/sidebar.php'; ?>
-    
+
+    <!-- Page-scoped alignment: keep the main content card the exact same
+         height as the fixed sidebar so both panels align top/bottom. -->
+    <style>
+        @media (min-width: 1024px) {
+            .lg\:ml-64 {
+                height: calc(100vh - 2rem) !important;
+                overflow-y: auto !important;
+            }
+            /* Thin, themed scrollbar for the in-card scroll area */
+            .lg\:ml-64 {
+                scrollbar-width: thin;
+                scrollbar-color: #d2dcd5 transparent;
+            }
+            .lg\:ml-64::-webkit-scrollbar {
+                width: 8px;
+            }
+            .lg\:ml-64::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            .lg\:ml-64::-webkit-scrollbar-thumb {
+                background-color: #d2dcd5;
+                border-radius: 4px;
+                border: 2px solid transparent;
+                background-clip: padding-box;
+            }
+            .lg\:ml-64::-webkit-scrollbar-thumb:hover {
+                background-color: #c0ccc5;
+            }
+        }
+    </style>
+
     <!-- Main Content -->
     <div class="lg:ml-64 p-4 lg:p-8">
         <!-- Page Header -->
@@ -271,6 +321,16 @@ if ($action === 'list') {
                         <?php endif; ?>
                     </tbody>
                 </table>
+                <?php
+                require_once __DIR__ . '/includes/pagination.php';
+                renderPagination([
+                    'current_page' => $current_page_num,
+                    'total_pages'   => $total_pages,
+                    'total_items'   => $total_events,
+                    'per_page'      => $per_page,
+                    'base_query'    => $_GET,
+                ]);
+                ?>
             </div>
             
             <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">

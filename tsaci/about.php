@@ -74,6 +74,10 @@ $company_full_name = getSiteSetting('company_name', 'Tupi Supreme Activated Carb
     <title>About Us - <?php echo htmlspecialchars_safe($company_full_name); ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Poppins font — matches the admin console typeface -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
@@ -90,14 +94,131 @@ $company_full_name = getSiteSetting('company_name', 'Tupi Supreme Activated Carb
         }
     </script>
     <style>
-        .page-header-gradient {
-            background: linear-gradient(135deg, #2c5530, #4a7c59);
+        html {
+            scroll-behavior: smooth;
         }
-        
+
+        body {
+            font-family: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+            background-color: #f7faf8;
+            color: #23332c;
+        }
+
+        .page-header-gradient {
+            background: linear-gradient(135deg, #23332c, #3d7a66);
+        }
+
         .page-header-pattern {
             background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
         }
-        
+
+        /* Floating gradient orbs for depth — a modern hero accent */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.35;
+            pointer-events: none;
+        }
+        .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: #8bc34a;
+            top: -100px;
+            right: -80px;
+            animation: float 8s ease-in-out infinite;
+        }
+        .orb-2 {
+            width: 300px;
+            height: 300px;
+            background: #3d7a66;
+            bottom: -80px;
+            left: 10%;
+            animation: float 10s ease-in-out infinite reverse;
+        }
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(20px, -30px); }
+        }
+
+        /* Subtle dot grid for section backgrounds */
+        .dot-grid {
+            background-image: radial-gradient(circle, #c0ccc5 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+
+        /* Eyebrow label — small uppercase tracked text above section titles */
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.375rem 1rem;
+            background-color: #eef3f0;
+            color: #3d7a66;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            border-radius: 9999px;
+        }
+
+        /* Story / value icon container */
+        .story-icon-wrap {
+            background: linear-gradient(135deg, #3d7a66, #60796e);
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .story-card:hover .story-icon-wrap {
+            transform: scale(1.06) rotate(-3deg);
+        }
+
+        /* Mission / Vision cards */
+        .mv-card {
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.35s ease, box-shadow 0.35s ease;
+        }
+        .mv-card:hover {
+            transform: translateY(-6px);
+            border-color: #3d7a66;
+            box-shadow: 0 12px 32px -12px rgba(35, 51, 44, 0.15);
+        }
+        .mv-icon-wrap {
+            background: linear-gradient(135deg, #3d7a66, #60796e);
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .mv-card:hover .mv-icon-wrap {
+            transform: scale(1.06);
+        }
+
+        /* Value cards */
+        .value-card {
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.35s ease, box-shadow 0.35s ease;
+        }
+        .value-card:hover {
+            transform: translateY(-6px);
+            border-color: #3d7a66;
+            box-shadow: 0 12px 32px -12px rgba(35, 51, 44, 0.15);
+        }
+        .value-card:hover .value-icon {
+            transform: scale(1.08) rotate(-3deg);
+        }
+        .value-icon {
+            background: linear-gradient(135deg, #3d7a66, #60796e);
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Team cards */
+        .team-card {
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.35s ease, box-shadow 0.35s ease;
+        }
+        .team-card:hover {
+            transform: translateY(-6px);
+            border-color: #3d7a66;
+            box-shadow: 0 12px 32px -12px rgba(35, 51, 44, 0.15);
+        }
+        .team-photo {
+            background: linear-gradient(135deg, #3d7a66, #60796e);
+        }
+
+        /* Timeline — modern vertical rail with alternating cards */
         .timeline::before {
             content: '';
             position: absolute;
@@ -105,43 +226,33 @@ $company_full_name = getSiteSetting('company_name', 'Tupi Supreme Activated Carb
             top: 0;
             bottom: 0;
             width: 2px;
-            background: #2c5530;
+            background: linear-gradient(180deg, #3d7a66, #c0ccc5);
             transform: translateX(-50%);
         }
-        
+
         .timeline-item:nth-child(odd) .timeline-content {
             margin-left: 0;
             margin-right: 50%;
             text-align: right;
             padding-right: 30px;
         }
-        
+
         .timeline-item:nth-child(even) .timeline-content {
             margin-left: 50%;
             margin-right: 0;
             text-align: left;
             padding-left: 30px;
         }
-        
-        .timeline-content::before {
-            content: '';
-            position: absolute;
-            top: 20px;
-            width: 0;
-            height: 0;
-            border: 10px solid transparent;
+
+        .timeline-content {
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.35s ease, box-shadow 0.35s ease;
         }
-        
-        .timeline-item:nth-child(odd) .timeline-content::before {
-            right: -20px;
-            border-left-color: white;
+        .timeline-content:hover {
+            transform: translateY(-4px);
+            border-color: #3d7a66;
+            box-shadow: 0 12px 32px -12px rgba(35, 51, 44, 0.15);
         }
-        
-        .timeline-item:nth-child(even) .timeline-content::before {
-            left: -20px;
-            border-right-color: white;
-        }
-        
+
         .timeline-dot {
             position: absolute;
             left: 50%;
@@ -149,32 +260,18 @@ $company_full_name = getSiteSetting('company_name', 'Tupi Supreme Activated Carb
             width: 20px;
             height: 20px;
             background: #8bc34a;
+            border: 4px solid #f7faf8;
             border-radius: 50%;
             transform: translateX(-50%);
             z-index: 2;
+            box-shadow: 0 0 0 2px #3d7a66;
         }
-        
-        .team-card {
-            transition: transform 0.3s ease;
-        }
-        
-        .team-card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .team-photo {
-            background: linear-gradient(135deg, #8bc34a, #4a7c59);
-        }
-        
-        .value-icon {
-            background: linear-gradient(135deg, #8bc34a, #4a7c59);
-        }
-        
+
         @media (max-width: 768px) {
             .timeline::before {
                 left: 30px;
             }
-            
+
             .timeline-item .timeline-content {
                 margin-left: 60px !important;
                 margin-right: 0 !important;
@@ -182,72 +279,147 @@ $company_full_name = getSiteSetting('company_name', 'Tupi Supreme Activated Carb
                 padding-left: 20px !important;
                 padding-right: 20px !important;
             }
-            
+
             .timeline-dot {
                 left: 30px;
             }
-            
-            .timeline-item .timeline-content::before {
-                left: -20px !important;
-                right: auto !important;
-                border-right-color: white !important;
-                border-left-color: transparent !important;
+        }
+
+        /* Scroll-triggered reveal — modern alternative to always-on fade-in.
+           Elements start hidden and animate in when they enter the viewport. */
+        .reveal {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .reveal.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Staggered delays for cascading reveal within a section */
+        .reveal-delay-1 { transition-delay: 0.08s; }
+        .reveal-delay-2 { transition-delay: 0.16s; }
+        .reveal-delay-3 { transition-delay: 0.24s; }
+        .reveal-delay-4 { transition-delay: 0.32s; }
+
+        /* Hero content uses the always-on fade-in (above the fold, no IO needed) */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            opacity: 0;
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+
+        .fade-in-delay-1 { animation-delay: 0.05s; }
+        .fade-in-delay-2 { animation-delay: 0.15s; }
+        .fade-in-delay-3 { animation-delay: 0.25s; }
+
+        /* Respect reduced-motion preference */
+        @media (prefers-reduced-motion: reduce) {
+            .fade-in,
+            .reveal {
+                opacity: 1;
+                animation: none;
+                transform: none;
+                transition: none;
+            }
+            .orb {
+                animation: none;
+            }
+            html {
+                scroll-behavior: auto;
             }
         }
     </style>
 </head>
-<body class="font-sans">
+<body>
     <?php include 'includes/navbar.php'; ?>
 
     <!-- Page Header -->
     <section class="page-header-gradient text-white relative overflow-hidden pt-24 pb-20">
+        <!-- Floating gradient orbs for depth -->
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
         <div class="page-header-pattern absolute inset-0 opacity-30"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="text-center">
-                <h1 class="text-5xl lg:text-6xl font-bold mb-6"><?php echo htmlspecialchars_safe($page_header_title); ?></h1>
-                <p class="text-xl"><?php echo htmlspecialchars_safe($page_header_subtitle); ?></p>
+                <span class="eyebrow bg-white/15 text-white/90 mb-5 fade-in fade-in-delay-1">
+                    <i class="fas fa-leaf text-xs"></i> Our Company
+                </span>
+                <h1 class="text-4xl lg:text-6xl font-bold mb-5 leading-tight mt-4 fade-in fade-in-delay-2"><?php echo htmlspecialchars_safe($page_header_title); ?></h1>
+                <p class="text-lg lg:text-xl text-white/85 max-w-2xl mx-auto fade-in fade-in-delay-3"><?php echo htmlspecialchars_safe($page_header_subtitle); ?></p>
             </div>
         </div>
     </section>
 
     <!-- Company Story -->
-    <section class="py-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section class="py-20 lg:py-24 relative overflow-hidden">
+        <!-- Subtle dot grid backdrop -->
+        <div class="absolute inset-0 dot-grid opacity-40"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div>
-                    <h2 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-6"><?php echo htmlspecialchars_safe($company_story_title); ?></h2>
+                <div class="reveal">
+                    <span class="eyebrow mb-4">
+                        <i class="fas fa-book-open text-xs"></i> Our Story
+                    </span>
+                    <h2 class="text-3xl lg:text-4xl font-bold text-[#23332c] mb-6 mt-4"><?php echo htmlspecialchars_safe($company_story_title); ?></h2>
                     <?php if ($company_story_content): ?>
-                        <div class="text-gray-600 text-lg prose prose-lg max-w-none">
+                        <div class="text-[#5a6b62] text-base lg:text-lg leading-relaxed prose prose-lg max-w-none">
                             <?php echo $company_story_content; ?>
                         </div>
                     <?php endif; ?>
                 </div>
-                <div class="text-center">
-                    <i class="<?php echo htmlspecialchars_safe($company_story_icon); ?> text-8xl text-primary opacity-75"></i>
+                <div class="text-center reveal reveal-delay-2">
+                    <div class="story-card inline-block">
+                        <div class="story-icon-wrap w-40 h-40 rounded-2xl flex items-center justify-center mx-auto">
+                            <i class="<?php echo htmlspecialchars_safe($company_story_icon); ?> text-6xl text-white"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Mission & Vision -->
-    <section class="py-20 bg-light">
+    <section class="py-20 lg:py-24 bg-[#f5f7f5]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div class="bg-white rounded-2xl shadow-lg p-8 h-full">
+            <div class="text-center mb-16 reveal">
+                <span class="eyebrow mb-4">
+                    <i class="fas fa-compass text-xs"></i> Purpose
+                </span>
+                <h2 class="text-3xl lg:text-4xl font-bold text-[#23332c] mb-4 mt-4">Mission & Vision</h2>
+                <p class="text-lg text-[#7d8b84] max-w-2xl mx-auto">The principles that drive us forward</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="mv-card bg-white border border-[#e6ece8] rounded-2xl p-8 h-full reveal reveal-delay-1">
                     <div class="text-center mb-6">
-                        <i class="<?php echo htmlspecialchars_safe($mission_icon); ?> text-5xl text-primary"></i>
+                        <div class="mv-icon-wrap w-20 h-20 rounded-2xl flex items-center justify-center mx-auto">
+                            <i class="<?php echo htmlspecialchars_safe($mission_icon); ?> text-3xl text-white"></i>
+                        </div>
                     </div>
-                    <h3 class="text-3xl font-bold text-center mb-6"><?php echo htmlspecialchars_safe($mission_title); ?></h3>
-                    <div class="text-gray-600 text-center prose prose-lg max-w-none">
+                    <h3 class="text-2xl font-semibold text-center text-[#23332c] mb-5"><?php echo htmlspecialchars_safe($mission_title); ?></h3>
+                    <div class="text-[#5a6b62] text-center prose prose-lg max-w-none leading-relaxed">
                         <?php echo $mission_content; ?>
                     </div>
                 </div>
-                <div class="bg-white rounded-2xl shadow-lg p-8 h-full">
+                <div class="mv-card bg-white border border-[#e6ece8] rounded-2xl p-8 h-full reveal reveal-delay-2">
                     <div class="text-center mb-6">
-                        <i class="<?php echo htmlspecialchars_safe($vision_icon); ?> text-5xl text-primary"></i>
+                        <div class="mv-icon-wrap w-20 h-20 rounded-2xl flex items-center justify-center mx-auto">
+                            <i class="<?php echo htmlspecialchars_safe($vision_icon); ?> text-3xl text-white"></i>
+                        </div>
                     </div>
-                    <h3 class="text-3xl font-bold text-center mb-6"><?php echo htmlspecialchars_safe($vision_title); ?></h3>
-                    <div class="text-gray-600 text-center prose prose-lg max-w-none">
+                    <h3 class="text-2xl font-semibold text-center text-[#23332c] mb-5"><?php echo htmlspecialchars_safe($vision_title); ?></h3>
+                    <div class="text-[#5a6b62] text-center prose prose-lg max-w-none leading-relaxed">
                         <?php echo $vision_content; ?>
                     </div>
                 </div>
@@ -257,19 +429,24 @@ $company_full_name = getSiteSetting('company_name', 'Tupi Supreme Activated Carb
 
     <!-- Company Timeline -->
     <?php if (!empty($timeline_events)): ?>
-    <section class="py-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-4"><?php echo htmlspecialchars_safe($timeline_title); ?></h2>
-                <p class="text-xl text-gray-600"><?php echo htmlspecialchars_safe($timeline_subtitle); ?></p>
+    <section class="py-20 lg:py-24 relative overflow-hidden">
+        <div class="absolute inset-0 dot-grid opacity-40"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div class="text-center mb-16 reveal">
+                <span class="eyebrow mb-4">
+                    <i class="fas fa-history text-xs"></i> Milestones
+                </span>
+                <h2 class="text-3xl lg:text-4xl font-bold text-[#23332c] mb-4 mt-4"><?php echo htmlspecialchars_safe($timeline_title); ?></h2>
+                <p class="text-lg text-[#7d8b84] max-w-2xl mx-auto"><?php echo htmlspecialchars_safe($timeline_subtitle); ?></p>
             </div>
             <div class="timeline relative">
                 <?php foreach ($timeline_events as $index => $event): ?>
-                    <div class="timeline-item relative mb-10">
+                    <div class="timeline-item relative mb-10 reveal <?php echo 'reveal-delay-' . ((($index % 4) + 1)); ?>">
                         <div class="timeline-dot"></div>
-                        <div class="timeline-content bg-white p-6 rounded-lg shadow-lg relative">
-                            <h4 class="text-xl font-bold mb-2"><?php echo htmlspecialchars_safe($event['year']); ?> - <?php echo htmlspecialchars_safe($event['title']); ?></h4>
-                            <p class="text-gray-600"><?php echo htmlspecialchars_safe($event['description']); ?></p>
+                        <div class="timeline-content bg-white border border-[#e6ece8] p-6 rounded-2xl relative">
+                            <span class="eyebrow mb-3 <?php echo ($index % 2 === 0) ? '' : ''; ?>"><?php echo htmlspecialchars_safe($event['year']); ?></span>
+                            <h4 class="text-xl font-semibold text-[#23332c] mb-2 mt-2"><?php echo htmlspecialchars_safe($event['title']); ?></h4>
+                            <p class="text-[#7d8b84] leading-relaxed text-sm"><?php echo htmlspecialchars_safe($event['description']); ?></p>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -280,22 +457,27 @@ $company_full_name = getSiteSetting('company_name', 'Tupi Supreme Activated Carb
 
     <!-- Core Values -->
     <?php if (!empty($company_values)): ?>
-    <section class="bg-light py-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-4"><?php echo htmlspecialchars_safe($values_title); ?></h2>
-                <p class="text-xl text-gray-600"><?php echo htmlspecialchars_safe($values_subtitle); ?></p>
+    <section class="bg-[#23332c] text-white py-20 lg:py-24 relative overflow-hidden">
+        <!-- Decorative orbs -->
+        <div class="orb orb-1" style="background: #3d7a66; opacity: 0.25;"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div class="text-center mb-16 reveal">
+                <span class="eyebrow bg-white/15 text-white/90 mb-4">
+                    <i class="fas fa-heart text-xs"></i> Principles
+                </span>
+                <h2 class="text-3xl lg:text-4xl font-bold mb-4 mt-4"><?php echo htmlspecialchars_safe($values_title); ?></h2>
+                <p class="text-lg text-white/70 max-w-2xl mx-auto"><?php echo htmlspecialchars_safe($values_subtitle); ?></p>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <?php foreach ($company_values as $value): ?>
-                    <div class="bg-white rounded-2xl shadow-lg p-8 text-center">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <?php foreach ($company_values as $i => $value): ?>
+                    <div class="value-card bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 text-center reveal <?php echo 'reveal-delay-' . ((($i % 3) + 1)); ?>">
                         <?php if ($value['icon']): ?>
-                            <div class="value-icon w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <i class="<?php echo htmlspecialchars_safe($value['icon']); ?> text-3xl text-white"></i>
+                            <div class="value-icon w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                                <i class="<?php echo htmlspecialchars_safe($value['icon']); ?> text-2xl text-white"></i>
                             </div>
                         <?php endif; ?>
-                        <h4 class="text-2xl font-bold text-gray-900 mb-4"><?php echo htmlspecialchars_safe($value['title']); ?></h4>
-                        <p class="text-gray-600"><?php echo htmlspecialchars_safe($value['description']); ?></p>
+                        <h4 class="text-xl font-semibold mb-3"><?php echo htmlspecialchars_safe($value['title']); ?></h4>
+                        <p class="text-white/70 leading-relaxed text-sm"><?php echo htmlspecialchars_safe($value['description']); ?></p>
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -305,32 +487,35 @@ $company_full_name = getSiteSetting('company_name', 'Tupi Supreme Activated Carb
 
     <!-- Leadership Team -->
     <?php if (!empty($team_members)): ?>
-    <section class="py-20">
+    <section class="py-20 lg:py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-4"><?php echo htmlspecialchars_safe($team_title); ?></h2>
-                <p class="text-xl text-gray-600"><?php echo htmlspecialchars_safe($team_subtitle); ?></p>
+            <div class="text-center mb-16 reveal">
+                <span class="eyebrow mb-4">
+                    <i class="fas fa-users text-xs"></i> Leadership
+                </span>
+                <h2 class="text-3xl lg:text-4xl font-bold text-[#23332c] mb-4 mt-4"><?php echo htmlspecialchars_safe($team_title); ?></h2>
+                <p class="text-lg text-[#7d8b84] max-w-2xl mx-auto"><?php echo htmlspecialchars_safe($team_subtitle); ?></p>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <?php foreach ($team_members as $member): ?>
-                    <div class="team-card bg-white rounded-2xl shadow-lg p-8 text-center">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <?php foreach ($team_members as $i => $member): ?>
+                    <div class="team-card bg-white border border-[#e6ece8] rounded-2xl p-8 text-center reveal <?php echo 'reveal-delay-' . ((($i % 3) + 1)); ?>">
                         <?php if ($member['photo_url']): ?>
-                            <img src="<?php echo htmlspecialchars_safe($member['photo_url']); ?>" alt="<?php echo htmlspecialchars_safe($member['name']); ?>" class="w-32 h-32 rounded-full mx-auto mb-6 object-cover">
+                            <img src="<?php echo htmlspecialchars_safe($member['photo_url']); ?>" alt="<?php echo htmlspecialchars_safe($member['name']); ?>" class="w-28 h-28 rounded-full mx-auto mb-6 object-cover border-4 border-[#eef3f0]">
                         <?php else: ?>
-                            <div class="team-photo w-32 h-32 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <i class="fas fa-user text-5xl text-white"></i>
+                            <div class="team-photo w-28 h-28 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-[#eef3f0]">
+                                <i class="fas fa-user text-4xl text-white"></i>
                             </div>
                         <?php endif; ?>
-                        <h5 class="text-2xl font-bold text-gray-900 mb-2"><?php echo htmlspecialchars_safe($member['name']); ?></h5>
+                        <h5 class="text-xl font-semibold text-[#23332c] mb-1"><?php echo htmlspecialchars_safe($member['name']); ?></h5>
                         <?php if ($member['position']): ?>
-                            <p class="text-gray-500 mb-4"><?php echo htmlspecialchars_safe($member['position']); ?></p>
+                            <p class="text-[#3d7a66] font-medium text-sm mb-4"><?php echo htmlspecialchars_safe($member['position']); ?></p>
                         <?php endif; ?>
                         <?php if ($member['bio']): ?>
-                            <p class="text-gray-600"><?php echo htmlspecialchars_safe($member['bio']); ?></p>
+                            <p class="text-[#7d8b84] leading-relaxed text-sm mb-4"><?php echo htmlspecialchars_safe($member['bio']); ?></p>
                         <?php endif; ?>
                         <?php if ($member['email']): ?>
-                            <a href="mailto:<?php echo htmlspecialchars_safe($member['email']); ?>" class="text-primary hover:text-secondary mt-2 inline-block">
-                                <i class="fas fa-envelope mr-1"></i>Email
+                            <a href="mailto:<?php echo htmlspecialchars_safe($member['email']); ?>" class="inline-flex items-center gap-2 text-[#3d7a66] hover:text-[#23332c] text-sm font-medium transition-colors">
+                                <i class="fas fa-envelope text-xs"></i> Email
                             </a>
                         <?php endif; ?>
                     </div>
@@ -341,5 +526,33 @@ $company_full_name = getSiteSetting('company_name', 'Tupi Supreme Activated Carb
     <?php endif; ?>
 
     <?php include 'includes/footer.php'; ?>
+
+    <!-- Scroll-triggered reveal animations -->
+    <script>
+        (function() {
+            const reveals = document.querySelectorAll('.reveal');
+            if (!reveals.length) return;
+
+            // Fallback: if IntersectionObserver isn't supported, show everything
+            if (!('IntersectionObserver' in window)) {
+                reveals.forEach(el => el.classList.add('is-visible'));
+                return;
+            }
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.12,
+                rootMargin: '0px 0px -60px 0px'
+            });
+
+            reveals.forEach(el => observer.observe(el));
+        })();
+    </script>
 </body>
 </html>

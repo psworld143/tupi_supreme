@@ -75,10 +75,73 @@ while ($row = $result->fetch_assoc()) {
     <!-- Sidebar -->
     <?php include 'includes/sidebar.php'; ?>
 
+    <!-- Page-scoped alignment: keep the main content card the exact same
+         height as the fixed sidebar so both panels align top/bottom. -->
+    <style>
+        @media (min-width: 1024px) {
+            .lg\:ml-64 {
+                height: calc(100vh - 2rem) !important;
+                overflow-y: auto !important;
+            }
+            /* Thin, themed scrollbar for the in-card scroll area */
+            .lg\:ml-64 {
+                scrollbar-width: thin;
+                scrollbar-color: #d2dcd5 transparent;
+            }
+            .lg\:ml-64::-webkit-scrollbar {
+                width: 8px;
+            }
+            .lg\:ml-64::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            .lg\:ml-64::-webkit-scrollbar-thumb {
+                background-color: #d2dcd5;
+                border-radius: 4px;
+                border: 2px solid transparent;
+                background-clip: padding-box;
+            }
+            .lg\:ml-64::-webkit-scrollbar-thumb:hover {
+                background-color: #c0ccc5;
+            }
+        }
+
+        /* Fade-in animation for dashboard content */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            opacity: 0;
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+
+        /* Staggered delays for a cascading reveal */
+        .fade-in-delay-1 { animation-delay: 0.05s; }
+        .fade-in-delay-2 { animation-delay: 0.15s; }
+        .fade-in-delay-3 { animation-delay: 0.25s; }
+        .fade-in-delay-4 { animation-delay: 0.35s; }
+        .fade-in-delay-5 { animation-delay: 0.45s; }
+
+        /* Respect reduced-motion preference */
+        @media (prefers-reduced-motion: reduce) {
+            .fade-in {
+                opacity: 1;
+                animation: none;
+            }
+        }
+    </style>
+
     <!-- Main Content -->
     <div class="lg:ml-64 p-6 lg:p-12">
         <!-- Hero / Welcome -->
-        <div class="mb-12">
+        <div class="mb-12 fade-in fade-in-delay-1">
             <h1 class="text-3xl lg:text-4xl font-bold text-[#23332c]">Hello! I'm <?php echo htmlspecialchars($user['full_name'] ?: $user['username']); ?></h1>
             <div class="flex flex-wrap items-center gap-x-5 gap-y-2 mt-2">
                 <span class="text-[#3d7a66] font-medium text-lg"><?php echo htmlspecialchars(ucwords(str_replace('_', ' ', $user['role'] ?? 'Administrator'))); ?></span>
@@ -98,11 +161,11 @@ while ($row = $result->fetch_assoc()) {
         </div>
 
         <!-- Overview -->
-        <div class="flex items-center justify-between mb-5">
+        <div class="flex items-center justify-between mb-5 fade-in fade-in-delay-2">
             <h2 class="text-xl font-bold text-[#23332c]">Overview</h2>
             <a href="statistics.php" class="text-sm text-[#7d8b84] hover:text-[#23332c] transition-colors">View All <i class="fas fa-arrow-right text-xs"></i></a>
         </div>
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12 fade-in fade-in-delay-2">
             <a href="pages.php" class="border border-[#e6ece8] rounded-2xl p-5 hover:bg-[#f7faf8] transition-colors">
                 <div class="w-10 h-10 rounded-full bg-[#eef3f0] flex items-center justify-center mb-4">
                     <i class="fas fa-file-alt text-[#60796e]"></i>
@@ -137,8 +200,8 @@ while ($row = $result->fetch_assoc()) {
         </div>
 
         <!-- Quick Actions -->
-        <h2 class="text-xl font-bold text-[#23332c] mb-5">Quick Actions</h2>
-        <div class="flex flex-wrap gap-3 mb-12">
+        <h2 class="text-xl font-bold text-[#23332c] mb-5 fade-in fade-in-delay-3">Quick Actions</h2>
+        <div class="flex flex-wrap gap-3 mb-12 fade-in fade-in-delay-3">
             <a href="pages.php?action=add" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#23332c] text-white text-sm font-medium hover:bg-[#3a4a41] transition-colors">
                 <i class="fas fa-plus text-xs"></i> Page Content
             </a>
@@ -153,7 +216,7 @@ while ($row = $result->fetch_assoc()) {
             </a>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 fade-in fade-in-delay-4">
             <!-- Content Management -->
             <div>
                 <h2 class="text-xl font-bold text-[#23332c] mb-5">Content Management</h2>

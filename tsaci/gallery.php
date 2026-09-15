@@ -14,15 +14,15 @@ $gallery_categories = ['all', 'facilities', 'products', 'process', 'installation
 function getPlaceholderImage($image, $index) {
     // Color schemes for different categories
     $colors = [
-        'facilities' => ['#2c5530', '#4a7c59'],
-        'products' => ['#4a7c59', '#8bc34a'],
-        'process' => ['#8bc34a', '#2c5530'],
-        'installations' => ['#2c5530', '#8bc34a'],
-        'team' => ['#4a7c59', '#2c5530']
+        'facilities' => ['#23332c', '#3d7a66'],
+        'products' => ['#3d7a66', '#60796e'],
+        'process' => ['#60796e', '#3d7a66'],
+        'installations' => ['#23332c', '#60796e'],
+        'team' => ['#3d7a66', '#23332c']
     ];
     
     $category = $image['category'] ?? 'facilities';
-    $colorScheme = $colors[$category] ?? ['#2c5530', '#4a7c59'];
+    $colorScheme = $colors[$category] ?? ['#23332c', '#3d7a66'];
     
     // Create unique identifier using image ID or index
     $uniqueId = isset($image['id']) ? $image['id'] : ($index + 1);
@@ -90,10 +90,12 @@ function isValidImageUrl($url) {
     <meta name="description" content="View our photo gallery showcasing facilities, products, manufacturing processes, and municipal water treatment installations at Tupi Supreme Activated Carbon, Inc.">
     <meta name="keywords" content="activated carbon gallery, water treatment photos, manufacturing facility, activated carbon products, TSACI gallery">
     <title>Gallery - Photo Albums | <?php echo htmlspecialchars_safe(getSiteSetting('company_name', 'Tupi Supreme Activated Carbon, Inc.')); ?></title>
-    <!-- Tailwind CSS CDN - Note: For production, consider using PostCSS or Tailwind CLI -->
-    <!-- See: https://tailwindcss.com/docs/installation -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Poppins font — matches the admin console typeface -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
@@ -110,54 +112,114 @@ function isValidImageUrl($url) {
         }
     </script>
     <style>
-        .page-header-gradient {
-            background: linear-gradient(135deg, #2c5530, #4a7c59);
+        html {
+            scroll-behavior: smooth;
         }
-        
+
+        body {
+            font-family: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+            background-color: #f7faf8;
+            color: #23332c;
+        }
+
+        .page-header-gradient {
+            background: linear-gradient(135deg, #23332c, #3d7a66);
+        }
+
         .page-header-pattern {
             background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
         }
-        
+
+        /* Floating gradient orbs for depth — a modern hero accent */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.35;
+            pointer-events: none;
+        }
+        .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: #8bc34a;
+            top: -100px;
+            right: -80px;
+            animation: float 8s ease-in-out infinite;
+        }
+        .orb-2 {
+            width: 300px;
+            height: 300px;
+            background: #3d7a66;
+            bottom: -80px;
+            left: 10%;
+            animation: float 10s ease-in-out infinite reverse;
+        }
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(20px, -30px); }
+        }
+
+        /* Subtle dot grid for section backgrounds */
+        .dot-grid {
+            background-image: radial-gradient(circle, #c0ccc5 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+
+        /* Eyebrow label — small uppercase tracked text above section titles */
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.375rem 1rem;
+            background-color: #eef3f0;
+            color: #3d7a66;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            border-radius: 9999px;
+        }
+
+        /* Filter buttons */
+        .filter-btn {
+            transition: all 0.3s ease;
+        }
+        .filter-btn.active {
+            background-color: #23332c;
+            color: white;
+            border-color: #23332c;
+        }
+        .filter-btn:hover:not(.active) {
+            background-color: #eaf0ec;
+            border-color: #3d7a66;
+            color: #23332c;
+        }
+
+        /* Gallery items */
         .gallery-item {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.35s ease, box-shadow 0.35s ease;
             cursor: pointer;
             overflow: hidden;
         }
-        
         .gallery-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transform: translateY(-6px);
+            border-color: #3d7a66;
+            box-shadow: 0 12px 32px -12px rgba(35, 51, 44, 0.15);
         }
-        
         .gallery-item img {
-            transition: transform 0.3s ease;
-            background-color: #f3f4f6;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            background-color: #f5f7f5;
             min-height: 256px;
             opacity: 0;
         }
-        
         .gallery-item:hover img {
-            transform: scale(1.05);
+            transform: scale(1.06);
         }
-        
         .gallery-item img[src=""],
         .gallery-item img:not([src]) {
             display: none;
         }
-        
-        /* Fallback for broken images */
-        .gallery-item .image-fallback {
-            background: linear-gradient(135deg, #2c5530, #4a7c59);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 3rem;
-            opacity: 0.75;
-            width: 100%;
-            height: 100%;
-        }
-        
+
         /* Lightbox Styles */
         .lightbox {
             display: none;
@@ -167,29 +229,26 @@ function isValidImageUrl($url) {
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
+            background-color: rgba(15, 20, 18, 0.95);
+            backdrop-filter: blur(8px);
             overflow: auto;
         }
-        
         .lightbox.active {
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        
         .lightbox-content {
             position: relative;
             max-width: 90%;
             max-height: 90%;
             margin: auto;
         }
-        
         .lightbox-content img {
             width: 100%;
             height: auto;
-            border-radius: 8px;
+            border-radius: 1rem;
         }
-        
         .lightbox-close {
             position: absolute;
             top: 20px;
@@ -199,56 +258,115 @@ function isValidImageUrl($url) {
             font-weight: bold;
             cursor: pointer;
             z-index: 10000;
+            transition: color 0.3s ease;
         }
-        
         .lightbox-close:hover {
             color: #8bc34a;
         }
-        
         .lightbox-nav {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
             color: #fff;
-            font-size: 30px;
+            font-size: 24px;
             cursor: pointer;
-            padding: 10px 15px;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 5px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 9999px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: background-color 0.3s ease;
         }
-        
         .lightbox-nav:hover {
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(255, 255, 255, 0.2);
         }
-        
         .lightbox-prev {
             left: 20px;
         }
-        
         .lightbox-next {
             right: 20px;
         }
+
+        /* Scroll-triggered reveal */
+        .reveal {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .reveal.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .reveal-delay-1 { transition-delay: 0.08s; }
+        .reveal-delay-2 { transition-delay: 0.16s; }
+        .reveal-delay-3 { transition-delay: 0.24s; }
+        .reveal-delay-4 { transition-delay: 0.32s; }
+
+        /* Hero content uses the always-on fade-in (above the fold, no IO needed) */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .fade-in {
+            opacity: 0;
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+        .fade-in-delay-1 { animation-delay: 0.05s; }
+        .fade-in-delay-2 { animation-delay: 0.15s; }
+        .fade-in-delay-3 { animation-delay: 0.25s; }
+
+        /* Respect reduced-motion preference */
+        @media (prefers-reduced-motion: reduce) {
+            .fade-in,
+            .reveal {
+                opacity: 1;
+                animation: none;
+                transform: none;
+                transition: none;
+            }
+            .orb {
+                animation: none;
+            }
+            html {
+                scroll-behavior: auto;
+            }
+        }
     </style>
 </head>
-<body class="font-sans">
+<body>
     <?php include 'includes/navbar.php'; ?>
 
     <!-- Page Header -->
     <section class="page-header-gradient text-white relative overflow-hidden pt-24 pb-20">
+        <!-- Floating gradient orbs for depth -->
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
         <div class="page-header-pattern absolute inset-0 opacity-30"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="text-center">
-                <h1 class="text-5xl lg:text-6xl font-bold mb-6"><?php echo htmlspecialchars_safe($page_header_title); ?></h1>
-                <p class="text-xl"><?php echo htmlspecialchars_safe($page_header_subtitle); ?></p>
+                <span class="eyebrow bg-white/15 text-white/90 mb-5 fade-in fade-in-delay-1">
+                    <i class="fas fa-images text-xs"></i> Visual Tour
+                </span>
+                <h1 class="text-4xl lg:text-6xl font-bold mb-5 leading-tight mt-4 fade-in fade-in-delay-2"><?php echo htmlspecialchars_safe($page_header_title); ?></h1>
+                <p class="text-lg lg:text-xl text-white/85 max-w-2xl mx-auto fade-in fade-in-delay-3"><?php echo htmlspecialchars_safe($page_header_subtitle); ?></p>
             </div>
         </div>
     </section>
 
     <!-- Gallery Categories Filter -->
-    <section class="py-12 bg-light">
+    <section class="py-10 bg-[#f5f7f5] border-b border-[#e6ece8]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-wrap justify-center gap-4">
-                <button onclick="filterGallery('all')" class="filter-btn active px-6 py-2 rounded-full bg-primary text-white font-semibold transition duration-300 hover:bg-secondary">All Photos</button>
+            <div class="flex flex-wrap justify-center gap-3 reveal">
+                <button onclick="filterGallery('all', this)" class="filter-btn active border-2 border-[#d6ded9] text-[#23332c] px-6 py-2.5 rounded-full font-medium text-sm">All Photos</button>
                 <?php 
                 $category_labels = [
                     'facilities' => 'Facilities',
@@ -268,7 +386,7 @@ function isValidImageUrl($url) {
                     }
                     if ($has_images):
                 ?>
-                    <button onclick="filterGallery('<?php echo htmlspecialchars_safe($cat); ?>')" class="filter-btn px-6 py-2 rounded-full bg-gray-200 text-gray-700 font-semibold transition duration-300 hover:bg-gray-300"><?php echo htmlspecialchars_safe($category_labels[$cat] ?? ucfirst($cat)); ?></button>
+                    <button onclick="filterGallery('<?php echo htmlspecialchars_safe($cat); ?>', this)" class="filter-btn border-2 border-[#d6ded9] text-[#23332c] px-6 py-2.5 rounded-full font-medium text-sm"><?php echo htmlspecialchars_safe($category_labels[$cat] ?? ucfirst($cat)); ?></button>
                 <?php 
                     endif;
                 endforeach; 
@@ -278,8 +396,10 @@ function isValidImageUrl($url) {
     </section>
 
     <!-- Gallery Grid -->
-    <section class="py-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section class="py-20 lg:py-24 relative overflow-hidden">
+        <!-- Subtle dot grid backdrop -->
+        <div class="absolute inset-0 dot-grid opacity-40"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <?php if (!empty($all_gallery_images)): ?>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="gallery-grid">
                     <?php foreach ($all_gallery_images as $index => $image): 
@@ -310,8 +430,8 @@ function isValidImageUrl($url) {
                         // Use placeholder if no valid image URL or if it's a placeholder service URL
                         $imageUrl = $hasValidImage ? $imageUrlFromDb : $placeholderUrl;
                     ?>
-                        <div class="gallery-item gallery-<?php echo htmlspecialchars_safe($image['category']); ?> bg-white rounded-lg shadow-lg overflow-hidden" data-category="<?php echo htmlspecialchars_safe($image['category']); ?>" onclick="openLightbox(<?php echo $index; ?>)">
-                            <div class="relative h-64 overflow-hidden bg-gray-100">
+                        <div class="gallery-item gallery-<?php echo htmlspecialchars_safe($image['category']); ?> bg-white border border-[#e6ece8] rounded-2xl reveal <?php echo 'reveal-delay-' . ((($index % 4) + 1)); ?>" data-category="<?php echo htmlspecialchars_safe($image['category']); ?>" onclick="openLightbox(<?php echo $index; ?>)">
+                            <div class="relative h-64 overflow-hidden bg-[#f5f7f5]">
                                 <img src="<?php echo htmlspecialchars_safe($imageUrl); ?>" 
                                      alt="<?php echo htmlspecialchars_safe($image['title']); ?>" 
                                      class="w-full h-full object-cover"
@@ -322,23 +442,25 @@ function isValidImageUrl($url) {
                                 <noscript>
                                     <img src="<?php echo htmlspecialchars_safe($placeholderUrl); ?>" alt="<?php echo htmlspecialchars_safe($image['title']); ?>" class="w-full h-full object-cover">
                                 </noscript>
-                                <div class="absolute inset-0 bg-black opacity-0 hover:opacity-30 transition duration-300 flex items-center justify-center cursor-pointer">
-                            <i class="fas fa-search-plus text-white text-3xl"></i>
-                        </div>
-                    </div>
-                    <div class="p-4">
-                                <h3 class="font-bold text-gray-900 mb-1"><?php echo htmlspecialchars_safe($image['title']); ?></h3>
+                                <div class="absolute inset-0 bg-[#23332c] opacity-0 hover:opacity-30 transition-opacity duration-300 flex items-center justify-center cursor-pointer">
+                                    <i class="fas fa-search-plus text-white text-3xl"></i>
+                                </div>
+                            </div>
+                            <div class="p-5">
+                                <h3 class="font-semibold text-[#23332c] mb-1 text-sm"><?php echo htmlspecialchars_safe($image['title']); ?></h3>
                                 <?php if ($image['description']): ?>
-                                    <p class="text-sm text-gray-600"><?php echo htmlspecialchars_safe($image['description']); ?></p>
+                                    <p class="text-xs text-[#7d8b84] leading-relaxed"><?php echo htmlspecialchars_safe($image['description']); ?></p>
                                 <?php endif; ?>
-                </div>
+                            </div>
                         </div>
                     <?php endforeach; ?>
                 </div>
             <?php else: ?>
-                <div class="text-center py-20">
-                    <i class="fas fa-images text-6xl text-gray-300 mb-4"></i>
-                    <p class="text-xl text-gray-600">No gallery images available at this time. Please check back later.</p>
+                <div class="text-center py-20 reveal">
+                    <div class="w-20 h-20 rounded-full bg-[#eef3f0] flex items-center justify-center mx-auto mb-5">
+                        <i class="fas fa-images text-3xl text-[#60796e]"></i>
+                    </div>
+                    <p class="text-lg text-[#7d8b84]">No gallery images available at this time. Please check back later.</p>
                 </div>
             <?php endif; ?>
         </div>
@@ -347,8 +469,8 @@ function isValidImageUrl($url) {
     <!-- Lightbox Modal -->
     <div id="lightbox" class="lightbox" onclick="closeLightboxOnBackdrop(event)">
         <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
-        <span class="lightbox-nav lightbox-prev" onclick="changeImage(-1)">&#10094;</span>
-        <span class="lightbox-nav lightbox-next" onclick="changeImage(1)">&#10095;</span>
+        <span class="lightbox-nav lightbox-prev" onclick="changeImage(-1, event)">&#10094;</span>
+        <span class="lightbox-nav lightbox-next" onclick="changeImage(1, event)">&#10095;</span>
         <div class="lightbox-content">
             <img id="lightbox-img" src="" alt="Gallery Image">
         </div>
@@ -412,17 +534,13 @@ function isValidImageUrl($url) {
         let currentImageIndex = 0;
 
         // Filter Gallery
-        function filterGallery(category) {
+        function filterGallery(category, btn) {
             const items = document.querySelectorAll('.gallery-item');
             const buttons = document.querySelectorAll('.filter-btn');
             
             // Update active button
-            buttons.forEach(btn => {
-                btn.classList.remove('active', 'bg-primary', 'text-white');
-                btn.classList.add('bg-gray-200', 'text-gray-700');
-            });
-            event.target.classList.add('active', 'bg-primary', 'text-white');
-            event.target.classList.remove('bg-gray-200', 'text-gray-700');
+            buttons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
             
             // Filter items
             items.forEach(item => {
@@ -485,8 +603,8 @@ function isValidImageUrl($url) {
         }
 
         // Change Image in Lightbox
-        function changeImage(direction) {
-            event.stopPropagation();
+        function changeImage(direction, event) {
+            if (event) event.stopPropagation();
             currentImageIndex += direction;
             
             if (currentImageIndex < 0) {
@@ -526,53 +644,30 @@ function isValidImageUrl($url) {
             }
         });
 
-        // Mobile Menu Toggle Function
-        function toggleMobileMenu() {
-            const mobileMenu = document.getElementById('mobile-menu');
-            const menuButton = document.getElementById('mobile-menu-button');
-            const icon = menuButton.querySelector('i');
-            
-            if (mobileMenu.classList.contains('hidden')) {
-                mobileMenu.classList.remove('hidden');
-                icon.classList.remove('fa-bars');
-                icon.classList.add('fa-times');
-            } else {
-                mobileMenu.classList.add('hidden');
-                icon.classList.remove('fa-times');
-                icon.classList.add('fa-bars');
-            }
-        }
+        // Scroll-triggered reveal animations
+        (function() {
+            const reveals = document.querySelectorAll('.reveal');
+            if (!reveals.length) return;
 
-        document.addEventListener('click', function(event) {
-            const mobileMenu = document.getElementById('mobile-menu');
-            const menuButton = document.getElementById('mobile-menu-button');
-            
-            if (mobileMenu && menuButton && !mobileMenu.contains(event.target) && !menuButton.contains(event.target)) {
-                if (!mobileMenu.classList.contains('hidden')) {
-                    mobileMenu.classList.add('hidden');
-                    const icon = menuButton.querySelector('i');
-                    if (icon) {
-                        icon.classList.remove('fa-times');
-                        icon.classList.add('fa-bars');
-                    }
-                }
+            if (!('IntersectionObserver' in window)) {
+                reveals.forEach(el => el.classList.add('is-visible'));
+                return;
             }
-        });
 
-        window.addEventListener('resize', function() {
-            if (window.innerWidth >= 768) {
-                const mobileMenu = document.getElementById('mobile-menu');
-                const menuButton = document.getElementById('mobile-menu-button');
-                if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
-                    mobileMenu.classList.add('hidden');
-                    const icon = menuButton.querySelector('i');
-                    if (icon) {
-                        icon.classList.remove('fa-times');
-                        icon.classList.add('fa-bars');
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
                     }
-                }
-            }
-        });
+                });
+            }, {
+                threshold: 0.12,
+                rootMargin: '0px 0px -60px 0px'
+            });
+
+            reveals.forEach(el => observer.observe(el));
+        })();
     </script>
 </body>
 </html>

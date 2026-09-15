@@ -61,10 +61,29 @@ if ($action === 'delete' && $id) {
     }
 }
 
-// Get slides for listing
+// Get slides for listing (with pagination)
 $slides = [];
+$total_slides = 0;
+$total_pages = 1;
 if ($action === 'list') {
-    $result = $db->query("SELECT * FROM carousel_slides ORDER BY display_order, id");
+    $per_page = 10;
+    $current_page_num = max(1, intval($_GET['page'] ?? 1));
+    $offset = ($current_page_num - 1) * $per_page;
+
+    // Total count for pagination controls
+    $count_result = $db->query("SELECT COUNT(*) as total FROM carousel_slides");
+    $total_slides = $count_result->fetch_assoc()['total'];
+    $total_pages = max(1, ceil($total_slides / $per_page));
+    // Clamp current page if out of range
+    if ($current_page_num > $total_pages) {
+        $current_page_num = $total_pages;
+        $offset = ($current_page_num - 1) * $per_page;
+    }
+
+    $stmt = $db->prepare("SELECT * FROM carousel_slides ORDER BY display_order, id LIMIT ? OFFSET ?");
+    $stmt->bind_param("ii", $per_page, $offset);
+    $stmt->execute();
+    $result = $stmt->get_result();
     while ($row = $result->fetch_assoc()) {
         $slides[] = $row;
     }
@@ -112,7 +131,38 @@ if (($action === 'edit' || $action === 'delete') && $id) {
 <body class="bg-gray-100">
     <!-- Sidebar -->
     <?php include 'includes/sidebar.php'; ?>
-    
+
+    <!-- Page-scoped alignment: keep the main content card the exact same
+         height as the fixed sidebar so both panels align top/bottom. -->
+    <style>
+        @media (min-width: 1024px) {
+            .lg\:ml-64 {
+                height: calc(100vh - 2rem) !important;
+                overflow-y: auto !important;
+            }
+            /* Thin, themed scrollbar for the in-card scroll area */
+            .lg\:ml-64 {
+                scrollbar-width: thin;
+                scrollbar-color: #d2dcd5 transparent;
+            }
+            .lg\:ml-64::-webkit-scrollbar {
+                width: 8px;
+            }
+            .lg\:ml-64::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            .lg\:ml-64::-webkit-scrollbar-thumb {
+                background-color: #d2dcd5;
+                border-radius: 4px;
+                border: 2px solid transparent;
+                background-clip: padding-box;
+            }
+            .lg\:ml-64::-webkit-scrollbar-thumb:hover {
+                background-color: #c0ccc5;
+            }
+        }
+    </style>
+
     <!-- Main Content -->
     <div class="lg:ml-64 p-4 lg:p-8">
         <!-- Page Header -->
@@ -199,6 +249,16 @@ if (($action === 'edit' || $action === 'delete') && $id) {
                         <?php endif; ?>
                     </tbody>
                 </table>
+                <?php
+                require_once __DIR__ . '/includes/pagination.php';
+                renderPagination([
+                    'current_page' => $current_page_num,
+                    'total_pages'   => $total_pages,
+                    'total_items'   => $total_slides,
+                    'per_page'      => $per_page,
+                    'base_query'    => $_GET,
+                ]);
+                ?>
             </div>
         <?php elseif ($action === 'add' || $action === 'edit'): ?>
             <!-- Add/Edit Form -->

@@ -122,6 +122,8 @@ $account_items = [
         border-radius: 1.5rem;
         margin: 0.75rem;
         min-height: calc(100vh - 1.5rem);
+        /* Animate its margin so it moves in sync with the collapsing sidebar */
+        transition: margin-left 0.3s ease;
     }
 
     /* Inner cards become flat, minimal panels */
@@ -220,15 +222,40 @@ $account_items = [
         document.body.style.overflow = '';
     }
 
-    sidebarToggle?.addEventListener('click', openSidebar);
+    function isSidebarOpen() {
+        return !sidebar.classList.contains('-translate-x-full');
+    }
+
+    // Hamburger toggles open/close instead of only opening
+    sidebarToggle?.addEventListener('click', function() {
+        if (isSidebarOpen()) {
+            closeSidebar();
+        } else {
+            openSidebar();
+        }
+    });
     sidebarClose?.addEventListener('click', closeSidebar);
     sidebarOverlay?.addEventListener('click', closeSidebar);
 
-    // Desktop collapse/expand toggle
+    // Escape closes the mobile sidebar
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && isSidebarOpen() && window.innerWidth < 1024) {
+            closeSidebar();
+        }
+    });
+
+    // Desktop collapse/expand toggle (throttled to 350ms so rapid clicks can't
+    // interrupt the width/margin transitions and leave the sidebar overlapping content)
+    let isCollapsing = false;
     sidebarCollapse?.addEventListener('click', function() {
+        if (isCollapsing) return;
+        isCollapsing = true;
         const isCollapsed = document.body.classList.contains('sidebar-collapsed');
         localStorage.setItem(COLLAPSE_KEY, isCollapsed ? '0' : '1');
         applyDesktopState();
+        setTimeout(function() {
+            isCollapsing = false;
+        }, 350);
     });
 
     // Apply persisted state on load (desktop only)
@@ -239,6 +266,15 @@ $account_items = [
     // Close sidebar on window resize if switching to desktop
     window.addEventListener('resize', function() {
         if (window.innerWidth >= 1024) {
+            closeSidebar();
+        }
+    });
+
+    // Safety net: if the page is shown from the back/forward cache with the
+    // mobile sidebar left open, clear the overlay + body scroll lock so the
+    // page never ends up in an unclickable state.
+    window.addEventListener('pageshow', function(e) {
+        if (e.persisted && isSidebarOpen() && window.innerWidth < 1024) {
             closeSidebar();
         }
     });
