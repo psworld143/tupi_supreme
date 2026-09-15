@@ -9,127 +9,95 @@ $current_page = basename($_SERVER['PHP_SELF']);
 $db = getDB();
 $result = $db->query("SELECT COUNT(*) as count FROM contact_messages WHERE is_read = 0 AND is_archived = 0");
 $unread_messages = $result->fetch_assoc()['count'];
+
+$display_name = $current_user['full_name'] ?: $current_user['username'];
+$avatar_initial = strtoupper(substr($display_name, 0, 1));
+$role_label = ucwords(str_replace('_', ' ', $current_user['role'] ?? 'Admin'));
+
+$nav_items = [
+    ['index.php',          'fa-home',           'Dashboard'],
+    ['pages.php',          'fa-file-alt',       'Pages'],
+    ['about.php',          'fa-info-circle',    'About Page'],
+    ['timeline.php',       'fa-history',        'Our Journey'],
+    ['statistics.php',     'fa-chart-bar',      'Statistics'],
+    ['carousel.php',       'fa-images',         'Carousel'],
+    ['products.php',       'fa-cube',           'Products'],
+    ['services.php',       'fa-concierge-bell', 'Services'],
+    ['case-studies.php',   'fa-book',           'Case Studies'],
+    ['gallery.php',        'fa-photo-video',    'Gallery'],
+    ['resources.php',      'fa-file-download',  'Resources'],
+    ['certifications.php', 'fa-certificate',    'Certifications'],
+];
+
+$account_items = [
+    ['profile.php',  'fa-user',         'Profile'],
+    ['settings.php', 'fa-cog',          'Settings'],
+    ['logout.php',   'fa-sign-out-alt', 'Logout'],
+];
 ?>
+<!-- Poppins font + admin theme -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
 <!-- Sidebar -->
-<aside id="sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen transition-all duration-300 -translate-x-full lg:translate-x-0 bg-dark text-white flex flex-col">
-    <div class="sidebar-scroll flex-1 overflow-y-auto px-3 py-4">
-        <!-- Logo/Brand -->
-        <div class="sidebar-header flex items-center justify-between mb-8 px-2">
-            <a href="index.php" class="sidebar-brand flex items-center text-xl font-bold">
-                <i class="fas fa-shield-alt mr-2"></i>
-                <span class="sidebar-label hidden lg:inline"><?php echo SITE_NAME; ?></span>
-            </a>
-            <div class="flex items-center">
-                <!-- Desktop collapse toggle -->
-                <button id="sidebar-collapse" type="button" title="Collapse sidebar" class="hidden lg:inline-block text-gray-400 hover:text-white hover:bg-gray-700 p-1 rounded transition-colors">
-                    <i class="fas fa-bars text-xl"></i>
-                </button>
-                <!-- Mobile close button -->
-                <button id="sidebar-close" class="lg:hidden text-white hover:text-gray-300">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
+<aside id="sidebar" class="fixed top-0 bottom-0 left-0 lg:top-4 lg:bottom-4 lg:left-4 z-40 w-64 transition-all duration-300 -translate-x-full lg:translate-x-0 bg-[#f5f7f5] text-[#45524b] lg:rounded-2xl lg:shadow-lg lg:border lg:border-black/5 flex flex-col">
+    <!-- Profile header (pinned — stays put while the nav scrolls) -->
+    <div class="sidebar-header flex items-center gap-3 px-5 pt-5 pb-4 flex-shrink-0">
+        <div class="w-11 h-11 rounded-full bg-[#23332c] text-white flex items-center justify-center font-semibold text-lg flex-shrink-0">
+            <?php echo htmlspecialchars($avatar_initial); ?>
         </div>
-        
+        <div class="sidebar-label min-w-0 flex-1">
+            <p class="font-semibold text-[15px] text-[#23332c] leading-tight truncate"><?php echo htmlspecialchars($display_name); ?></p>
+            <p class="text-xs text-[#8a978f] truncate"><?php echo htmlspecialchars($role_label); ?></p>
+        </div>
+        <!-- Mobile close button -->
+        <button id="sidebar-close" class="lg:hidden text-[#66746c] hover:text-[#23332c]">
+            <i class="fas fa-times text-xl"></i>
+        </button>
+    </div>
+
+    <div class="sidebar-scroll flex-1 overflow-y-auto px-3 pb-5">
         <!-- Navigation Menu -->
-        <nav class="space-y-2">
-            <a href="index.php" title="Dashboard" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors <?php echo $current_page == 'index.php' ? 'bg-primary' : ''; ?>">
-                <i class="fas fa-home w-5 text-center"></i>
-                <span class="sidebar-label ml-3">Dashboard</span>
-            </a>
-            
-            <a href="pages.php" title="Pages" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors <?php echo $current_page == 'pages.php' ? 'bg-primary' : ''; ?>">
-                <i class="fas fa-file-alt w-5 text-center"></i>
-                <span class="sidebar-label ml-3">Pages</span>
-            </a>
-            
-            <a href="about.php" title="About Page" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors <?php echo $current_page == 'about.php' ? 'bg-primary' : ''; ?>">
-                <i class="fas fa-info-circle w-5 text-center"></i>
-                <span class="sidebar-label ml-3">About Page</span>
-            </a>
-            
-            <a href="timeline.php" title="Our Journey" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors <?php echo $current_page == 'timeline.php' ? 'bg-primary' : ''; ?>">
-                <i class="fas fa-history w-5 text-center"></i>
-                <span class="sidebar-label ml-3">Our Journey</span>
-            </a>
-            
-            <a href="statistics.php" title="Statistics" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors <?php echo $current_page == 'statistics.php' ? 'bg-primary' : ''; ?>">
-                <i class="fas fa-chart-bar w-5 text-center"></i>
-                <span class="sidebar-label ml-3">Statistics</span>
-            </a>
-            
-            <a href="carousel.php" title="Carousel" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors <?php echo $current_page == 'carousel.php' ? 'bg-primary' : ''; ?>">
-                <i class="fas fa-images w-5 text-center"></i>
-                <span class="sidebar-label ml-3">Carousel</span>
-            </a>
-            
-            <a href="products.php" title="Products" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors <?php echo $current_page == 'products.php' ? 'bg-primary' : ''; ?>">
-                <i class="fas fa-cube w-5 text-center"></i>
-                <span class="sidebar-label ml-3">Products</span>
-            </a>
-            
-            <a href="services.php" title="Services" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors <?php echo $current_page == 'services.php' ? 'bg-primary' : ''; ?>">
-                <i class="fas fa-concierge-bell w-5 text-center"></i>
-                <span class="sidebar-label ml-3">Services</span>
-            </a>
-            
-            <a href="case-studies.php" title="Case Studies" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors <?php echo $current_page == 'case-studies.php' ? 'bg-primary' : ''; ?>">
-                <i class="fas fa-book w-5 text-center"></i>
-                <span class="sidebar-label ml-3">Case Studies</span>
-            </a>
-            
-            <a href="gallery.php" title="Gallery" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors <?php echo $current_page == 'gallery.php' ? 'bg-primary' : ''; ?>">
-                <i class="fas fa-images w-5 text-center"></i>
-                <span class="sidebar-label ml-3">Gallery</span>
-            </a>
-            
-            <a href="resources.php" title="Resources" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors <?php echo $current_page == 'resources.php' ? 'bg-primary' : ''; ?>">
-                <i class="fas fa-file-download w-5 text-center"></i>
-                <span class="sidebar-label ml-3">Resources</span>
-            </a>
-            
-            <a href="certifications.php" title="Certifications" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors <?php echo $current_page == 'certifications.php' ? 'bg-primary' : ''; ?>">
-                <i class="fas fa-certificate w-5 text-center"></i>
-                <span class="sidebar-label ml-3">Certifications</span>
-            </a>
-            
-            <a href="messages.php" title="Messages" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors relative <?php echo $current_page == 'messages.php' ? 'bg-primary' : ''; ?>">
+        <nav class="space-y-1">
+            <?php foreach ($nav_items as $item):
+                $is_active = $current_page === $item[0];
+            ?>
+                <a href="<?php echo $item[0]; ?>" title="<?php echo $item[2]; ?>" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm transition-colors <?php echo $is_active ? 'bg-[#e2eae4] text-[#23332c] font-medium' : 'text-[#66746c] hover:bg-[#eaf0ec] hover:text-[#23332c]'; ?>">
+                    <i class="fas <?php echo $item[1]; ?> w-5 text-center"></i>
+                    <span class="sidebar-label"><?php echo $item[2]; ?></span>
+                </a>
+            <?php endforeach; ?>
+
+            <a href="messages.php" title="Messages" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm transition-colors <?php echo $current_page == 'messages.php' ? 'bg-[#e2eae4] text-[#23332c] font-medium' : 'text-[#66746c] hover:bg-[#eaf0ec] hover:text-[#23332c]'; ?>">
                 <i class="fas fa-envelope w-5 text-center"></i>
-                <span class="sidebar-label ml-3">Messages</span>
+                <span class="sidebar-label">Messages</span>
                 <?php if ($unread_messages > 0): ?>
-                    <span class="sidebar-badge ml-auto bg-red-500 text-white text-xs font-bold rounded-full px-2 py-1"><?php echo $unread_messages; ?></span>
+                    <span class="sidebar-badge ml-auto bg-[#23332c] text-white text-[10px] font-semibold rounded-full px-2 py-0.5"><?php echo $unread_messages; ?></span>
                 <?php endif; ?>
             </a>
         </nav>
+
+        <!-- Account section -->
+        <p class="section-label px-3.5 pt-6 pb-2 text-[11px] font-semibold uppercase tracking-wider text-[#96a39b]">Account</p>
+        <nav class="space-y-1">
+            <?php foreach ($account_items as $item):
+                $is_active = $current_page === $item[0];
+                $is_logout = $item[0] === 'logout.php';
+            ?>
+                <a href="<?php echo $item[0]; ?>" title="<?php echo $item[2]; ?>" class="user-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm transition-colors <?php echo $is_logout ? 'text-red-500 hover:bg-red-50' : ($is_active ? 'bg-[#e2eae4] text-[#23332c] font-medium' : 'text-[#66746c] hover:bg-[#eaf0ec] hover:text-[#23332c]'); ?>">
+                    <i class="fas <?php echo $item[1]; ?> w-5 text-center"></i>
+                    <span class="sidebar-label"><?php echo $item[2]; ?></span>
+                </a>
+            <?php endforeach; ?>
+        </nav>
     </div>
-    
-    <!-- User Section -->
-    <div class="user-section p-4 border-t border-gray-700 bg-dark">
-            <div class="flex items-center mb-3">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-user-circle text-2xl text-gray-400"></i>
-                </div>
-                <div class="sidebar-label user-info ml-3 flex-1 min-w-0">
-                    <p class="text-sm font-medium truncate"><?php echo htmlspecialchars($current_user['username']); ?></p>
-                    <?php if (!empty($current_user['full_name'])): ?>
-                        <p class="text-xs text-gray-400 truncate"><?php echo htmlspecialchars($current_user['full_name']); ?></p>
-                    <?php endif; ?>
-                </div>
-            </div>
-            <div class="space-y-1">
-                <a href="profile.php" title="Profile" class="user-link flex items-center px-2 py-1.5 text-sm rounded hover:bg-gray-700 transition-colors">
-                    <i class="fas fa-user w-4 mr-2 text-center"></i>
-                    <span class="sidebar-label">Profile</span>
-                </a>
-                <a href="settings.php" title="Settings" class="user-link flex items-center px-2 py-1.5 text-sm rounded hover:bg-gray-700 transition-colors">
-                    <i class="fas fa-cog w-4 mr-2 text-center"></i>
-                    <span class="sidebar-label">Settings</span>
-                </a>
-                <a href="logout.php" title="Logout" class="user-link flex items-center px-2 py-1.5 text-sm rounded hover:bg-gray-700 transition-colors text-red-400">
-                    <i class="fas fa-sign-out-alt w-4 mr-2 text-center"></i>
-                    <span class="sidebar-label">Logout</span>
-                </a>
-            </div>
+
+    <!-- Bottom toggle (matches the dark round button in the reference) -->
+    <div class="sidebar-footer p-4">
+        <button id="sidebar-collapse" type="button" title="Collapse sidebar" class="hidden lg:flex w-10 h-10 rounded-full bg-[#23332c] text-white items-center justify-center hover:bg-[#3a4a41] transition-colors">
+            <i class="fas fa-bars"></i>
+        </button>
     </div>
 </aside>
 
@@ -137,40 +105,67 @@ $unread_messages = $result->fetch_assoc()['count'];
 <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden hidden"></div>
 
 <!-- Mobile Menu Button -->
-<button id="sidebar-toggle" class="fixed top-4 left-4 z-50 lg:hidden bg-dark text-white p-2 rounded-lg shadow-lg">
-    <i class="fas fa-bars text-xl"></i>
+<button id="sidebar-toggle" class="fixed top-4 left-4 z-50 lg:hidden w-11 h-11 bg-white text-[#23332c] rounded-full shadow-lg flex items-center justify-center">
+    <i class="fas fa-bars"></i>
 </button>
 
 <style>
-    /* Sidebar scrollbar — matches the dark sidebar background */
+    /* Global admin theme — Poppins + warm olive backdrop + white content card */
+    body {
+        font-family: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+        background-color: #60796e !important;
+    }
+
+    /* Main content sits in a large white rounded card, like the reference */
+    .lg\:ml-64 {
+        background: #ffffff;
+        border-radius: 1.5rem;
+        margin: 0.75rem;
+        min-height: calc(100vh - 1.5rem);
+    }
+
+    /* Inner cards become flat, minimal panels */
+    .lg\:ml-64 .shadow-md,
+    .lg\:ml-64 .shadow-lg {
+        box-shadow: none;
+        border: 1px solid #e6ece8;
+        border-radius: 1rem;
+    }
+
+    /* Sidebar scrollbar — matches the light sidebar background */
     #sidebar .sidebar-scroll {
         scrollbar-width: thin;
-        scrollbar-color: #4a5568 #1a1a1a;
+        scrollbar-color: #d2dcd5 #f5f7f5;
     }
     #sidebar .sidebar-scroll::-webkit-scrollbar {
         width: 8px;
     }
     #sidebar .sidebar-scroll::-webkit-scrollbar-track {
-        background: #1a1a1a;
+        background: #f5f7f5;
     }
     #sidebar .sidebar-scroll::-webkit-scrollbar-thumb {
-        background-color: #4a5568;
+        background-color: #d2dcd5;
         border-radius: 4px;
-        border: 2px solid #1a1a1a;
+        border: 2px solid #f5f7f5;
     }
     #sidebar .sidebar-scroll::-webkit-scrollbar-thumb:hover {
-        background-color: #5a6776;
+        background-color: #c0ccc5;
     }
 
-    /* Collapsed (desktop-only) state: shrink sidebar to an icon rail */
     @media (min-width: 1024px) {
+        /* Clear the floating sidebar (1rem offset + 16rem panel + 1rem gap) */
+        .lg\:ml-64 {
+            margin: 1rem 1rem 1rem 18rem !important;
+            min-height: calc(100vh - 2rem);
+        }
+
+        /* Collapsed (desktop-only) state: shrink sidebar to an icon rail */
         body.sidebar-collapsed #sidebar {
             width: 4rem;
         }
-        body.sidebar-collapsed #sidebar .sidebar-label {
-            display: none;
-        }
-        body.sidebar-collapsed #sidebar .sidebar-badge {
+        body.sidebar-collapsed #sidebar .sidebar-label,
+        body.sidebar-collapsed #sidebar .sidebar-badge,
+        body.sidebar-collapsed #sidebar .section-label {
             display: none;
         }
         body.sidebar-collapsed #sidebar nav a {
@@ -178,20 +173,19 @@ $unread_messages = $result->fetch_assoc()['count'];
             padding-left: 0.5rem;
             padding-right: 0.5rem;
         }
-        body.sidebar-collapsed #sidebar .user-section .user-info {
-            display: none;
-        }
-        body.sidebar-collapsed #sidebar .user-section .user-link {
-            justify-content: center;
-        }
-        body.sidebar-collapsed #sidebar .sidebar-brand {
-            display: none;
-        }
         body.sidebar-collapsed #sidebar .sidebar-header {
             justify-content: center;
+            padding-left: 0;
+            padding-right: 0;
+        }
+        body.sidebar-collapsed #sidebar .sidebar-footer {
+            display: flex;
+            justify-content: center;
+            padding-left: 0;
+            padding-right: 0;
         }
         body.sidebar-collapsed .lg\:ml-64 {
-            margin-left: 4rem !important;
+            margin-left: 6rem !important;
         }
     }
 </style>
@@ -249,4 +243,3 @@ $unread_messages = $result->fetch_assoc()['count'];
         }
     });
 </script>
-

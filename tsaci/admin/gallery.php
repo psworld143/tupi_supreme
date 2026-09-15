@@ -288,23 +288,6 @@ if ($action === 'list') {
                                 document.getElementById('upload-progress').classList.add('hidden');
                             }
                             
-                            document.getElementById('image-url-input').addEventListener('input', function(e) {
-                                const url = e.target.value;
-                                if (url) {
-                                    const preview = document.getElementById('image-preview');
-                                    preview.src = url;
-                                    preview.onerror = function() {
-                                        this.style.display = 'none';
-                                    };
-                                    preview.onload = function() {
-                                        this.style.display = 'block';
-                                        document.getElementById('image-preview-container').classList.remove('hidden');
-                                    };
-                                } else {
-                                    document.getElementById('image-preview-container').classList.add('hidden');
-                                }
-                            });
-                            
                             function validateImageUpload() {
                                 const urlInput = document.getElementById('image-url-input');
                                 

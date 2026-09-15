@@ -74,23 +74,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     </script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
-            background: linear-gradient(135deg, #2c5530, #4a7c59);
+            font-family: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+            background: #60796e;
         }
         .btn-primary {
-            background-color: #2c5530;
+            background-color: #3d7a66;
         }
         .btn-primary:hover {
-            background-color: #4a7c59;
+            background-color: #2f6351;
         }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8 bg-white p-10 rounded-lg shadow-2xl">
+    <div class="max-w-md w-full space-y-8 bg-white p-10 rounded-3xl shadow-2xl">
         <div>
             <div class="flex justify-center">
-                <i class="fas fa-shield-alt text-6xl" style="color: #2c5530;"></i>
+                <i class="fas fa-shield-alt text-6xl" style="color: #3d7a66;"></i>
             </div>
             <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
                 Admin Console Login

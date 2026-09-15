@@ -74,161 +74,137 @@ while ($row = $result->fetch_assoc()) {
 <body class="bg-gray-100">
     <!-- Sidebar -->
     <?php include 'includes/sidebar.php'; ?>
-    
+
     <!-- Main Content -->
-    <div class="lg:ml-64 p-4 lg:p-8">
-        <!-- Welcome Section -->
-        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">Welcome back, <?php echo htmlspecialchars($user['full_name'] ?: $user['username']); ?>!</h1>
-            <p class="text-gray-600">Manage your website content from this admin console.</p>
-        </div>
-        
-        <!-- Statistics Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-gray-600 text-sm">Page Content</p>
-                        <p class="text-3xl font-bold text-primary"><?php echo $stats['pages']; ?></p>
-                    </div>
-                    <div class="bg-primary bg-opacity-10 p-3 rounded-full">
-                        <i class="fas fa-file-alt text-primary text-2xl"></i>
-                    </div>
-                </div>
-                <a href="pages.php" class="text-sm text-primary hover:underline mt-2 block">Manage Pages →</a>
+    <div class="lg:ml-64 p-6 lg:p-12">
+        <!-- Hero / Welcome -->
+        <div class="mb-12">
+            <h1 class="text-3xl lg:text-4xl font-bold text-[#23332c]">Hello! I'm <?php echo htmlspecialchars($user['full_name'] ?: $user['username']); ?></h1>
+            <div class="flex flex-wrap items-center gap-x-5 gap-y-2 mt-2">
+                <span class="text-[#3d7a66] font-medium text-lg"><?php echo htmlspecialchars(ucwords(str_replace('_', ' ', $user['role'] ?? 'Administrator'))); ?></span>
+                <span class="inline-flex items-center gap-1.5 text-sm text-[#66746c]">
+                    <i class="fas fa-globe"></i> <?php echo SITE_NAME; ?>
+                </span>
             </div>
-            
-            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-gray-600 text-sm">Products</p>
-                        <p class="text-3xl font-bold text-secondary"><?php echo $stats['products']; ?></p>
-                    </div>
-                    <div class="bg-secondary bg-opacity-10 p-3 rounded-full">
-                        <i class="fas fa-cube text-secondary text-2xl"></i>
-                    </div>
-                </div>
-                <a href="products.php" class="text-sm text-secondary hover:underline mt-2 block">Manage Products →</a>
-            </div>
-            
-            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-gray-600 text-sm">Services</p>
-                        <p class="text-3xl font-bold text-accent"><?php echo $stats['services']; ?></p>
-                    </div>
-                    <div class="bg-accent bg-opacity-10 p-3 rounded-full">
-                        <i class="fas fa-concierge-bell text-accent text-2xl"></i>
-                    </div>
-                </div>
-                <a href="services.php" class="text-sm text-accent hover:underline mt-2 block">Manage Services →</a>
-            </div>
-            
-            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-gray-600 text-sm">Messages</p>
-                        <p class="text-3xl font-bold <?php echo $stats['messages'] > 0 ? 'text-red-600' : 'text-gray-600'; ?>"><?php echo $stats['messages']; ?></p>
-                    </div>
-                    <div class="bg-red-100 p-3 rounded-full">
-                        <i class="fas fa-envelope text-red-600 text-2xl"></i>
-                    </div>
-                </div>
-                <a href="messages.php" class="text-sm text-primary hover:underline mt-2 block">View Messages →</a>
+            <p class="text-[#7d8b84] mt-5 max-w-xl text-sm leading-relaxed">
+                Manage your website content, products, services and messages from this admin console.
+            </p>
+            <div class="flex flex-wrap gap-3 mt-6">
+                <a href="../index.php" target="_blank" class="px-5 py-2.5 rounded-full bg-[#3d7a66] text-white text-sm font-medium hover:bg-[#2f6351] transition-colors">View Website</a>
+                <a href="messages.php" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-[#d6ded9] text-sm font-medium text-[#23332c] hover:bg-[#eff4f1] transition-colors">
+                    <i class="far fa-envelope"></i> Messages
+                </a>
             </div>
         </div>
-        
+
+        <!-- Overview -->
+        <div class="flex items-center justify-between mb-5">
+            <h2 class="text-xl font-bold text-[#23332c]">Overview</h2>
+            <a href="statistics.php" class="text-sm text-[#7d8b84] hover:text-[#23332c] transition-colors">View All <i class="fas fa-arrow-right text-xs"></i></a>
+        </div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+            <a href="pages.php" class="border border-[#e6ece8] rounded-2xl p-5 hover:bg-[#f7faf8] transition-colors">
+                <div class="w-10 h-10 rounded-full bg-[#eef3f0] flex items-center justify-center mb-4">
+                    <i class="fas fa-file-alt text-[#60796e]"></i>
+                </div>
+                <p class="text-3xl font-semibold text-[#23332c]"><?php echo $stats['pages']; ?></p>
+                <p class="text-xs text-[#8a978f] mt-1">Page Content</p>
+            </a>
+
+            <a href="products.php" class="border border-[#e6ece8] rounded-2xl p-5 hover:bg-[#f7faf8] transition-colors">
+                <div class="w-10 h-10 rounded-full bg-[#eef3f0] flex items-center justify-center mb-4">
+                    <i class="fas fa-cube text-[#60796e]"></i>
+                </div>
+                <p class="text-3xl font-semibold text-[#23332c]"><?php echo $stats['products']; ?></p>
+                <p class="text-xs text-[#8a978f] mt-1">Products</p>
+            </a>
+
+            <a href="services.php" class="border border-[#e6ece8] rounded-2xl p-5 hover:bg-[#f7faf8] transition-colors">
+                <div class="w-10 h-10 rounded-full bg-[#eef3f0] flex items-center justify-center mb-4">
+                    <i class="fas fa-concierge-bell text-[#60796e]"></i>
+                </div>
+                <p class="text-3xl font-semibold text-[#23332c]"><?php echo $stats['services']; ?></p>
+                <p class="text-xs text-[#8a978f] mt-1">Services</p>
+            </a>
+
+            <a href="messages.php" class="border border-[#e6ece8] rounded-2xl p-5 hover:bg-[#f7faf8] transition-colors">
+                <div class="w-10 h-10 rounded-full bg-[#eef3f0] flex items-center justify-center mb-4">
+                    <i class="fas fa-envelope text-[#60796e]"></i>
+                </div>
+                <p id="stat-messages-count" class="text-3xl font-semibold <?php echo $stats['messages'] > 0 ? 'text-red-500' : 'text-[#23332c]'; ?>"><?php echo $stats['messages']; ?></p>
+                <p class="text-xs text-[#8a978f] mt-1">Unread Messages</p>
+            </a>
+        </div>
+
         <!-- Quick Actions -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">Quick Actions</h2>
-                <div class="grid grid-cols-2 gap-4">
-                    <a href="pages.php?action=add" class="bg-primary text-white p-4 rounded-lg hover:bg-secondary transition-colors text-center">
-                        <i class="fas fa-plus-circle text-2xl mb-2"></i>
-                        <p class="font-semibold">Add Page Content</p>
-                    </a>
-                    <a href="products.php?action=add" class="bg-secondary text-white p-4 rounded-lg hover:bg-primary transition-colors text-center">
-                        <i class="fas fa-cube text-2xl mb-2"></i>
-                        <p class="font-semibold">Add Product</p>
-                    </a>
-                    <a href="case-studies.php?action=add" class="bg-accent text-white p-4 rounded-lg hover:bg-secondary transition-colors text-center">
-                        <i class="fas fa-book text-2xl mb-2"></i>
-                        <p class="font-semibold">Add Case Study</p>
-                    </a>
-                    <a href="gallery.php?action=add" class="bg-gray-700 text-white p-4 rounded-lg hover:bg-gray-800 transition-colors text-center">
-                        <i class="fas fa-images text-2xl mb-2"></i>
-                        <p class="font-semibold">Add Gallery Image</p>
-                    </a>
+        <h2 class="text-xl font-bold text-[#23332c] mb-5">Quick Actions</h2>
+        <div class="flex flex-wrap gap-3 mb-12">
+            <a href="pages.php?action=add" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#23332c] text-white text-sm font-medium hover:bg-[#3a4a41] transition-colors">
+                <i class="fas fa-plus text-xs"></i> Page Content
+            </a>
+            <a href="products.php?action=add" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-[#d6ded9] text-sm font-medium text-[#23332c] hover:bg-[#eff4f1] transition-colors">
+                <i class="fas fa-plus text-xs"></i> Product
+            </a>
+            <a href="case-studies.php?action=add" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-[#d6ded9] text-sm font-medium text-[#23332c] hover:bg-[#eff4f1] transition-colors">
+                <i class="fas fa-plus text-xs"></i> Case Study
+            </a>
+            <a href="gallery.php?action=add" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-[#d6ded9] text-sm font-medium text-[#23332c] hover:bg-[#eff4f1] transition-colors">
+                <i class="fas fa-plus text-xs"></i> Gallery Image
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+            <!-- Content Management -->
+            <div>
+                <h2 class="text-xl font-bold text-[#23332c] mb-5">Content Management</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <?php
+                    $content_links = [
+                        ['pages.php',          'fa-file-alt',      'Page Content',   'Manage page sections'],
+                        ['products.php',       'fa-cube',          'Products',       'Manage products'],
+                        ['services.php',       'fa-concierge-bell','Services',       'Manage services'],
+                        ['case-studies.php',   'fa-book',          'Case Studies',   'Manage case studies'],
+                        ['gallery.php',        'fa-photo-video',   'Gallery',        'Manage images'],
+                        ['resources.php',      'fa-file-download', 'Resources',      'Manage documents'],
+                        ['certifications.php', 'fa-certificate',   'Certifications', 'Manage certifications'],
+                        ['messages.php',       'fa-envelope',      'Messages',       'View contact messages'],
+                    ];
+                    foreach ($content_links as $link):
+                    ?>
+                        <a href="<?php echo $link[0]; ?>" class="flex items-center gap-3 p-4 border border-[#e6ece8] rounded-2xl hover:bg-[#f7faf8] transition-colors">
+                            <div class="w-9 h-9 rounded-full bg-[#eef3f0] flex items-center justify-center flex-shrink-0">
+                                <i class="fas <?php echo $link[1]; ?> text-[#60796e] text-sm"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="font-medium text-sm text-[#23332c]"><?php echo $link[2]; ?></p>
+                                <p class="text-xs text-[#8a978f] truncate"><?php echo $link[3]; ?></p>
+                            </div>
+                        </a>
+                    <?php endforeach; ?>
                 </div>
             </div>
-            
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">Recent Activity</h2>
-                <div class="space-y-3 max-h-96 overflow-y-auto">
+
+            <!-- Recent Activity -->
+            <div>
+                <h2 class="text-xl font-bold text-[#23332c] mb-5">Recent Activity</h2>
+                <div class="space-y-3 max-h-96 overflow-y-auto pr-2">
                     <?php if (empty($recent_activity)): ?>
-                        <p class="text-gray-500 text-center py-4">No recent activity</p>
+                        <p class="text-[#8a978f] text-sm py-4">No recent activity</p>
                     <?php else: ?>
                         <?php foreach ($recent_activity as $activity): ?>
-                            <div class="border-l-4 border-primary pl-4 py-2">
-                                <p class="text-sm text-gray-800">
+                            <div class="border-l-2 border-[#3d7a66] pl-4 py-1.5">
+                                <p class="text-sm text-[#23332c]">
                                     <span class="font-semibold"><?php echo htmlspecialchars($activity['username']); ?></span>
                                     <?php echo htmlspecialchars($activity['action']); ?>
                                     <?php if ($activity['table_name']): ?>
-                                        <span class="text-gray-600">in <?php echo htmlspecialchars($activity['table_name']); ?></span>
+                                        <span class="text-[#8a978f]">in <?php echo htmlspecialchars($activity['table_name']); ?></span>
                                     <?php endif; ?>
                                 </p>
-                                <p class="text-xs text-gray-500"><?php echo formatDate($activity['created_at'], 'M d, Y H:i'); ?></p>
+                                <p class="text-xs text-[#8a978f]"><?php echo formatDate($activity['created_at'], 'M d, Y H:i'); ?></p>
                             </div>
                         <?php endforeach; ?>
                     <?php endif; ?>
                 </div>
-            </div>
-        </div>
-        
-        <!-- Content Management Links -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Content Management</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <a href="pages.php" class="p-4 border-2 border-gray-200 rounded-lg hover:border-primary hover:bg-primary hover:bg-opacity-5 transition-all">
-                    <i class="fas fa-file-alt text-primary text-2xl mb-2"></i>
-                    <p class="font-semibold">Page Content</p>
-                    <p class="text-sm text-gray-600">Manage page sections</p>
-                </a>
-                <a href="products.php" class="p-4 border-2 border-gray-200 rounded-lg hover:border-secondary hover:bg-secondary hover:bg-opacity-5 transition-all">
-                    <i class="fas fa-cube text-secondary text-2xl mb-2"></i>
-                    <p class="font-semibold">Products</p>
-                    <p class="text-sm text-gray-600">Manage products</p>
-                </a>
-                <a href="services.php" class="p-4 border-2 border-gray-200 rounded-lg hover:border-accent hover:bg-accent hover:bg-opacity-5 transition-all">
-                    <i class="fas fa-concierge-bell text-accent text-2xl mb-2"></i>
-                    <p class="font-semibold">Services</p>
-                    <p class="text-sm text-gray-600">Manage services</p>
-                </a>
-                <a href="case-studies.php" class="p-4 border-2 border-gray-200 rounded-lg hover:border-primary hover:bg-primary hover:bg-opacity-5 transition-all">
-                    <i class="fas fa-book text-primary text-2xl mb-2"></i>
-                    <p class="font-semibold">Case Studies</p>
-                    <p class="text-sm text-gray-600">Manage case studies</p>
-                </a>
-                <a href="gallery.php" class="p-4 border-2 border-gray-200 rounded-lg hover:border-gray-700 hover:bg-gray-700 hover:bg-opacity-5 transition-all">
-                    <i class="fas fa-images text-gray-700 text-2xl mb-2"></i>
-                    <p class="font-semibold">Gallery</p>
-                    <p class="text-sm text-gray-600">Manage images</p>
-                </a>
-                <a href="resources.php" class="p-4 border-2 border-gray-200 rounded-lg hover:border-secondary hover:bg-secondary hover:bg-opacity-5 transition-all">
-                    <i class="fas fa-file-download text-secondary text-2xl mb-2"></i>
-                    <p class="font-semibold">Resources</p>
-                    <p class="text-sm text-gray-600">Manage documents</p>
-                </a>
-                <a href="certifications.php" class="p-4 border-2 border-gray-200 rounded-lg hover:border-accent hover:bg-accent hover:bg-opacity-5 transition-all">
-                    <i class="fas fa-certificate text-accent text-2xl mb-2"></i>
-                    <p class="font-semibold">Certifications</p>
-                    <p class="text-sm text-gray-600">Manage certifications</p>
-                </a>
-                <a href="messages.php" class="p-4 border-2 border-gray-200 rounded-lg hover:border-red-500 hover:bg-red-500 hover:bg-opacity-5 transition-all">
-                    <i class="fas fa-envelope text-red-500 text-2xl mb-2"></i>
-                    <p class="font-semibold">Messages</p>
-                    <p class="text-sm text-gray-600">View contact messages</p>
-                </a>
             </div>
         </div>
     </div>
@@ -240,10 +216,10 @@ while ($row = $result->fetch_assoc()) {
                 .then(response => response.json())
                 .then(data => {
                     if (data.messages !== undefined) {
-                        const messagesEl = document.querySelector('[href="messages.php"]').previousElementSibling.querySelector('p.text-3xl');
+                        const messagesEl = document.getElementById('stat-messages-count');
                         if (messagesEl) {
                             messagesEl.textContent = data.messages;
-                            messagesEl.className = data.messages > 0 ? 'text-3xl font-bold text-red-600' : 'text-3xl font-bold text-gray-600';
+                            messagesEl.className = data.messages > 0 ? 'text-3xl font-semibold text-red-500' : 'text-3xl font-semibold text-[#23332c]';
                         }
                     }
                 })
