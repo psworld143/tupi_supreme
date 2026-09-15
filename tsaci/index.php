@@ -248,14 +248,26 @@ $featured_products = getProducts(3, true);
 
         /* Scroll-triggered reveal — modern alternative to always-on fade-in.
            Elements start hidden and animate in when they enter the viewport. */
-        .reveal {
+        .reveal, .reveal-left, .reveal-right, .reveal-scale {
             opacity: 0;
-            transform: translateY(24px);
             transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .reveal.is-visible {
+        .reveal { transform: translateY(24px); }
+        .reveal-left { transform: translateX(-32px); }
+        .reveal-right { transform: translateX(32px); }
+        .reveal-scale { transform: scale(0.92); }
+        .reveal.is-visible, .reveal-left.is-visible, .reveal-right.is-visible, .reveal-scale.is-visible {
             opacity: 1;
-            transform: translateY(0);
+            transform: none;
+        }
+
+        /* Soft pulsing ring on the hero icon */
+        @keyframes pulse-soft {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.25); }
+            50% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(255, 255, 255, 0); }
+        }
+        .hero-icon-pulse {
+            animation: pulse-soft 3.5s ease-in-out infinite;
         }
 
         /* Staggered delays for cascading reveal within a section */
@@ -288,13 +300,13 @@ $featured_products = getProducts(3, true);
         /* Respect reduced-motion preference */
         @media (prefers-reduced-motion: reduce) {
             .fade-in,
-            .reveal {
+            .reveal, .reveal-left, .reveal-right, .reveal-scale {
                 opacity: 1;
                 animation: none;
                 transform: none;
                 transition: none;
             }
-            .orb {
+            .orb, .hero-icon-pulse {
                 animation: none;
             }
             html {
@@ -308,7 +320,7 @@ $featured_products = getProducts(3, true);
 
     <!-- Hero Carousel Section -->
     <?php if (!empty($carousel_slides)): ?>
-    <section class="carousel-container hero-gradient text-white relative overflow-hidden pt-24 pb-20" style="min-height: 600px;">
+    <section id="hero" class="carousel-container hero-gradient text-white relative overflow-hidden pt-24 pb-20" style="min-height: 600px;">
         <!-- Floating gradient orbs for depth -->
         <div class="orb orb-1"></div>
         <div class="orb orb-2"></div>
@@ -337,7 +349,7 @@ $featured_products = getProducts(3, true);
                             <?php endif; ?>
                         </div>
                         <div class="text-center fade-in fade-in-delay-2 hidden lg:block">
-                            <div class="inline-flex items-center justify-center w-40 h-40 rounded-full bg-white/10 backdrop-blur-sm border border-white/20">
+                            <div class="hero-icon-pulse inline-flex items-center justify-center w-40 h-40 rounded-full bg-white/10 backdrop-blur-sm border border-white/20">
                                 <i class="<?php echo htmlspecialchars_safe($hero_icon); ?> text-7xl text-white opacity-90"></i>
                             </div>
                         </div>
@@ -361,7 +373,7 @@ $featured_products = getProducts(3, true);
     </section>
     <?php else: ?>
     <!-- Fallback Hero Section (if no carousel slides) -->
-    <section class="hero-gradient text-white relative overflow-hidden pt-24 pb-20">
+    <section id="hero" class="hero-gradient text-white relative overflow-hidden pt-24 pb-20">
         <!-- Floating gradient orbs for depth -->
         <div class="orb orb-1"></div>
         <div class="orb orb-2"></div>
@@ -386,7 +398,7 @@ $featured_products = getProducts(3, true);
                     </div>
                 </div>
                 <div class="text-center fade-in fade-in-delay-2 hidden lg:block">
-                    <div class="inline-flex items-center justify-center w-40 h-40 rounded-full bg-white/10 backdrop-blur-sm border border-white/20">
+                    <div class="hero-icon-pulse inline-flex items-center justify-center w-40 h-40 rounded-full bg-white/10 backdrop-blur-sm border border-white/20">
                         <i class="<?php echo htmlspecialchars_safe($hero_icon); ?> text-7xl text-white opacity-90"></i>
                     </div>
                 </div>
@@ -396,7 +408,7 @@ $featured_products = getProducts(3, true);
     <?php endif; ?>
 
     <!-- Features Section -->
-    <section class="py-20 lg:py-24 relative overflow-hidden">
+    <section id="features" class="py-20 lg:py-24 relative overflow-hidden">
         <!-- Subtle dot grid backdrop -->
         <div class="absolute inset-0 dot-grid opacity-40"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
@@ -426,14 +438,14 @@ $featured_products = getProducts(3, true);
     </section>
 
     <!-- Stats Section -->
-    <section class="bg-[#23332c] text-white py-20 lg:py-24 relative overflow-hidden">
+    <section id="stats" class="bg-[#23332c] text-white py-20 lg:py-24 relative overflow-hidden">
         <!-- Decorative orbs -->
         <div class="orb orb-1" style="background: #3d7a66; opacity: 0.25;"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
                 <?php foreach ($statistics as $i => $stat): ?>
-                <div class="stat-card text-center reveal <?php echo 'reveal-delay-' . ((($i % 4) + 1)); ?>">
-                        <div class="text-4xl lg:text-5xl font-bold mb-2"><?php echo htmlspecialchars_safe($stat['value']); ?></div>
+                <div class="stat-card text-center reveal-scale <?php echo 'reveal-delay-' . ((($i % 4) + 1)); ?>">
+                        <div class="stat-value text-4xl lg:text-5xl font-bold mb-2"><?php echo htmlspecialchars_safe($stat['value']); ?></div>
                         <div class="text-sm font-medium uppercase tracking-wider text-[#8bc34a]"><?php echo htmlspecialchars_safe($stat['label']); ?></div>
                         <?php if ($stat['description']): ?>
                             <div class="text-sm text-white/60 mt-2"><?php echo htmlspecialchars_safe($stat['description']); ?></div>
@@ -445,7 +457,7 @@ $featured_products = getProducts(3, true);
     </section>
 
     <!-- Products Preview -->
-    <section class="py-20 lg:py-24">
+    <section id="products" class="py-20 lg:py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16 reveal">
                 <span class="eyebrow mb-4">
@@ -456,7 +468,7 @@ $featured_products = getProducts(3, true);
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <?php foreach ($featured_products as $i => $product): ?>
-                    <div class="product-card bg-white border border-[#e6ece8] rounded-2xl h-full flex flex-col overflow-hidden reveal <?php echo 'reveal-delay-' . ((($i % 3) + 1)); ?>">
+                    <div class="product-card bg-white border border-[#e6ece8] rounded-2xl h-full flex flex-col overflow-hidden <?php echo ['reveal-left', 'reveal', 'reveal-right'][$i % 3] . ' reveal-delay-' . (($i % 3) + 1); ?>">
                         <div class="product-image-wrap flex items-center justify-center pt-10 pb-6 px-8 bg-[#f7faf8]">
                             <?php if (!empty($product['image_url'])): ?>
                                 <img src="<?php echo htmlspecialchars_safe($product['image_url']); ?>" alt="<?php echo htmlspecialchars_safe($product['name']); ?>" class="w-28 h-28 object-contain">
@@ -490,13 +502,13 @@ $featured_products = getProducts(3, true);
     </section>
 
     <!-- CTA Section -->
-    <section class="relative overflow-hidden py-20 lg:py-24">
+    <section id="cta" class="relative overflow-hidden py-20 lg:py-24">
         <!-- Gradient background with orbs -->
         <div class="absolute inset-0 hero-gradient"></div>
         <div class="orb orb-1" style="background: #8bc34a; opacity: 0.25;"></div>
         <div class="orb orb-2" style="background: #3d7a66; opacity: 0.3;"></div>
         <div class="hero-pattern absolute inset-0 opacity-30"></div>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative text-center text-white reveal">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative text-center text-white reveal-scale">
             <span class="eyebrow bg-white/15 text-white/90 mb-5">
                 <i class="fas fa-comments text-xs"></i> Get In Touch
             </span>
@@ -571,7 +583,7 @@ $featured_products = getProducts(3, true);
     <!-- Scroll-triggered reveal animations -->
     <script>
         (function() {
-            const reveals = document.querySelectorAll('.reveal');
+            const reveals = document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale');
             if (!reveals.length) return;
 
             // Fallback: if IntersectionObserver isn't supported, show everything
@@ -593,6 +605,55 @@ $featured_products = getProducts(3, true);
             });
 
             reveals.forEach(el => observer.observe(el));
+        })();
+
+        // Count-up animation for stat values (e.g. "500+", "98%")
+        (function() {
+            const statValues = document.querySelectorAll('.stat-value');
+            if (!statValues.length) return;
+
+            const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            function animateValue(el) {
+                const raw = el.dataset.rawValue || el.textContent.trim();
+                const match = raw.match(/^([\d,.]+)(.*)$/);
+                if (!match) return;
+                const target = parseFloat(match[1].replace(/,/g, ''));
+                const suffix = match[2] || '';
+                const hasCommas = match[1].indexOf(',') !== -1;
+
+                if (reducedMotion || isNaN(target)) {
+                    el.textContent = raw;
+                    return;
+                }
+
+                const duration = 1500;
+                const start = performance.now();
+                function tick(now) {
+                    const progress = Math.min((now - start) / duration, 1);
+                    const eased = 1 - Math.pow(1 - progress, 3);
+                    const current = Math.round(target * eased);
+                    el.textContent = (hasCommas ? current.toLocaleString() : String(current)) + suffix;
+                    if (progress < 1) requestAnimationFrame(tick);
+                }
+                requestAnimationFrame(tick);
+            }
+
+            if (!('IntersectionObserver' in window)) return;
+
+            const statObserver = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        animateValue(entry.target);
+                        statObserver.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.5 });
+
+            statValues.forEach(el => {
+                el.dataset.rawValue = el.textContent.trim();
+                statObserver.observe(el);
+            });
         })();
     </script>
 </body>

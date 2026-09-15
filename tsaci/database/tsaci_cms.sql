@@ -973,6 +973,7 @@ ALTER TABLE `case_studies`
 --
 ALTER TABLE `certifications`
   ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_title` (`title`),
   ADD KEY `updated_by` (`updated_by`),
   ADD KEY `idx_is_active` (`is_active`);
 
@@ -981,6 +982,7 @@ ALTER TABLE `certifications`
 --
 ALTER TABLE `company_values`
   ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_title` (`title`),
   ADD KEY `updated_by` (`updated_by`),
   ADD KEY `idx_display_order` (`display_order`);
 
@@ -1027,6 +1029,7 @@ ALTER TABLE `faqs`
 --
 ALTER TABLE `footer_links`
   ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_category_label` (`category`,`label`),
   ADD KEY `updated_by` (`updated_by`),
   ADD KEY `idx_category` (`category`),
   ADD KEY `idx_display_order` (`display_order`);
@@ -1036,6 +1039,7 @@ ALTER TABLE `footer_links`
 --
 ALTER TABLE `gallery_images`
   ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_title` (`title`),
   ADD KEY `updated_by` (`updated_by`),
   ADD KEY `idx_category` (`category`),
   ADD KEY `idx_is_active` (`is_active`);
@@ -1045,6 +1049,7 @@ ALTER TABLE `gallery_images`
 --
 ALTER TABLE `homepage_features`
   ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_title` (`title`),
   ADD KEY `updated_by` (`updated_by`),
   ADD KEY `idx_display_order` (`display_order`),
   ADD KEY `idx_is_active` (`is_active`);
@@ -1084,6 +1089,7 @@ ALTER TABLE `products`
 --
 ALTER TABLE `resources`
   ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_title` (`title`),
   ADD KEY `updated_by` (`updated_by`),
   ADD KEY `idx_category` (`category`),
   ADD KEY `idx_is_active` (`is_active`);
@@ -1121,6 +1127,7 @@ ALTER TABLE `social_media`
 --
 ALTER TABLE `statistics`
   ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_label` (`label`),
   ADD KEY `updated_by` (`updated_by`),
   ADD KEY `idx_display_order` (`display_order`),
   ADD KEY `idx_is_active` (`is_active`);
@@ -1130,6 +1137,7 @@ ALTER TABLE `statistics`
 --
 ALTER TABLE `team_members`
   ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_name` (`name`),
   ADD KEY `updated_by` (`updated_by`),
   ADD KEY `idx_display_order` (`display_order`);
 
@@ -1146,6 +1154,7 @@ ALTER TABLE `testimonials`
 --
 ALTER TABLE `timeline_events`
   ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_title` (`title`),
   ADD KEY `updated_by` (`updated_by`),
   ADD KEY `idx_year` (`year`),
   ADD KEY `idx_display_order` (`display_order`);

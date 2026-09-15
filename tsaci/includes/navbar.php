@@ -9,12 +9,15 @@ $company_name = getSiteSetting('company_short_name', 'Tupi Supreme');
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+<!-- Offset anchored sections so they don't hide under the fixed navbar -->
+<style>section[id]{scroll-margin-top:5rem}</style>
+
 <!-- Navigation -->
 <nav class="bg-white/95 backdrop-blur-sm text-[#23332c] fixed w-full top-0 z-50 border-b border-[#e6ece8]">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
             <a href="index.php" class="flex items-center text-xl font-semibold text-[#23332c]">
-                <i class="fas fa-leaf mr-2 text-[#3d7a66]"></i><?php echo htmlspecialchars_safe($company_name); ?>
+                <img src="uploads/images/tupi_supreme_logo.png" alt="<?php echo htmlspecialchars_safe($company_name); ?> logo" class="h-9 w-auto mr-2 object-contain"><?php echo htmlspecialchars_safe($company_name); ?>
             </a>
             <div class="hidden md:block">
                 <div class="ml-10 flex items-center gap-1">

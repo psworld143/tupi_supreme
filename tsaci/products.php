@@ -247,7 +247,7 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
     <?php include 'includes/navbar.php'; ?>
 
     <!-- Page Header -->
-    <section class="page-header-gradient text-white relative overflow-hidden pt-24 pb-20">
+    <section id="page-header" class="page-header-gradient text-white relative overflow-hidden pt-24 pb-20">
         <!-- Floating gradient orbs for depth -->
         <div class="orb orb-1"></div>
         <div class="orb orb-2"></div>
@@ -264,7 +264,7 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
     </section>
 
     <!-- Product Categories -->
-    <section class="py-20 lg:py-24 relative overflow-hidden">
+    <section id="main" class="py-20 lg:py-24 relative overflow-hidden">
         <!-- Subtle dot grid backdrop -->
         <div class="absolute inset-0 dot-grid opacity-40"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
@@ -668,7 +668,7 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
     </section>
 
     <!-- Product Specifications -->
-    <section class="bg-[#f5f7f5] py-20 lg:py-24">
+    <section id="specifications" class="bg-[#f5f7f5] py-20 lg:py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16 reveal">
                 <span class="eyebrow mb-4">
@@ -736,7 +736,7 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
     </section>
 
     <!-- Applications -->
-    <section class="py-20 lg:py-24">
+    <section id="applications" class="py-20 lg:py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16 reveal">
                 <span class="eyebrow mb-4">
@@ -811,7 +811,7 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
     </section>
 
     <!-- CTA Section -->
-    <section class="relative overflow-hidden py-20 lg:py-24">
+    <section id="cta" class="relative overflow-hidden py-20 lg:py-24">
         <!-- Gradient background with orbs -->
         <div class="absolute inset-0 page-header-gradient"></div>
         <div class="orb orb-1" style="background: #8bc34a; opacity: 0.25;"></div>

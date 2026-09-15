@@ -214,7 +214,7 @@ $current_page = 'certifications';
     <?php include 'includes/navbar.php'; ?>
 
     <!-- Page Header -->
-    <section class="page-header-gradient text-white relative overflow-hidden pt-24 pb-20">
+    <section id="page-header" class="page-header-gradient text-white relative overflow-hidden pt-24 pb-20">
         <!-- Floating gradient orbs for depth -->
         <div class="orb orb-1"></div>
         <div class="orb orb-2"></div>
@@ -231,7 +231,7 @@ $current_page = 'certifications';
     </section>
 
     <!-- ISO Certifications -->
-    <section class="py-20 lg:py-24 relative overflow-hidden">
+    <section id="iso-certifications" class="py-20 lg:py-24 relative overflow-hidden">
         <!-- Subtle dot grid backdrop -->
         <div class="absolute inset-0 dot-grid opacity-40"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
@@ -285,7 +285,7 @@ $current_page = 'certifications';
     </section>
 
     <!-- Product Certifications -->
-    <section class="bg-[#f5f7f5] py-20 lg:py-24">
+    <section id="product-certifications" class="bg-[#f5f7f5] py-20 lg:py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16 reveal">
                 <span class="eyebrow mb-4">
@@ -326,7 +326,7 @@ $current_page = 'certifications';
     </section>
 
     <!-- Quality Management -->
-    <section class="py-20 lg:py-24 relative overflow-hidden">
+    <section id="quality-management" class="py-20 lg:py-24 relative overflow-hidden">
         <div class="absolute inset-0 dot-grid opacity-40"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div class="text-center mb-16 reveal">
@@ -380,7 +380,7 @@ $current_page = 'certifications';
     </section>
 
     <!-- Industry Compliance -->
-    <section class="bg-[#23332c] text-white py-20 lg:py-24 relative overflow-hidden">
+    <section id="industry-compliance" class="bg-[#23332c] text-white py-20 lg:py-24 relative overflow-hidden">
         <!-- Decorative orbs -->
         <div class="orb orb-1" style="background: #3d7a66; opacity: 0.25;"></div>
         <div class="orb orb-2" style="background: #8bc34a; opacity: 0.2;"></div>
@@ -426,7 +426,7 @@ $current_page = 'certifications';
     </section>
 
     <!-- Testing & Validation -->
-    <section class="py-20 lg:py-24">
+    <section id="testing-validation" class="py-20 lg:py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16 reveal">
                 <span class="eyebrow mb-4">
@@ -494,7 +494,7 @@ $current_page = 'certifications';
     </section>
 
     <!-- CTA Section -->
-    <section class="relative overflow-hidden py-20 lg:py-24">
+    <section id="cta" class="relative overflow-hidden py-20 lg:py-24">
         <!-- Gradient background with orbs -->
         <div class="absolute inset-0 page-header-gradient"></div>
         <div class="orb orb-1" style="background: #8bc34a; opacity: 0.25;"></div>

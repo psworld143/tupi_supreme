@@ -194,7 +194,7 @@ $case_studies = getCaseStudies();
     <?php include 'includes/navbar.php'; ?>
 
     <!-- Page Header -->
-    <section class="page-header-gradient text-white relative overflow-hidden pt-24 pb-20">
+    <section id="page-header" class="page-header-gradient text-white relative overflow-hidden pt-24 pb-20">
         <!-- Floating gradient orbs for depth -->
         <div class="orb orb-1"></div>
         <div class="orb orb-2"></div>
@@ -211,7 +211,7 @@ $case_studies = getCaseStudies();
     </section>
 
     <!-- Featured Case Studies -->
-    <section class="py-20 lg:py-24 relative overflow-hidden">
+    <section id="main" class="py-20 lg:py-24 relative overflow-hidden">
         <!-- Subtle dot grid backdrop -->
         <div class="absolute inset-0 dot-grid opacity-40"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
@@ -351,7 +351,7 @@ $case_studies = getCaseStudies();
     </section>
 
     <!-- CTA Section -->
-    <section class="relative overflow-hidden py-20 lg:py-24">
+    <section id="cta" class="relative overflow-hidden py-20 lg:py-24">
         <!-- Gradient background with orbs -->
         <div class="absolute inset-0 page-header-gradient"></div>
         <div class="orb orb-1" style="background: #8bc34a; opacity: 0.25;"></div>

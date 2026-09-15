@@ -10,24 +10,29 @@ $success = '';
 
 $categories = ['facilities', 'products', 'process', 'installations', 'team'];
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+// Status flash from PRG redirect (avoids form resubmission on refresh)
+$status_param = $_GET['status'] ?? '';
+if ($status_param === 'saved')   $success = 'Gallery image saved successfully!';
+if ($status_param === 'deleted') $success = 'Gallery image deleted successfully!';
+
+// Handle form submissions (POST)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['delete_id'] ?? '') === '') {
     $title = sanitizeInput($_POST['title'] ?? '');
     $description = $_POST['description'] ?? '';
     $image_url = sanitizeInput($_POST['image_url'] ?? '');
     $category = sanitizeInput($_POST['category'] ?? 'facilities');
     $display_order = intval($_POST['display_order'] ?? 0);
     $is_active = isset($_POST['is_active']) ? 1 : 0;
-    
+
     if (empty($title) || empty($image_url)) {
-        $error = 'Title and image URL are required.';
+        $error = 'Title and image are required.';
     } else {
         if ($action === 'add') {
             $stmt = $db->prepare("INSERT INTO gallery_images (title, description, image_url, category, display_order, is_active, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?)");
             $stmt->bind_param("ssssiii", $title, $description, $image_url, $category, $display_order, $is_active, $_SESSION['admin_id']);
             if ($stmt->execute()) {
                 logActivity('create', 'gallery_images', $db->insert_id, "Added gallery image: {$title}");
-                $success = 'Image added successfully!';
-                $action = 'list';
+                redirect('gallery.php?status=saved');
             } else {
                 $error = 'Error: ' . $stmt->error;
             }
@@ -36,8 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->bind_param("ssssiiii", $title, $description, $image_url, $category, $display_order, $is_active, $_SESSION['admin_id'], $id);
             if ($stmt->execute()) {
                 logActivity('update', 'gallery_images', $id, "Updated gallery image: {$title}");
-                $success = 'Image updated successfully!';
-                $action = 'list';
+                redirect('gallery.php?status=saved');
             } else {
                 $error = 'Error: ' . $stmt->error;
             }
@@ -45,16 +49,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-if ($action === 'delete' && $id) {
+// Handle delete (POST only — safer than GET)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['delete_id'] ?? '') !== '') {
+    $del_id = intval($_POST['delete_id']);
     $stmt = $db->prepare("DELETE FROM gallery_images WHERE id = ?");
-    $stmt->bind_param("i", $id);
+    $stmt->bind_param("i", $del_id);
     if ($stmt->execute()) {
-        logActivity('delete', 'gallery_images', $id, 'Deleted gallery image');
-        $success = 'Image deleted successfully!';
+        logActivity('delete', 'gallery_images', $del_id, 'Deleted gallery image');
+        redirect('gallery.php?status=deleted');
+    } else {
+        $error = 'Error deleting gallery image: ' . $stmt->error;
     }
-    $action = 'list';
 }
 
+// Get image for edit
 $edit_image = null;
 if ($action === 'edit' && $id) {
     $stmt = $db->prepare("SELECT * FROM gallery_images WHERE id = ?");
@@ -68,32 +76,88 @@ if ($action === 'edit' && $id) {
     }
 }
 
+// Get all images for list (with pagination + filtering + search)
 $all_images = [];
 $total_images = 0;
 $total_pages = 1;
+$current_page_num = 1;
+$per_page = 10;
+
 if ($action === 'list') {
     $per_page = 10;
     $current_page_num = max(1, intval($_GET['page'] ?? 1));
-    $offset = ($current_page_num - 1) * $per_page;
+    $filter_status = $_GET['filter_status'] ?? '';
+    $filter_category = $_GET['filter_category'] ?? '';
+    $search_q = trim($_GET['q'] ?? '');
 
-    // Total count for pagination controls
-    $count_result = $db->query("SELECT COUNT(*) as total FROM gallery_images");
-    $total_images = $count_result->fetch_assoc()['total'];
+    // Build dynamic WHERE
+    $where = [];
+    $params = [];
+    $types = '';
+    if ($filter_status === 'active') {
+        $where[] = 'is_active = 1';
+    } elseif ($filter_status === 'inactive') {
+        $where[] = 'is_active = 0';
+    }
+    if (in_array($filter_category, $categories, true)) {
+        $where[] = 'category = ?';
+        $params[] = $filter_category;
+        $types .= 's';
+    }
+    if ($search_q !== '') {
+        $where[] = '(title LIKE ? OR description LIKE ?)';
+        $like = '%' . $search_q . '%';
+        $params[] = $like;
+        $params[] = $like;
+        $types .= 'ss';
+    }
+    $where_sql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
+
+    // Total count
+    $count_sql = "SELECT COUNT(*) as total FROM gallery_images $where_sql";
+    $count_stmt = $db->prepare($count_sql);
+    if ($types && $count_stmt) {
+        $count_stmt->bind_param($types, ...$params);
+    }
+    if ($count_stmt) {
+        $count_stmt->execute();
+        $total_images = $count_stmt->get_result()->fetch_assoc()['total'];
+    }
     $total_pages = max(1, ceil($total_images / $per_page));
-    // Clamp current page if out of range
     if ($current_page_num > $total_pages) {
         $current_page_num = $total_pages;
-        $offset = ($current_page_num - 1) * $per_page;
     }
+    $offset = ($current_page_num - 1) * $per_page;
 
-    $stmt = $db->prepare("SELECT * FROM gallery_images ORDER BY category, display_order, title LIMIT ? OFFSET ?");
-    $stmt->bind_param("ii", $per_page, $offset);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    while ($row = $result->fetch_assoc()) {
-        $all_images[] = $row;
+    // List query
+    $list_sql = "SELECT * FROM gallery_images $where_sql ORDER BY category, display_order, title LIMIT ? OFFSET ?";
+    $list_stmt = $db->prepare($list_sql);
+    $list_params = $params;
+    $list_types = $types . 'ii';
+    $list_params[] = $per_page;
+    $list_params[] = $offset;
+    if ($list_stmt) {
+        $list_stmt->bind_param($list_types, ...$list_params);
+        $list_stmt->execute();
+        $result = $list_stmt->get_result();
+        while ($row = $result->fetch_assoc()) {
+            $all_images[] = $row;
+        }
     }
 }
+
+// Quick stats for the list header
+$stats = ['total' => 0, 'active' => 0, 'inactive' => 0];
+$st = $db->query("SELECT COUNT(*) total, SUM(is_active) active FROM gallery_images");
+if ($st) {
+    $row = $st->fetch_assoc();
+    $stats['total'] = (int)$row['total'];
+    $stats['active'] = (int)$row['active'];
+    $stats['inactive'] = $stats['total'] - $stats['active'];
+}
+
+// All gallery images render in the gallery grid on the public page
+$view_url = '../gallery.php#gallery-grid';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -123,34 +187,14 @@ if ($action === 'list') {
     <!-- Sidebar -->
     <?php include 'includes/sidebar.php'; ?>
 
-    <!-- Page-scoped alignment: keep the main content card the exact same
-         height as the fixed sidebar so both panels align top/bottom. -->
     <style>
         @media (min-width: 1024px) {
-            .lg\:ml-64 {
-                height: calc(100vh - 2rem) !important;
-                overflow-y: auto !important;
-            }
-            /* Thin, themed scrollbar for the in-card scroll area */
-            .lg\:ml-64 {
-                scrollbar-width: thin;
-                scrollbar-color: #d2dcd5 transparent;
-            }
-            .lg\:ml-64::-webkit-scrollbar {
-                width: 8px;
-            }
-            .lg\:ml-64::-webkit-scrollbar-track {
-                background: transparent;
-            }
-            .lg\:ml-64::-webkit-scrollbar-thumb {
-                background-color: #d2dcd5;
-                border-radius: 4px;
-                border: 2px solid transparent;
-                background-clip: padding-box;
-            }
-            .lg\:ml-64::-webkit-scrollbar-thumb:hover {
-                background-color: #c0ccc5;
-            }
+            .lg\:ml-64 { height: calc(100vh - 2rem) !important; overflow-y: auto !important; }
+            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #d2dcd5 transparent; }
+            .lg\:ml-64::-webkit-scrollbar { width: 8px; }
+            .lg\:ml-64::-webkit-scrollbar-track { background: transparent; }
+            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #d2dcd5; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
+            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #c0ccc5; }
         }
     </style>
 
@@ -158,48 +202,79 @@ if ($action === 'list') {
     <div class="lg:ml-64 p-4 lg:p-8">
         <!-- Page Header -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-            <div class="flex justify-between items-center">
-                <h1 class="text-3xl font-bold text-gray-800">Gallery Management</h1>
-                <a href="?action=add" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition-colors">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-3">
+                        <i class="fas fa-images text-primary"></i> Gallery Management
+                    </h1>
+                    <p class="text-sm text-gray-500 mt-1">Manage the image gallery shown on the public Gallery page.</p>
+                </div>
+                <?php if ($action === 'list'): ?>
+                <a href="?action=add" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition-colors inline-flex items-center justify-center">
                     <i class="fas fa-plus mr-2"></i>Add New Image
                 </a>
+                <?php else: ?>
+                <a href="gallery.php" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors inline-flex items-center justify-center">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to List
+                </a>
+                <?php endif; ?>
             </div>
         </div>
-        
+
         <?php if ($error): ?>
-            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4"><?php echo htmlspecialchars($error); ?></div>
+            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4 flex items-start gap-2">
+                <i class="fas fa-exclamation-circle mt-0.5"></i>
+                <span><?php echo htmlspecialchars($error); ?></span>
+            </div>
         <?php endif; ?>
-        
+
         <?php if ($success): ?>
-            <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded mb-4"><?php echo htmlspecialchars($success); ?></div>
+            <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded mb-4 flex items-start gap-2">
+                <i class="fas fa-check-circle mt-0.5"></i>
+                <span><?php echo htmlspecialchars($success); ?></span>
+            </div>
         <?php endif; ?>
-        
+
         <?php if ($action === 'add' || $action === 'edit'): ?>
+            <!-- Add/Edit Form -->
             <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-2xl font-bold mb-4"><?php echo $action === 'add' ? 'Add New' : 'Edit'; ?> Gallery Image</h2>
+                <h2 class="text-2xl font-bold mb-1"><?php echo $action === 'add' ? 'Add New' : 'Edit'; ?> Gallery Image</h2>
+                <p class="text-sm text-gray-500 mb-6">Fields marked <span class="text-red-500">*</span> are required.</p>
+
                 <form method="POST" action="" onsubmit="return validateImageUpload()">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Title *</label>
-                            <input type="text" name="title" required value="<?php echo htmlspecialchars($edit_image['title'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Title <span class="text-red-500">*</span></label>
+                            <input type="text" name="title" required
+                                   value="<?php echo htmlspecialchars($edit_image['title'] ?? ''); ?>"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                   placeholder="e.g., Production Facility Interior">
+                            <p class="text-xs text-gray-400 mt-1">A short, descriptive title for the image.</p>
                         </div>
+
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Category *</label>
-                            <select name="category" required class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Category <span class="text-red-500">*</span></label>
+                            <select name="category" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
                                 <?php foreach ($categories as $cat): ?>
                                     <option value="<?php echo $cat; ?>" <?php echo ($edit_image && $edit_image['category'] === $cat) ? 'selected' : ''; ?>>
                                         <?php echo ucfirst($cat); ?>
                                     </option>
                                 <?php endforeach; ?>
                             </select>
+                            <p class="text-xs text-gray-400 mt-1">Used to group images on the public Gallery page.</p>
                         </div>
+
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Display Order</label>
-                            <input type="number" name="display_order" value="<?php echo htmlspecialchars($edit_image['display_order'] ?? 0); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                            <input type="number" name="display_order" min="0"
+                                   value="<?php echo htmlspecialchars($edit_image['display_order'] ?? 0); ?>"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
+                            <p class="text-xs text-gray-400 mt-1">Lower numbers appear first within the category.</p>
                         </div>
+
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Image <span class="text-red-500">*</span></label>
-                            
+
                             <!-- Image Preview -->
                             <div id="image-preview-container" class="mb-3 <?php echo empty($edit_image['image_url'] ?? '') ? 'hidden' : ''; ?>">
                                 <img id="image-preview" src="<?php echo htmlspecialchars($edit_image['image_url'] ?? ''); ?>" alt="Preview" class="max-w-full h-48 object-contain border border-gray-300 rounded-lg p-2 bg-gray-50">
@@ -207,7 +282,7 @@ if ($action === 'list') {
                                     <i class="fas fa-times mr-1"></i>Remove Image
                                 </button>
                             </div>
-                            
+
                             <!-- File Picker -->
                             <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 mb-3">
                                 <div class="text-center">
@@ -224,23 +299,23 @@ if ($action === 'list') {
                                     <p id="upload-status" class="text-sm text-gray-600 mt-1"></p>
                                 </div>
                             </div>
-                            
+
                             <!-- URL Input (hidden, auto-filled by upload) -->
                             <input type="hidden" name="image_url" id="image-url-input" value="<?php echo htmlspecialchars($edit_image['image_url'] ?? ''); ?>">
-                            
+
                             <script>
                             let selectedFile = null;
                             // Upload state: 'idle' | 'uploading' | 'success' | 'failed'
                             let uploadState = 'idle';
                             // Remember the original URL when editing so we know if the user picked a new file
                             const originalImageUrl = document.getElementById('image-url-input').value;
-                            
+
                             document.getElementById('image-file-input').addEventListener('change', function(e) {
                                 const file = e.target.files[0];
                                 if (file) {
                                     selectedFile = file;
                                     uploadState = 'idle';
-                                    
+
                                     const reader = new FileReader();
                                     reader.onload = function(e) {
                                         const preview = document.getElementById('image-preview');
@@ -248,26 +323,26 @@ if ($action === 'list') {
                                         document.getElementById('image-preview-container').classList.remove('hidden');
                                     };
                                     reader.readAsDataURL(file);
-                                    
+
                                     // Auto-upload immediately after selection
                                     uploadImage();
                                 }
                             });
-                            
+
                             function uploadImage() {
                                 if (!selectedFile) {
                                     alert('Please select an image file first');
                                     return;
                                 }
-                                
+
                                 const formData = new FormData();
                                 formData.append('image', selectedFile);
-                                
+
                                 const progressContainer = document.getElementById('upload-progress');
                                 const progressBar = document.getElementById('upload-progress-bar');
                                 const statusText = document.getElementById('upload-status');
                                 const fileLabel = document.querySelector('label[for="image-file-input"]');
-                                
+
                                 uploadState = 'uploading';
                                 progressContainer.classList.remove('hidden');
                                 statusText.textContent = 'Uploading...';
@@ -276,16 +351,16 @@ if ($action === 'list') {
                                 progressBar.style.width = '0%';
                                 fileLabel.style.pointerEvents = 'none';
                                 fileLabel.style.opacity = '0.6';
-                                
+
                                 const xhr = new XMLHttpRequest();
-                                
+
                                 xhr.upload.addEventListener('progress', function(e) {
                                     if (e.lengthComputable) {
                                         const percentComplete = (e.loaded / e.total) * 100;
                                         progressBar.style.width = percentComplete + '%';
                                     }
                                 });
-                                
+
                                 xhr.addEventListener('load', function() {
                                     if (xhr.status === 200) {
                                         const response = JSON.parse(xhr.responseText);
@@ -315,7 +390,7 @@ if ($action === 'list') {
                                     fileLabel.style.pointerEvents = '';
                                     fileLabel.style.opacity = '';
                                 });
-                                
+
                                 xhr.addEventListener('error', function() {
                                     statusText.textContent = 'Upload failed: Network error';
                                     statusText.classList.add('text-red-600');
@@ -324,11 +399,11 @@ if ($action === 'list') {
                                     fileLabel.style.pointerEvents = '';
                                     fileLabel.style.opacity = '';
                                 });
-                                
+
                                 xhr.open('POST', 'api/upload_image.php');
                                 xhr.send(formData);
                             }
-                            
+
                             function clearImagePreview() {
                                 document.getElementById('image-preview-container').classList.add('hidden');
                                 document.getElementById('image-url-input').value = '';
@@ -337,76 +412,142 @@ if ($action === 'list') {
                                 uploadState = 'idle';
                                 document.getElementById('upload-progress').classList.add('hidden');
                             }
-                            
+
                             function validateImageUpload() {
                                 const urlInput = document.getElementById('image-url-input');
-                                
+
                                 // Block save while an upload is still in progress
                                 if (uploadState === 'uploading') {
                                     alert('Please wait for the image upload to finish before saving.');
                                     return false;
                                 }
-                                
+
                                 // User picked a new file but the upload failed
                                 if (selectedFile && uploadState === 'failed') {
                                     alert('The image upload failed. Please try again or pick a different file.');
                                     return false;
                                 }
-                                
+
                                 // No image at all (new record with no upload, or image was cleared)
                                 if (!urlInput.value.trim()) {
                                     alert('Please choose and upload an image file first.');
                                     return false;
                                 }
-                                
+
                                 return true;
                             }
                             </script>
                         </div>
+
                         <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                            <textarea name="description" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md"><?php echo htmlspecialchars($edit_image['description'] ?? ''); ?></textarea>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Description <span class="text-gray-400 font-normal">(optional)</span></label>
+                            <textarea name="description" rows="4"
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"><?php echo htmlspecialchars($edit_image['description'] ?? ''); ?></textarea>
+                            <p class="text-xs text-gray-400 mt-1">Optional caption shown with the image.</p>
                         </div>
+
                         <div class="md:col-span-2">
-                            <label class="flex items-center">
-                                <input type="checkbox" name="is_active" value="1" <?php echo ($edit_image && $edit_image['is_active']) || !$edit_image ? 'checked' : ''; ?> class="mr-2">
-                                <span class="text-sm text-gray-700">Active</span>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" name="is_active" value="1"
+                                       <?php echo ($edit_image && $edit_image['is_active']) || !$edit_image ? 'checked' : ''; ?>
+                                       class="sr-only peer">
+                                <span class="relative inline-flex items-center">
+                                    <span class="w-11 h-6 bg-gray-300 peer-checked:bg-primary rounded-full transition-colors"></span>
+                                    <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5"></span>
+                                </span>
+                                <span class="ml-3 text-sm text-gray-700">Active <span class="text-gray-400">(shown on the website)</span></span>
                             </label>
                         </div>
                     </div>
-                    <div class="mt-6 flex gap-4">
-                        <button type="submit" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-secondary">Save</button>
-                        <a href="gallery.php" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors">Cancel</a>
+
+                    <div class="mt-8 flex flex-col sm:flex-row gap-3">
+                        <button type="submit" class="bg-primary text-white px-6 py-2.5 rounded-lg hover:bg-secondary transition-colors inline-flex items-center justify-center">
+                            <i class="fas fa-save mr-2"></i><?php echo $action === 'add' ? 'Add Image' : 'Save Changes'; ?>
+                        </button>
+                        <a href="gallery.php" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2.5 rounded-lg transition-colors inline-flex items-center justify-center">
+                            <i class="fas fa-times mr-2"></i>Cancel
+                        </a>
                     </div>
                 </form>
             </div>
+
         <?php else: ?>
+            <!-- List View -->
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <!-- Stats + Filters -->
+                <div class="p-4 bg-gray-50 border-b">
+                    <div class="flex flex-wrap items-center gap-2 mb-4">
+                        <span class="px-3 py-1 text-xs rounded-full bg-gray-200 text-gray-700"><i class="fas fa-layer-group mr-1"></i><?php echo $stats['total']; ?> total</span>
+                        <span class="px-3 py-1 text-xs rounded-full bg-green-100 text-green-800"><i class="fas fa-check mr-1"></i><?php echo $stats['active']; ?> active</span>
+                        <span class="px-3 py-1 text-xs rounded-full bg-red-100 text-red-800"><i class="fas fa-pause mr-1"></i><?php echo $stats['inactive']; ?> inactive</span>
+                    </div>
+                    <form method="GET" action="gallery.php" class="flex flex-col sm:flex-row gap-2">
+                        <div class="flex-1 flex flex-col sm:flex-row gap-2">
+                            <select name="filter_status" class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary">
+                                <option value="">All statuses</option>
+                                <option value="active" <?php echo (($_GET['filter_status'] ?? '') === 'active') ? 'selected' : ''; ?>>Active only</option>
+                                <option value="inactive" <?php echo (($_GET['filter_status'] ?? '') === 'inactive') ? 'selected' : ''; ?>>Inactive only</option>
+                            </select>
+                            <select name="filter_category" class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary">
+                                <option value="">All categories</option>
+                                <?php foreach ($categories as $cat): ?>
+                                    <option value="<?php echo $cat; ?>" <?php echo (($_GET['filter_category'] ?? '') === $cat) ? 'selected' : ''; ?>><?php echo ucfirst($cat); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <div class="relative flex-1">
+                                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                <input type="text" name="q" value="<?php echo htmlspecialchars($_GET['q'] ?? ''); ?>"
+                                       placeholder="Search title or description…"
+                                       class="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary">
+                            </div>
+                        </div>
+                        <button type="submit" class="bg-primary text-white px-4 py-2 rounded-md hover:bg-secondary transition-colors text-sm inline-flex items-center justify-center">
+                            <i class="fas fa-filter mr-1"></i>Filter
+                        </button>
+                        <?php if (!empty($_GET['filter_status']) || !empty($_GET['filter_category']) || !empty($_GET['q'])): ?>
+                        <a href="gallery.php" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200 transition-colors text-sm inline-flex items-center justify-center">
+                            <i class="fas fa-times mr-1"></i>Clear
+                        </a>
+                        <?php endif; ?>
+                    </form>
+                </div>
+
+                <div class="overflow-auto" style="max-height: 55vh;">
                 <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
+                    <thead class="bg-gray-50 sticky top-0">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Image</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         <?php if (empty($all_images)): ?>
-                            <tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">No images found.</td></tr>
+                            <tr>
+                                <td colspan="6" class="px-6 py-12 text-center">
+                                    <i class="fas fa-images text-4xl text-gray-300 mb-3"></i>
+                                    <p class="text-gray-500 mb-2">No gallery images found.</p>
+                                    <a href="?action=add" class="text-primary hover:underline text-sm"><i class="fas fa-plus mr-1"></i>Add new image</a>
+                                </td>
+                            </tr>
                         <?php else: ?>
                             <?php foreach ($all_images as $img): ?>
-                                <tr>
+                                <tr class="hover:bg-gray-50">
                                     <td class="px-6 py-4">
                                         <?php if ($img['image_url']): ?>
                                             <img src="<?php echo htmlspecialchars($img['image_url']); ?>" alt="<?php echo htmlspecialchars($img['title']); ?>" class="w-20 h-20 object-cover rounded">
                                         <?php else: ?>
-                                            <div class="w-20 h-20 bg-gray-200 rounded"></div>
+                                            <div class="w-20 h-20 bg-gray-200 rounded flex items-center justify-center text-gray-400"><i class="fas fa-image"></i></div>
                                         <?php endif; ?>
                                     </td>
                                     <td class="px-6 py-4 text-sm font-medium text-gray-900"><?php echo htmlspecialchars($img['title']); ?></td>
-                                    <td class="px-6 py-4 text-sm text-gray-500"><?php echo ucfirst($img['category']); ?></td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800"><?php echo ucfirst($img['category']); ?></span>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-900"><?php echo (int)$img['display_order']; ?></td>
                                     <td class="px-6 py-4">
                                         <?php if ($img['is_active']): ?>
                                             <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Active</span>
@@ -414,15 +555,26 @@ if ($action === 'list') {
                                             <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">Inactive</span>
                                         <?php endif; ?>
                                     </td>
-                                    <td class="px-6 py-4 text-sm font-medium">
-                                        <a href="?action=edit&id=<?php echo $img['id']; ?>" class="text-primary hover:text-secondary mr-3">Edit</a>
-                                        <a href="?action=delete&id=<?php echo $img['id']; ?>" onclick="return confirm('Are you sure?')" class="text-red-600">Delete</a>
+                                    <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
+                                        <a href="?action=edit&id=<?php echo $img['id']; ?>" class="text-primary hover:text-secondary mr-3" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="<?php echo $view_url; ?>" target="_blank" class="text-gray-500 hover:text-gray-700 mr-3" title="View on site">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <form method="POST" action="gallery.php" class="inline" onsubmit="return confirm('Delete this gallery image? This cannot be undone.');">
+                                            <input type="hidden" name="delete_id" value="<?php echo $img['id']; ?>">
+                                            <button type="submit" class="text-red-600 hover:text-red-800" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
                     </tbody>
                 </table>
+                </div>
                 <?php
                 require_once __DIR__ . '/includes/pagination.php';
                 renderPagination([
@@ -434,8 +586,15 @@ if ($action === 'list') {
                 ]);
                 ?>
             </div>
+
+            <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h3 class="font-semibold text-blue-900 mb-2">Quick Links</h3>
+                <ul class="text-sm text-blue-800 space-y-1">
+                    <li><a href="<?php echo $view_url; ?>" target="_blank" class="hover:underline"><i class="fas fa-external-link-alt mr-1"></i>View Gallery Page</a></li>
+                    <li><a href="index.php" class="hover:underline"><i class="fas fa-home mr-1"></i>Back to Admin Dashboard</a></li>
+                </ul>
+            </div>
         <?php endif; ?>
     </div>
 </body>
 </html>
-

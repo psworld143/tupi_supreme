@@ -311,7 +311,7 @@ $subject_options = getContactSubjectOptions(); // Get contact form subject optio
     <?php include 'includes/navbar.php'; ?>
     
     <!-- Page Header -->
-    <section class="page-header-gradient text-white relative overflow-hidden pt-24 pb-20">
+    <section id="page-header" class="page-header-gradient text-white relative overflow-hidden pt-24 pb-20">
         <!-- Floating gradient orbs for depth -->
         <div class="orb orb-1"></div>
         <div class="orb orb-2"></div>
@@ -328,7 +328,7 @@ $subject_options = getContactSubjectOptions(); // Get contact form subject optio
     </section>
 
     <!-- Contact Information -->
-    <section class="py-20 lg:py-24 relative overflow-hidden">
+    <section id="contact-section" class="py-20 lg:py-24 relative overflow-hidden">
         <!-- Subtle dot grid backdrop -->
         <div class="absolute inset-0 dot-grid opacity-40"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
@@ -385,7 +385,7 @@ $subject_options = getContactSubjectOptions(); // Get contact form subject optio
     </section>
 
     <!-- Contact Form -->
-    <section class="bg-[#f5f7f5] py-20 lg:py-24">
+    <section id="contact-form" class="bg-[#f5f7f5] py-20 lg:py-24">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white border border-[#e6ece8] rounded-2xl p-8 lg:p-10 reveal">
                 <div class="text-center mb-8">
@@ -456,7 +456,7 @@ $subject_options = getContactSubjectOptions(); // Get contact form subject optio
     </section>
 
     <!-- Office Hours -->
-    <section class="py-20 lg:py-24 relative overflow-hidden">
+    <section id="office-hours" class="py-20 lg:py-24 relative overflow-hidden">
         <div class="absolute inset-0 dot-grid opacity-40"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div class="text-center mb-16 reveal">
@@ -502,7 +502,7 @@ $subject_options = getContactSubjectOptions(); // Get contact form subject optio
     </section>
 
     <!-- Map Section -->
-    <section class="bg-[#f5f7f5] py-20 lg:py-24">
+    <section id="map" class="bg-[#f5f7f5] py-20 lg:py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16 reveal">
                 <span class="eyebrow mb-4">
@@ -572,7 +572,7 @@ $subject_options = getContactSubjectOptions(); // Get contact form subject optio
     </section>
 
     <!-- FAQ Section -->
-    <section class="py-20 lg:py-24 relative overflow-hidden">
+    <section id="faqs" class="py-20 lg:py-24 relative overflow-hidden">
         <div class="absolute inset-0 dot-grid opacity-40"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div class="text-center mb-16 reveal">

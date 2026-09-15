@@ -17,7 +17,7 @@ $legal_links = getFooterLinks('legal');
         <div class="grid grid-cols-1 md:grid-cols-4 gap-10">
             <div>
                 <h5 class="text-lg font-semibold mb-4 flex items-center">
-                    <i class="fas fa-leaf mr-2 text-[#8bc34a]"></i><?php echo htmlspecialchars_safe($company_name); ?>
+                    <img src="uploads/images/tupi_supreme_logo.png" alt="<?php echo htmlspecialchars_safe($company_name); ?> logo" class="h-9 w-auto mr-2 object-contain"><?php echo htmlspecialchars_safe($company_name); ?>
                 </h5>
                 <p class="text-white/70 mb-5 text-sm leading-relaxed"><?php echo htmlspecialchars_safe($company_tagline); ?></p>
                 <div class="flex space-x-3">

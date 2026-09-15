@@ -346,7 +346,7 @@ function isValidImageUrl($url) {
     <?php include 'includes/navbar.php'; ?>
 
     <!-- Page Header -->
-    <section class="page-header-gradient text-white relative overflow-hidden pt-24 pb-20">
+    <section id="page-header" class="page-header-gradient text-white relative overflow-hidden pt-24 pb-20">
         <!-- Floating gradient orbs for depth -->
         <div class="orb orb-1"></div>
         <div class="orb orb-2"></div>

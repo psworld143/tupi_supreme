@@ -346,7 +346,7 @@ $company_full_name = getSiteSetting('company_name', 'Tupi Supreme Activated Carb
     <?php include 'includes/navbar.php'; ?>
 
     <!-- Page Header -->
-    <section class="page-header-gradient text-white relative overflow-hidden pt-24 pb-20">
+    <section id="page-header" class="page-header-gradient text-white relative overflow-hidden pt-24 pb-20">
         <!-- Floating gradient orbs for depth -->
         <div class="orb orb-1"></div>
         <div class="orb orb-2"></div>
@@ -363,7 +363,7 @@ $company_full_name = getSiteSetting('company_name', 'Tupi Supreme Activated Carb
     </section>
 
     <!-- Company Story -->
-    <section class="py-20 lg:py-24 relative overflow-hidden">
+    <section id="company-story" class="py-20 lg:py-24 relative overflow-hidden">
         <!-- Subtle dot grid backdrop -->
         <div class="absolute inset-0 dot-grid opacity-40"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
@@ -391,7 +391,7 @@ $company_full_name = getSiteSetting('company_name', 'Tupi Supreme Activated Carb
     </section>
 
     <!-- Mission & Vision -->
-    <section class="py-20 lg:py-24 bg-[#f5f7f5]">
+    <section id="mission-vision" class="py-20 lg:py-24 bg-[#f5f7f5]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16 reveal">
                 <span class="eyebrow mb-4">
@@ -429,7 +429,7 @@ $company_full_name = getSiteSetting('company_name', 'Tupi Supreme Activated Carb
 
     <!-- Company Timeline -->
     <?php if (!empty($timeline_events)): ?>
-    <section class="py-20 lg:py-24 relative overflow-hidden">
+    <section id="timeline" class="py-20 lg:py-24 relative overflow-hidden">
         <div class="absolute inset-0 dot-grid opacity-40"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div class="text-center mb-16 reveal">
@@ -457,7 +457,7 @@ $company_full_name = getSiteSetting('company_name', 'Tupi Supreme Activated Carb
 
     <!-- Core Values -->
     <?php if (!empty($company_values)): ?>
-    <section class="bg-[#23332c] text-white py-20 lg:py-24 relative overflow-hidden">
+    <section id="values" class="bg-[#23332c] text-white py-20 lg:py-24 relative overflow-hidden">
         <!-- Decorative orbs -->
         <div class="orb orb-1" style="background: #3d7a66; opacity: 0.25;"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
@@ -487,7 +487,7 @@ $company_full_name = getSiteSetting('company_name', 'Tupi Supreme Activated Carb
 
     <!-- Leadership Team -->
     <?php if (!empty($team_members)): ?>
-    <section class="py-20 lg:py-24">
+    <section id="team" class="py-20 lg:py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16 reveal">
                 <span class="eyebrow mb-4">
