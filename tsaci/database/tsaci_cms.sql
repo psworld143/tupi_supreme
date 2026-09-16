@@ -128,6 +128,7 @@ CREATE TABLE `carousel_slides` (
   `title` varchar(200) DEFAULT NULL,
   `description` text DEFAULT NULL,
   `image_url` varchar(500) NOT NULL,
+  `overlay_opacity` tinyint(3) unsigned NOT NULL DEFAULT 92,
   `button_text` varchar(100) DEFAULT NULL,
   `button_link` varchar(200) DEFAULT NULL,
   `display_order` int(11) DEFAULT 0,
@@ -141,10 +142,10 @@ CREATE TABLE `carousel_slides` (
 -- Dumping data for table `carousel_slides`
 --
 
-INSERT INTO `carousel_slides` (`id`, `title`, `description`, `image_url`, `button_text`, `button_link`, `display_order`, `is_active`, `created_at`, `updated_at`, `updated_by`) VALUES
-(1, 'Premium Activated Carbon Solutions', 'Leading provider of high-quality activated carbon products for municipal water treatment facilities', '/images/hero1.jpg', 'Request Technical Consultation', 'contact.php', 1, 1, '2025-12-02 14:12:49', '2025-12-02 14:12:49', NULL),
-(2, 'Municipal Water Treatment Excellence', 'Trusted by 200+ municipal water treatment facilities nationwide', '/images/hero2.jpg', 'View Our Products', 'products.php', 2, 1, '2025-12-02 14:12:49', '2025-12-02 14:12:49', NULL),
-(3, 'Sustainable Environmental Solutions', 'Committed to environmental responsibility and sustainable business practices', '/images/hero3.jpg', 'Learn More', 'about.php', 3, 1, '2025-12-02 14:12:49', '2025-12-02 14:12:49', NULL);
+INSERT INTO `carousel_slides` (`id`, `title`, `description`, `image_url`, `overlay_opacity`, `button_text`, `button_link`, `display_order`, `is_active`, `created_at`, `updated_at`, `updated_by`) VALUES
+(1, 'Premium Activated Carbon Solutions', 'Leading provider of high-quality activated carbon products for municipal water treatment facilities', '/images/hero1.jpg', 92, 'Request Technical Consultation', 'contact.php', 1, 1, '2025-12-02 14:12:49', '2025-12-02 14:12:49', NULL),
+(2, 'Municipal Water Treatment Excellence', 'Trusted by 200+ municipal water treatment facilities nationwide', '/images/hero2.jpg', 92, 'View Our Products', 'products.php', 2, 1, '2025-12-02 14:12:49', '2025-12-02 14:12:49', NULL),
+(3, 'Sustainable Environmental Solutions', 'Committed to environmental responsibility and sustainable business practices', '/images/hero3.jpg', 92, 'Learn More', 'about.php', 3, 1, '2025-12-02 14:12:49', '2025-12-02 14:12:49', NULL);
 
 -- --------------------------------------------------------
 
@@ -637,6 +638,7 @@ CREATE TABLE `products` (
   `features` text DEFAULT NULL,
   `applications` text DEFAULT NULL,
   `image_url` varchar(500) DEFAULT NULL,
+  `category_id` int(11) DEFAULT NULL,
   `display_order` int(11) DEFAULT 0,
   `is_featured` tinyint(1) DEFAULT 0,
   `is_active` tinyint(1) DEFAULT 1,
@@ -1100,6 +1102,7 @@ ALTER TABLE `products`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `slug` (`slug`),
   ADD KEY `updated_by` (`updated_by`),
+  ADD KEY `category_id` (`category_id`),
   ADD KEY `idx_slug` (`slug`),
   ADD KEY `idx_is_active` (`is_active`),
   ADD KEY `idx_is_featured` (`is_featured`);
@@ -1419,7 +1422,8 @@ ALTER TABLE `page_content`
 -- Constraints for table `products`
 --
 ALTER TABLE `products`
-  ADD CONSTRAINT `products_ibfk_1` FOREIGN KEY (`updated_by`) REFERENCES `admin_users` (`id`) ON DELETE SET NULL;
+  ADD CONSTRAINT `products_ibfk_1` FOREIGN KEY (`updated_by`) REFERENCES `admin_users` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `products_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `product_tabs` (`id`) ON DELETE SET NULL;
 
 --
 -- Constraints for table `resources`

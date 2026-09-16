@@ -186,6 +186,8 @@ $icon_options = ['fa-cube', 'fa-cubes', 'fa-seedling', 'fa-leaf', 'fa-cogs', 'fa
             .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #d2dcd5; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
             .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #c0ccc5; }
         }
+        .quick-pick { padding: 3px 8px; font-size: 11px; border: 1px solid #d1d5db; background: #fff; border-radius: 4px; cursor: pointer; color: #4b5563; }
+        .quick-pick:hover { background: #f3f4f6; border-color: #9ca3af; }
     </style>
 
     <!-- Main Content -->
@@ -229,89 +231,249 @@ $icon_options = ['fa-cube', 'fa-cubes', 'fa-seedling', 'fa-leaf', 'fa-cogs', 'fa
             <!-- Add/Edit Form -->
             <div class="bg-white rounded-lg shadow-md p-6">
                 <h2 class="text-2xl font-bold mb-1"><?php echo $action === 'add' ? 'Add New' : 'Edit'; ?> Product Tab</h2>
-                <p class="text-sm text-gray-500 mb-6">Fields marked <span class="text-red-500">*</span> are required.</p>
+                <p class="text-sm text-gray-500 mb-4">Fields marked <span class="text-red-500">*</span> are required.</p>
 
-                <form method="POST" action="">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Tab Key <span class="text-red-500">*</span></label>
-                            <?php if ($action === 'add'): ?>
-                                <input type="text" name="tab_key" required pattern="[a-z0-9\-_]+"
-                                       value="<?php echo htmlspecialchars($edit_tab['tab_key'] ?? ''); ?>"
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
-                                       placeholder="e.g., water-filters">
-                                <p class="text-xs text-gray-400 mt-1">A unique identifier (lowercase letters, numbers, hyphens). Used internally — not shown to visitors.</p>
-                            <?php else: ?>
-                                <input type="text" value="<?php echo htmlspecialchars($edit_tab['tab_key'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100" readonly disabled>
-                                <input type="hidden" name="tab_key" value="<?php echo htmlspecialchars($edit_tab['tab_key'] ?? ''); ?>">
-                                <p class="text-xs text-gray-400 mt-1">The tab key can't be changed after creation.</p>
-                            <?php endif; ?>
-                        </div>
+                <!-- Info banner -->
+                <div class="mb-6 p-3 rounded-lg bg-blue-50 border border-blue-200 flex items-start gap-2">
+                    <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
+                    <p class="text-sm text-blue-800">Tabs are the pill buttons on the public <a href="../products.php#main" target="_blank" class="underline hover:text-blue-900">Products page</a>. A product appears in a tab if its <strong>category</strong> is set to this tab OR its name/slug contains any of the tab's <strong>keywords</strong>. The three built-in tabs (Granulated, Husk, Custom) are system tabs and can't be deleted.</p>
+                </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Label <span class="text-red-500">*</span></label>
-                            <input type="text" name="label" required
-                                   value="<?php echo htmlspecialchars($edit_tab['label'] ?? ''); ?>"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
-                                   placeholder="e.g., Water Filter Products">
-                            <p class="text-xs text-gray-400 mt-1">The text shown on the tab button.</p>
-                        </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Left: form fields -->
+                    <div>
+                        <form method="POST" action="">
+                            <div class="space-y-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Label <span class="text-red-500">*</span></label>
+                                    <input type="text" name="label" id="label_input" required
+                                           value="<?php echo htmlspecialchars($edit_tab['label'] ?? ''); ?>"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                           placeholder="e.g., Water Filter Products"
+                                           oninput="updatePreview(); autoSuggestKey()">
+                                    <p class="text-xs text-gray-400 mt-1">The text shown on the tab button (visible to visitors).</p>
+                                </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Icon</label>
-                            <input type="text" name="icon" list="icon-list"
-                                   value="<?php echo htmlspecialchars($edit_tab['icon'] ?? 'fa-cube'); ?>"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
-                                   placeholder="fa-cube">
-                            <datalist id="icon-list">
-                                <?php foreach ($icon_options as $ic): ?>
-                                    <option value="<?php echo htmlspecialchars($ic); ?>">
-                                <?php endforeach; ?>
-                            </datalist>
-                            <p class="text-xs text-gray-400 mt-1">Font Awesome icon class without the <code>fas</code> prefix (e.g., <code>fa-cube</code>).</p>
-                        </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Tab Key <span class="text-red-500">*</span></label>
+                                    <?php if ($action === 'add'): ?>
+                                        <input type="text" name="tab_key" id="tab_key_input" required pattern="[a-z0-9\-_]+"
+                                               value="<?php echo htmlspecialchars($edit_tab['tab_key'] ?? ''); ?>"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary font-mono"
+                                               placeholder="e.g., water-filters">
+                                        <p class="text-xs text-gray-400 mt-1">Unique identifier (lowercase, hyphens, numbers). Used internally — not shown to visitors. <button type="button" onclick="autoSuggestKey()" class="text-primary hover:underline">Auto-generate from label</button>.</p>
+                                    <?php else: ?>
+                                        <input type="text" value="<?php echo htmlspecialchars($edit_tab['tab_key'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 font-mono" readonly disabled>
+                                        <input type="hidden" name="tab_key" value="<?php echo htmlspecialchars($edit_tab['tab_key'] ?? ''); ?>">
+                                        <p class="text-xs text-gray-400 mt-1">The tab key can't be changed after creation.</p>
+                                    <?php endif; ?>
+                                </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Display Order</label>
-                            <input type="number" name="display_order" min="0"
-                                   value="<?php echo htmlspecialchars($edit_tab['display_order'] ?? 0); ?>"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
-                            <p class="text-xs text-gray-400 mt-1">Lower numbers appear first.</p>
-                        </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Icon</label>
+                                    <div class="flex items-center gap-3">
+                                        <input type="text" name="icon" id="icon_input" list="icon-list"
+                                               value="<?php echo htmlspecialchars($edit_tab['icon'] ?? 'fa-cube'); ?>"
+                                               class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary font-mono"
+                                               placeholder="fa-cube"
+                                               oninput="updateIconPreview(this.value); updatePreview()">
+                                        <div id="icon_preview" class="flex items-center justify-center w-10 h-10 border border-gray-300 rounded-lg bg-gray-50 text-lg text-primary">
+                                            <i class="fas <?php echo htmlspecialchars($edit_tab['icon'] ?? 'fa-cube'); ?>"></i>
+                                        </div>
+                                    </div>
+                                    <datalist id="icon-list">
+                                        <?php foreach ($icon_options as $ic): ?>
+                                            <option value="<?php echo htmlspecialchars($ic); ?>">
+                                        <?php endforeach; ?>
+                                    </datalist>
+                                    <p class="text-xs text-gray-400 mt-1">Font Awesome icon class without the <code>fas</code> prefix. <a href="https://fontawesome.com/v6/search?o=r&m=free" target="_blank" class="text-primary hover:underline">Browse icons</a>.</p>
+                                    <div class="mt-2 flex flex-wrap gap-1">
+                                        <?php foreach (['fa-cube','fa-cubes','fa-seedling','fa-leaf','fa-cogs','fa-tools','fa-flask','fa-industry','fa-water','fa-tint','fa-wind','fa-fire','fa-box','fa-recycle','fa-tree'] as $ic): ?>
+                                            <button type="button" class="quick-pick" onclick="setIcon('<?php echo $ic; ?>')"><?php echo $ic; ?></button>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
 
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Keywords <span class="text-red-500">*</span></label>
-                            <input type="text" name="keywords" required
-                                   value="<?php echo htmlspecialchars($edit_tab['keywords'] ?? ''); ?>"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
-                                   placeholder="e.g., water,filter,purification">
-                            <p class="text-xs text-gray-400 mt-1">Comma-separated words. A product appears in this tab if its name or slug contains any of these keywords (case-insensitive). Example: <code>husk,coconut</code></p>
-                        </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Display Order</label>
+                                        <input type="number" name="display_order" min="0"
+                                               value="<?php echo htmlspecialchars($edit_tab['display_order'] ?? 0); ?>"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
+                                        <p class="text-xs text-gray-400 mt-1">Lower numbers appear first (left to right). Use 10, 20, 30…</p>
+                                    </div>
 
-                        <div class="md:col-span-2">
-                            <label class="flex items-center cursor-pointer">
-                                <input type="checkbox" name="is_active" value="1"
-                                       <?php echo ($edit_tab && $edit_tab['is_active']) || !$edit_tab ? 'checked' : ''; ?>
-                                       class="sr-only peer">
-                                <span class="relative inline-flex items-center">
-                                    <span class="w-11 h-6 bg-gray-300 peer-checked:bg-primary rounded-full transition-colors"></span>
-                                    <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5"></span>
-                                </span>
-                                <span class="ml-3 text-sm text-gray-700">Active <span class="text-gray-400">(shown on the website)</span></span>
-                            </label>
-                        </div>
+                                    <div class="flex items-center">
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="checkbox" name="is_active" value="1"
+                                                   <?php echo ($edit_tab && $edit_tab['is_active']) || !$edit_tab ? 'checked' : ''; ?>
+                                                   class="sr-only peer">
+                                            <span class="relative inline-flex items-center">
+                                                <span class="w-11 h-6 bg-gray-300 peer-checked:bg-primary rounded-full transition-colors"></span>
+                                                <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5"></span>
+                                            </span>
+                                            <span class="ml-3 text-sm text-gray-700">Active <span class="text-gray-400">(shown on the website)</span></span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Keywords <span class="text-red-500">*</span></label>
+                                    <input type="text" name="keywords" id="keywords_input" required
+                                           value="<?php echo htmlspecialchars($edit_tab['keywords'] ?? ''); ?>"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                           placeholder="e.g., water,filter,purification"
+                                           oninput="updatePreview()">
+                                    <p class="text-xs text-gray-400 mt-1">Comma-separated words. A product appears in this tab if its name or slug contains any of these keywords (case-insensitive).</p>
+                                    <div class="mt-2 flex flex-wrap gap-1">
+                                        <button type="button" class="quick-pick" onclick="addKeyword('water')">+ water</button>
+                                        <button type="button" class="quick-pick" onclick="addKeyword('filter')">+ filter</button>
+                                        <button type="button" class="quick-pick" onclick="addKeyword('carbon')">+ carbon</button>
+                                        <button type="button" class="quick-pick" onclick="addKeyword('coconut')">+ coconut</button>
+                                        <button type="button" class="quick-pick" onclick="addKeyword('husk')">+ husk</button>
+                                        <button type="button" class="quick-pick" onclick="addKeyword('powder')">+ powder</button>
+                                        <button type="button" class="quick-pick" onclick="addKeyword('granulated')">+ granulated</button>
+                                        <button type="button" class="quick-pick" onclick="addKeyword('custom')">+ custom</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-8 flex flex-col sm:flex-row gap-3">
+                                <button type="submit" class="bg-primary text-white px-6 py-2.5 rounded-lg hover:bg-secondary transition-colors inline-flex items-center justify-center">
+                                    <i class="fas fa-save mr-2"></i><?php echo $action === 'add' ? 'Add Tab' : 'Save Changes'; ?>
+                                </button>
+                                <a href="product-tabs.php" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2.5 rounded-lg transition-colors inline-flex items-center justify-center">
+                                    <i class="fas fa-times mr-2"></i>Cancel
+                                </a>
+                            </div>
+                        </form>
                     </div>
 
-                    <div class="mt-8 flex flex-col sm:flex-row gap-3">
-                        <button type="submit" class="bg-primary text-white px-6 py-2.5 rounded-lg hover:bg-secondary transition-colors inline-flex items-center justify-center">
-                            <i class="fas fa-save mr-2"></i><?php echo $action === 'add' ? 'Add Tab' : 'Save Changes'; ?>
-                        </button>
-                        <a href="product-tabs.php" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2.5 rounded-lg transition-colors inline-flex items-center justify-center">
-                            <i class="fas fa-times mr-2"></i>Cancel
-                        </a>
+                    <!-- Right: live preview -->
+                    <div>
+                        <p class="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                            <i class="fas fa-eye text-gray-400"></i> Live Preview
+                            <span class="text-xs text-gray-400 font-normal">(how the tab appears on the Products page)</span>
+                        </p>
+
+                        <!-- Tab button preview (the pill) -->
+                        <div class="border border-gray-200 rounded-lg p-6 bg-gray-50 mb-4">
+                            <p class="text-xs text-gray-400 mb-3">Tab button (among other tabs):</p>
+                            <div class="flex flex-wrap gap-3">
+                                <button class="border-2 border-[#d6ded9] text-[#23332c] px-6 py-3 rounded-full font-medium text-sm bg-white">
+                                    <i class="fas fa-cubes mr-2"></i>Granulated
+                                </button>
+                                <button class="border-2 border-primary text-white px-6 py-3 rounded-full font-medium text-sm bg-primary">
+                                    <i id="preview_icon" class="fas <?php echo htmlspecialchars($edit_tab['icon'] ?? 'fa-cube'); ?> mr-2"></i><span id="preview_label"><?php echo htmlspecialchars($edit_tab['label'] ?? 'Tab label'); ?></span>
+                                </button>
+                                <button class="border-2 border-[#d6ded9] text-[#23332c] px-6 py-3 rounded-full font-medium text-sm bg-white">
+                                    <i class="fas fa-cogs mr-2"></i>Custom
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Tab pane header preview -->
+                        <div class="rounded-lg overflow-hidden border border-gray-200">
+                            <div class="bg-[#60796e] text-white p-8 text-center relative overflow-hidden">
+                                <div class="absolute inset-0 opacity-25" style="background: #8bc34a; border-radius: 50%; filter: blur(40px); width: 100px; height: 100px; top: -20px; right: -20px;"></div>
+                                <div class="relative">
+                                    <span class="bg-white/15 text-white/90 mb-4 inline-block px-2 py-0.5 text-xs rounded-full">
+                                        <i id="preview_icon2" class="fas <?php echo htmlspecialchars($edit_tab['icon'] ?? 'fa-cube'); ?> text-xs"></i> Products
+                                    </span>
+                                    <h3 id="preview_label2" class="text-2xl lg:text-3xl font-bold mb-4 mt-3"><?php echo htmlspecialchars($edit_tab['label'] ?? 'Tab label'); ?></h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Keywords preview -->
+                        <div class="mt-4 p-3 rounded-lg bg-gray-50 border border-gray-200">
+                            <p class="text-xs text-gray-400 mb-1">Products matching these keywords will appear here:</p>
+                            <div class="flex flex-wrap gap-1" id="preview_keywords">
+                                <?php
+                                $kws = array_filter(array_map('trim', explode(',', $edit_tab['keywords'] ?? '')));
+                                if (!empty($kws)):
+                                    foreach ($kws as $kw):
+                                ?>
+                                    <span class="px-2 py-0.5 text-xs rounded-full bg-primary/10 text-primary font-mono"><?php echo htmlspecialchars($kw); ?></span>
+                                <?php
+                                    endforeach;
+                                else:
+                                ?>
+                                    <span class="text-xs text-gray-400">No keywords yet — add some above.</span>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-2">The active tab is highlighted in green. The pane header shows the icon and label on a dark green background.</p>
                     </div>
-                </form>
+                </div>
             </div>
+
+            <script>
+            function setIcon(i) {
+                document.getElementById('icon_input').value = i;
+                updateIconPreview(i);
+                updatePreview();
+            }
+
+            function updateIconPreview(iconClass) {
+                document.getElementById('icon_preview').innerHTML = '<i class="fas ' + iconClass + '"></i>';
+            }
+
+            function updatePreview() {
+                var label = document.getElementById('label_input').value || 'Tab label';
+                var icon = document.getElementById('icon_input').value || 'fa-cube';
+                var keywords = document.getElementById('keywords_input').value || '';
+
+                document.getElementById('preview_label').textContent = label;
+                document.getElementById('preview_label2').textContent = label;
+                document.getElementById('preview_icon').className = 'fas ' + icon + ' mr-2';
+                document.getElementById('preview_icon2').className = 'fas ' + icon + ' text-xs';
+
+                // Keywords preview
+                var kws = keywords.split(',').map(function(s){ return s.trim(); }).filter(function(s){ return s.length > 0; });
+                var kwBox = document.getElementById('preview_keywords');
+                if (kws.length > 0) {
+                    kwBox.innerHTML = kws.map(function(k) {
+                        return '<span class="px-2 py-0.5 text-xs rounded-full bg-primary/10 text-primary font-mono">' + escapeHtml(k) + '</span>';
+                    }).join('');
+                } else {
+                    kwBox.innerHTML = '<span class="text-xs text-gray-400">No keywords yet — add some above.</span>';
+                }
+            }
+
+            function addKeyword(kw) {
+                var input = document.getElementById('keywords_input');
+                var current = input.value.trim();
+                if (!current) {
+                    input.value = kw;
+                } else {
+                    var parts = current.split(',').map(function(s){ return s.trim(); }).filter(function(s){ return s.length > 0; });
+                    if (parts.indexOf(kw) === -1) {
+                        parts.push(kw);
+                    }
+                    input.value = parts.join(', ');
+                }
+                updatePreview();
+            }
+
+            function autoSuggestKey() {
+                var keyInput = document.getElementById('tab_key_input');
+                if (!keyInput || keyInput.value.trim() !== '') return; // don't overwrite
+                var label = document.getElementById('label_input').value || '';
+                var key = label.toLowerCase()
+                    .replace(/[^a-z0-9\s-]/g, '')
+                    .replace(/[\s_]+/g, '-')
+                    .replace(/-+/g, '-')
+                    .replace(/^-|-$/g, '');
+                keyInput.value = key;
+            }
+
+            function escapeHtml(s) {
+                return s.replace(/[&<>"']/g, function(c) {
+                    return {'&':'&','<':'<','>':'>','"':'"',"'":'&#39;'}[c];
+                });
+            }
+            </script>
 
         <?php else: ?>
             <!-- List View -->

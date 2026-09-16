@@ -10,7 +10,11 @@ $company_name = getSiteSetting('company_short_name', 'Tupi Supreme');
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <!-- Offset anchored sections so they don't hide under the fixed navbar -->
-<style>section[id]{scroll-margin-top:5rem}</style>
+<style>
+    section[id]{scroll-margin-top:5rem}
+    /* Hide empty paragraph tags for a cleaner look on landing pages */
+    p:empty{display:none !important}
+</style>
 
 <!-- Navigation -->
 <nav class="bg-white/95 backdrop-blur-sm text-[#23332c] fixed w-full top-0 z-50 border-b border-[#e6ece8]">

@@ -175,6 +175,31 @@ function jsonResponse($data, $status = 200) {
     exit;
 }
 
+/**
+ * CSRF protection helpers.
+ * Opt-in: pages must call csrfTokenField() and verifyCsrfToken() to use them.
+ * Existing pages that don't call them are unaffected.
+ */
+function generateCsrfToken() {
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function csrfTokenField() {
+    $token = generateCsrfToken();
+    return '<input type="hidden" name="csrf_token" value="' . htmlspecialchars($token, ENT_QUOTES, 'UTF-8') . '">';
+}
+
+function verifyCsrfToken() {
+    $token = $_POST['csrf_token'] ?? '';
+    if (!is_string($token) || $token === '' || empty($_SESSION['csrf_token'])) {
+        return false;
+    }
+    return hash_equals($_SESSION['csrf_token'], $token);
+}
+
 // Create upload directories if they don't exist (suppress errors if permissions don't allow)
 if (!file_exists(UPLOAD_DIR)) {
     @mkdir(UPLOAD_DIR, 0755, true);

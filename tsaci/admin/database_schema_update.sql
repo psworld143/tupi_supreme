@@ -150,3 +150,9 @@ CREATE TABLE IF NOT EXISTS footer_links (
     INDEX idx_display_order (display_order)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Carousel slides: per-slide overlay opacity (0-100, controls how strong the
+-- dark green gradient overlay is over the background image; 100 = fully hidden,
+-- 0 = image fully visible). Defaults to 92 to match the original fixed overlay.
+ALTER TABLE carousel_slides
+    ADD COLUMN overlay_opacity TINYINT UNSIGNED NOT NULL DEFAULT 92 AFTER image_url;
+

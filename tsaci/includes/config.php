@@ -211,6 +211,48 @@ function filterProductsByKeywords($products, $keywords) {
     return $matched;
 }
 
+/**
+ * Get the products that belong to a given product tab (category).
+ *
+ * A product is included if EITHER:
+ *   - it is directly assigned to the tab via its `category_id` column, OR
+ *   - its slug/name matches any of the tab's comma-separated `keywords`.
+ *
+ * Results are de-duplicated by product id so a product assigned to the tab
+ * won't appear twice even if it also matches the keywords. This keeps the
+ * legacy keyword-matching behaviour working alongside the new explicit
+ * category assignment.
+ *
+ * @param array $products List of product rows (each may have category_id).
+ * @param array $tab      A product_tabs row (must contain id + keywords).
+ * @return array Matching products.
+ */
+function getProductsForTab($products, $tab) {
+    $tab_id = (int)($tab['id'] ?? 0);
+    $keywords = $tab['keywords'] ?? '';
+    $seen = [];
+    $result = [];
+    foreach ($products as $p) {
+        $pid = (int)($p['id'] ?? 0);
+        if (isset($seen[$pid])) continue;
+        $assigned = $tab_id > 0 && (int)($p['category_id'] ?? 0) === $tab_id;
+        if ($assigned) {
+            $seen[$pid] = true;
+            $result[] = $p;
+            continue;
+        }
+    }
+    // Then add keyword-matched products not already included by assignment.
+    $keyword_matched = filterProductsByKeywords($products, $keywords);
+    foreach ($keyword_matched as $p) {
+        $pid = (int)($p['id'] ?? 0);
+        if (isset($seen[$pid])) continue;
+        $seen[$pid] = true;
+        $result[] = $p;
+    }
+    return $result;
+}
+
 function getServices($limit = null) {
     $db = getDB();
     if (!$db) return [];

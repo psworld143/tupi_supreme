@@ -196,6 +196,8 @@ $view_url = '../gallery.php#gallery-grid';
             .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #d2dcd5; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
             .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #c0ccc5; }
         }
+        .quick-pick { padding: 3px 8px; font-size: 11px; border: 1px solid #d1d5db; background: #fff; border-radius: 4px; cursor: pointer; color: #4b5563; }
+        .quick-pick:hover { background: #f3f4f6; border-color: #9ca3af; }
     </style>
 
     <!-- Main Content -->
@@ -239,303 +241,353 @@ $view_url = '../gallery.php#gallery-grid';
             <!-- Add/Edit Form -->
             <div class="bg-white rounded-lg shadow-md p-6">
                 <h2 class="text-2xl font-bold mb-1"><?php echo $action === 'add' ? 'Add New' : 'Edit'; ?> Gallery Image</h2>
-                <p class="text-sm text-gray-500 mb-6">Fields marked <span class="text-red-500">*</span> are required.</p>
+                <p class="text-sm text-gray-500 mb-4">Fields marked <span class="text-red-500">*</span> are required.</p>
 
-                <form method="POST" action="" onsubmit="return validateImageUpload()">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Title <span class="text-red-500">*</span></label>
-                            <input type="text" name="title" required
-                                   value="<?php echo htmlspecialchars($edit_image['title'] ?? ''); ?>"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
-                                   placeholder="e.g., Production Facility Interior">
-                            <p class="text-xs text-gray-400 mt-1">A short, descriptive title for the image.</p>
-                        </div>
+                <!-- Info banner -->
+                <div class="mb-6 p-3 rounded-lg bg-blue-50 border border-blue-200 flex items-start gap-2">
+                    <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
+                    <p class="text-sm text-blue-800">Gallery images appear in a grid on the public <a href="<?php echo $view_url; ?>" target="_blank" class="underline hover:text-blue-900">Gallery page</a>, filterable by category. Clicking an image opens a lightbox with the title and description. Use landscape images for best results (≥800px wide).</p>
+                </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Category <span class="text-red-500">*</span></label>
-                            <select name="category" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
-                                <?php foreach ($categories as $cat): ?>
-                                    <option value="<?php echo $cat; ?>" <?php echo ($edit_image && $edit_image['category'] === $cat) ? 'selected' : ''; ?>>
-                                        <?php echo ucfirst($cat); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                            <p class="text-xs text-gray-400 mt-1">Used to group images on the public Gallery page.</p>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Display Order</label>
-                            <input type="number" name="display_order" min="0"
-                                   value="<?php echo htmlspecialchars($edit_image['display_order'] ?? 0); ?>"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
-                            <p class="text-xs text-gray-400 mt-1">Lower numbers appear first within the category.</p>
-                        </div>
-
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Image <span class="text-red-500">*</span></label>
-
-                            <!-- Image source mode selector -->
-                            <div class="mb-3">
-                                <label class="block text-xs font-medium text-gray-500 mb-1">Image source</label>
-                                <select id="image-source-mode" onchange="switchImageMode()" class="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm">
-                                    <option value="upload">Upload from file</option>
-                                    <option value="url">Enter image URL</option>
-                                </select>
-                            </div>
-
-                            <!-- Image Preview -->
-                            <div id="image-preview-container" class="mb-3 <?php echo empty($edit_image['image_url'] ?? '') ? 'hidden' : ''; ?>">
-                                <img id="image-preview" src="<?php echo htmlspecialchars($edit_image['image_url'] ?? ''); ?>" alt="Preview" class="max-w-full h-48 object-contain border border-gray-300 rounded-lg p-2 bg-gray-50">
-                                <button type="button" onclick="clearImagePreview()" class="mt-2 text-sm text-red-600 hover:text-red-800">
-                                    <i class="fas fa-times mr-1"></i>Remove Image
-                                </button>
-                            </div>
-
-                            <!-- File Picker (upload mode) -->
-                            <div id="file-picker-block" class="border-2 border-dashed border-gray-300 rounded-lg p-4 mb-3">
-                                <div class="text-center">
-                                    <input type="file" id="image-file-input" accept="image/jpeg,image/png,image/gif,image/webp" class="hidden">
-                                    <label for="image-file-input" class="cursor-pointer inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
-                                        <i class="fas fa-upload mr-2"></i>Choose Image File
-                                    </label>
-                                    <p class="mt-2 text-xs text-gray-500">JPEG, PNG, GIF, or WebP (Max 10MB) — file uploads automatically when selected</p>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Left: form fields -->
+                    <div>
+                        <form method="POST" action="" onsubmit="return validateImageUpload()">
+                            <div class="space-y-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Title <span class="text-red-500">*</span></label>
+                                    <input type="text" name="title" id="title_input" required
+                                           value="<?php echo htmlspecialchars($edit_image['title'] ?? ''); ?>"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                           placeholder="e.g., Production Facility Interior"
+                                           oninput="updatePreview()">
+                                    <p class="text-xs text-gray-400 mt-1">A short, descriptive title shown with the image.</p>
                                 </div>
-                                <div id="upload-progress" class="hidden mt-2">
-                                    <div class="bg-gray-200 rounded-full h-2">
-                                        <div id="upload-progress-bar" class="bg-primary h-2 rounded-full transition-all" style="width: 0%"></div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Category <span class="text-red-500">*</span></label>
+                                        <select name="category" id="category_input" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary" onchange="updatePreview()">
+                                            <?php
+                                            $cat_descriptions = [
+                                                'facilities' => 'Factory buildings, facility interiors',
+                                                'products' => 'Product photos, packaging',
+                                                'process' => 'Manufacturing process, production lines',
+                                                'installations' => 'On-site installations, delivered systems',
+                                                'team' => 'Team members, operations',
+                                            ];
+                                            foreach ($categories as $cat):
+                                            ?>
+                                                <option value="<?php echo $cat; ?>" <?php echo ($edit_image && $edit_image['category'] === $cat) ? 'selected' : ''; ?>>
+                                                    <?php echo ucfirst($cat); ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <p class="text-xs text-gray-400 mt-1" id="category_hint"><?php echo $cat_descriptions[$edit_image['category'] ?? 'facilities'] ?? ''; ?></p>
                                     </div>
-                                    <p id="upload-status" class="text-sm text-gray-600 mt-1"></p>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Display Order</label>
+                                        <input type="number" name="display_order" min="0"
+                                               value="<?php echo htmlspecialchars($edit_image['display_order'] ?? 0); ?>"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
+                                        <p class="text-xs text-gray-400 mt-1">Lower numbers appear first within the category. Use 10, 20, 30…</p>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Image <span class="text-red-500">*</span></label>
+
+                                    <!-- Image source mode selector -->
+                                    <div class="mb-3">
+                                        <label class="block text-xs font-medium text-gray-500 mb-1">Image source</label>
+                                        <select id="image-source-mode" onchange="switchImageMode()" class="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm">
+                                            <option value="upload">Upload from file</option>
+                                            <option value="url">Enter image URL</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Image Preview -->
+                                    <div id="image-preview-container" class="mb-3 <?php echo empty($edit_image['image_url'] ?? '') ? 'hidden' : ''; ?>">
+                                        <img id="image-preview" src="<?php echo htmlspecialchars($edit_image['image_url'] ?? ''); ?>" alt="Preview" class="max-w-full h-48 object-contain border border-gray-300 rounded-lg p-2 bg-gray-50">
+                                        <button type="button" onclick="clearImagePreview()" class="mt-2 text-sm text-red-600 hover:text-red-800">
+                                            <i class="fas fa-times mr-1"></i>Remove Image
+                                        </button>
+                                    </div>
+
+                                    <!-- File Picker (upload mode) -->
+                                    <div id="file-picker-block" class="border-2 border-dashed border-gray-300 rounded-lg p-4 mb-3">
+                                        <div class="text-center">
+                                            <input type="file" id="image-file-input" accept="image/jpeg,image/png,image/gif,image/webp" class="hidden">
+                                            <label for="image-file-input" class="cursor-pointer inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
+                                                <i class="fas fa-upload mr-2"></i>Choose Image File
+                                            </label>
+                                            <p class="mt-2 text-xs text-gray-500">JPEG, PNG, GIF, or WebP (Max 10MB). Recommended: landscape images, ≥800px wide.</p>
+                                        </div>
+                                        <div id="upload-progress" class="hidden mt-2">
+                                            <div class="bg-gray-200 rounded-full h-2">
+                                                <div id="upload-progress-bar" class="bg-primary h-2 rounded-full transition-all" style="width: 0%"></div>
+                                            </div>
+                                            <p id="upload-status" class="text-sm text-gray-600 mt-1"></p>
+                                        </div>
+                                    </div>
+
+                                    <!-- URL Input (url mode) -->
+                                    <div id="url-input-block" class="hidden mb-3">
+                                        <input type="url" id="image-url-visible" value="<?php echo htmlspecialchars($edit_image['image_url'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary" placeholder="https://example.com/image.jpg" oninput="syncUrlInput(this.value)">
+                                        <p class="mt-1 text-xs text-gray-500">Paste a full image URL (https://...).</p>
+                                    </div>
+
+                                    <!-- Hidden field: the actual value submitted with the form -->
+                                    <input type="hidden" name="image_url" id="image-url-input" value="<?php echo htmlspecialchars($edit_image['image_url'] ?? ''); ?>">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Description <span class="text-gray-400 font-normal">(optional)</span></label>
+                                    <textarea name="description" id="description_input" rows="4"
+                                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                              placeholder="e.g., Interior view of the activated carbon production facility"
+                                              oninput="updatePreview()"><?php echo htmlspecialchars($edit_image['description'] ?? ''); ?></textarea>
+                                    <p class="text-xs text-gray-400 mt-1">Optional caption shown with the image in the lightbox.</p>
+                                </div>
+
+                                <div>
+                                    <label class="flex items-center cursor-pointer">
+                                        <input type="checkbox" name="is_active" value="1"
+                                               <?php echo ($edit_image && $edit_image['is_active']) || !$edit_image ? 'checked' : ''; ?>
+                                               class="sr-only peer">
+                                        <span class="relative inline-flex items-center">
+                                            <span class="w-11 h-6 bg-gray-300 peer-checked:bg-primary rounded-full transition-colors"></span>
+                                            <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5"></span>
+                                        </span>
+                                        <span class="ml-3 text-sm text-gray-700">Active <span class="text-gray-400">(shown on the website)</span></span>
+                                    </label>
                                 </div>
                             </div>
 
-                            <!-- URL Input (url mode — visible text field for manual entry) -->
-                            <div id="url-input-block" class="hidden mb-3">
-                                <input type="url" id="image-url-visible" value="<?php echo htmlspecialchars($edit_image['image_url'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary" placeholder="https://example.com/image.jpg" oninput="syncUrlInput(this.value)">
-                                <p class="mt-1 text-xs text-gray-500">Paste a full image URL (https://...).</p>
+                            <div class="mt-8 flex flex-col sm:flex-row gap-3">
+                                <button type="submit" class="bg-primary text-white px-6 py-2.5 rounded-lg hover:bg-secondary transition-colors inline-flex items-center justify-center">
+                                    <i class="fas fa-save mr-2"></i><?php echo $action === 'add' ? 'Add Image' : 'Save Changes'; ?>
+                                </button>
+                                <a href="gallery.php" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2.5 rounded-lg transition-colors inline-flex items-center justify-center">
+                                    <i class="fas fa-times mr-2"></i>Cancel
+                                </a>
                             </div>
-
-                            <!-- Hidden field: the actual value submitted with the form -->
-                            <input type="hidden" name="image_url" id="image-url-input" value="<?php echo htmlspecialchars($edit_image['image_url'] ?? ''); ?>">
-
-                            <script>
-                            let selectedFile = null;
-                            // Upload state: 'idle' | 'uploading' | 'success' | 'failed'
-                            let uploadState = 'idle';
-                            // Current image source mode: 'upload' | 'url'
-                            let imageMode = 'upload';
-                            // Remember the original URL when editing so we know if the user picked a new file
-                            const originalImageUrl = document.getElementById('image-url-input').value;
-
-                            function switchImageMode() {
-                                const mode = document.getElementById('image-source-mode').value;
-                                imageMode = mode;
-                                const fileBlock = document.getElementById('file-picker-block');
-                                const urlBlock = document.getElementById('url-input-block');
-                                if (mode === 'url') {
-                                    fileBlock.classList.add('hidden');
-                                    urlBlock.classList.remove('hidden');
-                                    // Carry the current value into the visible URL field
-                                    document.getElementById('image-url-visible').value = document.getElementById('image-url-input').value;
-                                } else {
-                                    urlBlock.classList.add('hidden');
-                                    fileBlock.classList.remove('hidden');
-                                    // Reset any failed upload state when switching back to upload mode
-                                    if (uploadState === 'failed') {
-                                        uploadState = 'idle';
-                                        document.getElementById('upload-progress').classList.add('hidden');
-                                    }
-                                }
-                            }
-
-                            // Keep the hidden submitted field in sync with the visible URL text box
-                            function syncUrlInput(value) {
-                                document.getElementById('image-url-input').value = value;
-                                // Update the preview live
-                                const preview = document.getElementById('image-preview');
-                                if (value.trim()) {
-                                    preview.src = value;
-                                    preview.onerror = function() { this.style.display = 'none'; };
-                                    preview.onload = function() {
-                                        this.style.display = 'block';
-                                        document.getElementById('image-preview-container').classList.remove('hidden');
-                                    };
-                                } else {
-                                    document.getElementById('image-preview-container').classList.add('hidden');
-                                }
-                            }
-
-                            document.getElementById('image-file-input').addEventListener('change', function(e) {
-                                const file = e.target.files[0];
-                                if (file) {
-                                    selectedFile = file;
-                                    uploadState = 'idle';
-
-                                    const reader = new FileReader();
-                                    reader.onload = function(e) {
-                                        const preview = document.getElementById('image-preview');
-                                        preview.src = e.target.result;
-                                        document.getElementById('image-preview-container').classList.remove('hidden');
-                                    };
-                                    reader.readAsDataURL(file);
-
-                                    // Auto-upload immediately after selection
-                                    uploadImage();
-                                }
-                            });
-
-                            function uploadImage() {
-                                if (!selectedFile) {
-                                    alert('Please select an image file first');
-                                    return;
-                                }
-
-                                const formData = new FormData();
-                                formData.append('image', selectedFile);
-
-                                const progressContainer = document.getElementById('upload-progress');
-                                const progressBar = document.getElementById('upload-progress-bar');
-                                const statusText = document.getElementById('upload-status');
-                                const fileLabel = document.querySelector('label[for="image-file-input"]');
-
-                                uploadState = 'uploading';
-                                progressContainer.classList.remove('hidden');
-                                statusText.textContent = 'Uploading...';
-                                statusText.classList.remove('text-green-600', 'text-red-600');
-                                progressBar.classList.remove('bg-green-500');
-                                progressBar.style.width = '0%';
-                                fileLabel.style.pointerEvents = 'none';
-                                fileLabel.style.opacity = '0.6';
-
-                                const xhr = new XMLHttpRequest();
-
-                                xhr.upload.addEventListener('progress', function(e) {
-                                    if (e.lengthComputable) {
-                                        const percentComplete = (e.loaded / e.total) * 100;
-                                        progressBar.style.width = percentComplete + '%';
-                                    }
-                                });
-
-                                xhr.addEventListener('load', function() {
-                                    if (xhr.status === 200) {
-                                        const response = JSON.parse(xhr.responseText);
-                                        if (response.success) {
-                                            document.getElementById('image-url-input').value = response.url;
-                                            statusText.textContent = 'Upload successful!';
-                                            statusText.classList.add('text-green-600');
-                                            progressBar.classList.add('bg-green-500');
-                                            uploadState = 'success';
-                                            setTimeout(() => {
-                                                progressContainer.classList.add('hidden');
-                                            }, 2000);
-                                        } else {
-                                            statusText.textContent = 'Upload failed: ' + response.error;
-                                            statusText.classList.add('text-red-600');
-                                            progressContainer.classList.remove('hidden');
-                                            uploadState = 'failed';
-                                        }
-                                    } else {
-                                        let errMsg = 'Server error';
-                                        try { errMsg = JSON.parse(xhr.responseText).error || errMsg; } catch (_) {}
-                                        statusText.textContent = 'Upload failed: ' + errMsg;
-                                        statusText.classList.add('text-red-600');
-                                        progressContainer.classList.remove('hidden');
-                                        uploadState = 'failed';
-                                    }
-                                    fileLabel.style.pointerEvents = '';
-                                    fileLabel.style.opacity = '';
-                                });
-
-                                xhr.addEventListener('error', function() {
-                                    statusText.textContent = 'Upload failed: Network error';
-                                    statusText.classList.add('text-red-600');
-                                    progressContainer.classList.remove('hidden');
-                                    uploadState = 'failed';
-                                    fileLabel.style.pointerEvents = '';
-                                    fileLabel.style.opacity = '';
-                                });
-
-                                xhr.open('POST', 'api/upload_image.php');
-                                xhr.send(formData);
-                            }
-
-                            function clearImagePreview() {
-                                document.getElementById('image-preview-container').classList.add('hidden');
-                                document.getElementById('image-url-input').value = '';
-                                document.getElementById('image-url-visible').value = '';
-                                document.getElementById('image-file-input').value = '';
-                                selectedFile = null;
-                                uploadState = 'idle';
-                                document.getElementById('upload-progress').classList.add('hidden');
-                            }
-
-                            function validateImageUpload() {
-                                const urlInput = document.getElementById('image-url-input');
-
-                                // In URL mode, just require a non-empty URL
-                                if (imageMode === 'url') {
-                                    if (!urlInput.value.trim()) {
-                                        alert('Please enter an image URL.');
-                                        return false;
-                                    }
-                                    return true;
-                                }
-
-                                // Upload mode validations
-                                // Block save while an upload is still in progress
-                                if (uploadState === 'uploading') {
-                                    alert('Please wait for the image upload to finish before saving.');
-                                    return false;
-                                }
-
-                                // User picked a new file but the upload failed
-                                if (selectedFile && uploadState === 'failed') {
-                                    alert('The image upload failed. Please try again or pick a different file.');
-                                    return false;
-                                }
-
-                                // No image at all (new record with no upload, or image was cleared)
-                                if (!urlInput.value.trim()) {
-                                    alert('Please choose and upload an image file first.');
-                                    return false;
-                                }
-
-                                return true;
-                            }
-                            </script>
-                        </div>
-
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Description <span class="text-gray-400 font-normal">(optional)</span></label>
-                            <textarea name="description" rows="4"
-                                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"><?php echo htmlspecialchars($edit_image['description'] ?? ''); ?></textarea>
-                            <p class="text-xs text-gray-400 mt-1">Optional caption shown with the image.</p>
-                        </div>
-
-                        <div class="md:col-span-2">
-                            <label class="flex items-center cursor-pointer">
-                                <input type="checkbox" name="is_active" value="1"
-                                       <?php echo ($edit_image && $edit_image['is_active']) || !$edit_image ? 'checked' : ''; ?>
-                                       class="sr-only peer">
-                                <span class="relative inline-flex items-center">
-                                    <span class="w-11 h-6 bg-gray-300 peer-checked:bg-primary rounded-full transition-colors"></span>
-                                    <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5"></span>
-                                </span>
-                                <span class="ml-3 text-sm text-gray-700">Active <span class="text-gray-400">(shown on the website)</span></span>
-                            </label>
-                        </div>
+                        </form>
                     </div>
 
-                    <div class="mt-8 flex flex-col sm:flex-row gap-3">
-                        <button type="submit" class="bg-primary text-white px-6 py-2.5 rounded-lg hover:bg-secondary transition-colors inline-flex items-center justify-center">
-                            <i class="fas fa-save mr-2"></i><?php echo $action === 'add' ? 'Add Image' : 'Save Changes'; ?>
-                        </button>
-                        <a href="gallery.php" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2.5 rounded-lg transition-colors inline-flex items-center justify-center">
-                            <i class="fas fa-times mr-2"></i>Cancel
-                        </a>
+                    <!-- Right: live preview -->
+                    <div>
+                        <p class="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                            <i class="fas fa-eye text-gray-400"></i> Live Preview
+                            <span class="text-xs text-gray-400 font-normal">(gallery card on the Gallery page)</span>
+                        </p>
+                        <div class="gallery-item bg-white border border-[#e6ece8] rounded-2xl overflow-hidden">
+                            <div class="aspect-video bg-[#f7faf8] flex items-center justify-center overflow-hidden" id="preview_img_wrap">
+                                <img id="preview_img" src="<?php echo htmlspecialchars($edit_image['image_url'] ?? ''); ?>" alt="" class="w-full h-full object-cover <?php echo empty($edit_image['image_url'] ?? '') ? 'hidden' : ''; ?>">
+                                <div id="preview_img_placeholder" class="aspect-video bg-gradient-to-br from-[#3d7a66] to-[#60796e] flex items-center justify-center w-full h-full <?php echo empty($edit_image['image_url'] ?? '') ? '' : 'hidden'; ?>">
+                                    <i class="fas fa-image text-5xl text-white/80"></i>
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span id="preview_category" class="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800"><?php echo ucfirst($edit_image['category'] ?? 'facilities'); ?></span>
+                                </div>
+                                <h4 id="preview_title" class="text-lg font-semibold text-[#23332c] mb-1"><?php echo htmlspecialchars($edit_image['title'] ?? 'Image title'); ?></h4>
+                                <p id="preview_desc" class="text-sm text-[#7d8b84] leading-relaxed <?php echo empty($edit_image['description'] ?? '') ? 'hidden' : ''; ?>"><?php echo htmlspecialchars($edit_image['description'] ?? ''); ?></p>
+                                <p id="preview_desc_empty" class="text-sm text-gray-400 italic <?php echo empty($edit_image['description'] ?? '') ? '' : 'hidden'; ?>">No description added…</p>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-2">On the public site, clicking the image opens a lightbox with the title and description. The category badge is used here for preview only — it's not shown on the card itself.</p>
                     </div>
-                </form>
+                </div>
             </div>
+
+            <script>
+            // Live preview
+            function updatePreview() {
+                var title = document.getElementById('title_input').value || 'Image title';
+                var desc = document.getElementById('description_input').value || '';
+                var category = document.getElementById('category_input').value || 'facilities';
+                var imgUrl = document.getElementById('image-url-input').value;
+
+                document.getElementById('preview_title').textContent = title;
+                document.getElementById('preview_category').textContent = category.charAt(0).toUpperCase() + category.slice(1);
+
+                // Description
+                var descEl = document.getElementById('preview_desc');
+                var descEmpty = document.getElementById('preview_desc_empty');
+                if (desc.trim()) {
+                    descEl.textContent = desc;
+                    descEl.classList.remove('hidden');
+                    descEmpty.classList.add('hidden');
+                } else {
+                    descEl.classList.add('hidden');
+                    descEmpty.classList.remove('hidden');
+                }
+
+                // Category hint
+                var hints = {
+                    'facilities': 'Factory buildings, facility interiors',
+                    'products': 'Product photos, packaging',
+                    'process': 'Manufacturing process, production lines',
+                    'installations': 'On-site installations, delivered systems',
+                    'team': 'Team members, operations',
+                };
+                document.getElementById('category_hint').textContent = hints[category] || '';
+
+                // Image
+                var img = document.getElementById('preview_img');
+                var placeholder = document.getElementById('preview_img_placeholder');
+                if (imgUrl.trim()) {
+                    img.src = imgUrl;
+                    img.classList.remove('hidden');
+                    placeholder.classList.add('hidden');
+                } else {
+                    img.classList.add('hidden');
+                    placeholder.classList.remove('hidden');
+                }
+            }
+            </script>
+
+            <script>
+            // Image upload logic (upload from file vs enter URL)
+            let selectedFile = null;
+            let uploadState = 'idle';
+            let imageMode = 'upload';
+            const originalImageUrl = document.getElementById('image-url-input').value;
+
+            function switchImageMode() {
+                const mode = document.getElementById('image-source-mode').value;
+                imageMode = mode;
+                const fileBlock = document.getElementById('file-picker-block');
+                const urlBlock = document.getElementById('url-input-block');
+                if (mode === 'url') {
+                    fileBlock.classList.add('hidden');
+                    urlBlock.classList.remove('hidden');
+                    document.getElementById('image-url-visible').value = document.getElementById('image-url-input').value;
+                } else {
+                    urlBlock.classList.add('hidden');
+                    fileBlock.classList.remove('hidden');
+                    if (uploadState === 'failed') {
+                        uploadState = 'idle';
+                        document.getElementById('upload-progress').classList.add('hidden');
+                    }
+                }
+            }
+
+            function syncUrlInput(value) {
+                document.getElementById('image-url-input').value = value;
+                const preview = document.getElementById('image-preview');
+                if (value.trim()) {
+                    preview.src = value;
+                    preview.onerror = function() { this.style.display = 'none'; };
+                    preview.onload = function() {
+                        this.style.display = 'block';
+                        document.getElementById('image-preview-container').classList.remove('hidden');
+                    };
+                } else {
+                    document.getElementById('image-preview-container').classList.add('hidden');
+                }
+                updatePreview();
+            }
+
+            document.getElementById('image-file-input').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    selectedFile = file;
+                    uploadState = 'idle';
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const preview = document.getElementById('image-preview');
+                        preview.src = e.target.result;
+                        document.getElementById('image-preview-container').classList.remove('hidden');
+                    };
+                    reader.readAsDataURL(file);
+                    uploadImage();
+                }
+            });
+
+            function uploadImage() {
+                if (!selectedFile) { alert('Please select an image file first'); return; }
+                const formData = new FormData();
+                formData.append('image', selectedFile);
+                const progressContainer = document.getElementById('upload-progress');
+                const progressBar = document.getElementById('upload-progress-bar');
+                const statusText = document.getElementById('upload-status');
+                const fileLabel = document.querySelector('label[for="image-file-input"]');
+                uploadState = 'uploading';
+                progressContainer.classList.remove('hidden');
+                statusText.textContent = 'Uploading...';
+                statusText.classList.remove('text-green-600', 'text-red-600');
+                progressBar.classList.remove('bg-green-500');
+                progressBar.style.width = '0%';
+                fileLabel.style.pointerEvents = 'none';
+                fileLabel.style.opacity = '0.6';
+                const xhr = new XMLHttpRequest();
+                xhr.upload.addEventListener('progress', function(e) {
+                    if (e.lengthComputable) { progressBar.style.width = ((e.loaded / e.total) * 100) + '%'; }
+                });
+                xhr.addEventListener('load', function() {
+                    if (xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.success) {
+                            document.getElementById('image-url-input').value = response.url;
+                            statusText.textContent = 'Upload successful!';
+                            statusText.classList.add('text-green-600');
+                            progressBar.classList.add('bg-green-500');
+                            uploadState = 'success';
+                            setTimeout(() => { progressContainer.classList.add('hidden'); }, 2000);
+                            updatePreview();
+                        } else {
+                            statusText.textContent = 'Upload failed: ' + response.error;
+                            statusText.classList.add('text-red-600');
+                            uploadState = 'failed';
+                        }
+                    } else {
+                        let errMsg = 'Server error';
+                        try { errMsg = JSON.parse(xhr.responseText).error || errMsg; } catch (_) {}
+                        statusText.textContent = 'Upload failed: ' + errMsg;
+                        statusText.classList.add('text-red-600');
+                        uploadState = 'failed';
+                    }
+                    fileLabel.style.pointerEvents = '';
+                    fileLabel.style.opacity = '';
+                });
+                xhr.addEventListener('error', function() {
+                    statusText.textContent = 'Upload failed: Network error';
+                    statusText.classList.add('text-red-600');
+                    uploadState = 'failed';
+                    fileLabel.style.pointerEvents = '';
+                    fileLabel.style.opacity = '';
+                });
+                xhr.open('POST', 'api/upload_image.php');
+                xhr.send(formData);
+            }
+
+            function clearImagePreview() {
+                document.getElementById('image-preview-container').classList.add('hidden');
+                document.getElementById('image-url-input').value = '';
+                document.getElementById('image-url-visible').value = '';
+                document.getElementById('image-file-input').value = '';
+                selectedFile = null;
+                uploadState = 'idle';
+                document.getElementById('upload-progress').classList.add('hidden');
+                updatePreview();
+            }
+
+            function validateImageUpload() {
+                const urlInput = document.getElementById('image-url-input');
+                if (imageMode === 'url') {
+                    if (!urlInput.value.trim()) { alert('Please enter an image URL.'); return false; }
+                    return true;
+                }
+                if (uploadState === 'uploading') { alert('Please wait for the image upload to finish before saving.'); return false; }
+                if (selectedFile && uploadState === 'failed') { alert('The image upload failed. Please try again or pick a different file.'); return false; }
+                if (!urlInput.value.trim()) { alert('Please choose and upload an image file first.'); return false; }
+                return true;
+            }
+            </script>
 
         <?php else: ?>
             <!-- List View -->

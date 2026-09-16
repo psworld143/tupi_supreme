@@ -324,8 +324,11 @@ $featured_products = getProducts(3, true);
         <!-- Floating gradient orbs for depth -->
         <div class="orb orb-1"></div>
         <div class="orb orb-2"></div>
-        <?php foreach ($carousel_slides as $index => $slide): ?>
-            <div class="carousel-slide <?php echo $index === 0 ? 'active' : ''; ?>" style="background-image: linear-gradient(135deg, rgba(35, 51, 44, 0.92), rgba(61, 122, 102, 0.92)), url('<?php echo htmlspecialchars_safe($slide['image_url']); ?>'); background-size: cover; background-position: center; position: absolute; top: 0; left: 0; right: 0; bottom: 0;">
+        <?php foreach ($carousel_slides as $index => $slide):
+            // Per-slide overlay opacity (0-100 stored; 92 = original fixed value).
+            $overlay_alpha = number_format((isset($slide['overlay_opacity']) ? (int)$slide['overlay_opacity'] : 92) / 100, 2);
+        ?>
+            <div class="carousel-slide <?php echo $index === 0 ? 'active' : ''; ?>" style="background-image: linear-gradient(135deg, rgba(35, 51, 44, <?php echo $overlay_alpha; ?>), rgba(61, 122, 102, <?php echo $overlay_alpha; ?>)), url('<?php echo htmlspecialchars_safe($slide['image_url']); ?>'); background-size: cover; background-position: center; position: absolute; top: 0; left: 0; right: 0; bottom: 0;">
                 <div class="hero-pattern absolute inset-0 opacity-30"></div>
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 h-full flex items-center">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center w-full">

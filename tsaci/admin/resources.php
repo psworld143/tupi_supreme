@@ -217,6 +217,8 @@ function resourceViewUrl($category) {
             .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #d2dcd5; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
             .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #c0ccc5; }
         }
+        .quick-pick { padding: 3px 8px; font-size: 11px; border: 1px solid #d1d5db; background: #fff; border-radius: 4px; cursor: pointer; color: #4b5563; }
+        .quick-pick:hover { background: #f3f4f6; border-color: #9ca3af; }
     </style>
 
     <!-- Main Content -->
@@ -260,328 +262,364 @@ function resourceViewUrl($category) {
             <!-- Add/Edit Form -->
             <div class="bg-white rounded-lg shadow-md p-6">
                 <h2 class="text-2xl font-bold mb-1"><?php echo $action === 'add' ? 'Add New' : 'Edit'; ?> Resource</h2>
-                <p class="text-sm text-gray-500 mb-6">Fields marked <span class="text-red-500">*</span> are required.</p>
+                <p class="text-sm text-gray-500 mb-4">Fields marked <span class="text-red-500">*</span> are required.</p>
 
-                <form method="POST" action="" onsubmit="return validateFileUpload()">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Title <span class="text-red-500">*</span></label>
-                            <input type="text" name="title" required
-                                   value="<?php echo htmlspecialchars($edit_resource['title'] ?? ''); ?>"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
-                                   placeholder="e.g., Granulated Activated Carbon — Technical Data Sheet">
-                            <p class="text-xs text-gray-400 mt-1">The name shown on the download card.</p>
-                        </div>
+                <!-- Info banner -->
+                <div class="mb-6 p-3 rounded-lg bg-blue-50 border border-blue-200 flex items-start gap-2">
+                    <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
+                    <p class="text-sm text-blue-800">Resources appear as download cards on the public <a href="../resources.php#data-sheets" target="_blank" class="underline hover:text-blue-900">Resources page</a>, grouped by category. Each card shows a file icon, the title, file type badge, description, and a download button. The three built-in categories (Technical Data Sheets, Product Catalogs, Application Guides) have their own sections; custom categories appear under "Other Resources".</p>
+                </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Category <span class="text-red-500">*</span></label>
-                            <?php
-                            $current_category = $edit_resource['category'] ?? '';
-                            $is_known_category = isset($category_anchors[$current_category]);
-                            // For new records, default to the first known category
-                            if (!$edit_resource && $current_category === '' && !empty($category_anchors)) {
-                                $current_category = array_key_first($category_anchors);
-                                $is_known_category = true;
-                            }
-                            ?>
-                            <input type="hidden" name="category" id="category-value"
-                                   value="<?php echo htmlspecialchars($current_category); ?>">
-                            <select id="category-select"
-                                    onchange="onCategoryChange()"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
-                                <?php foreach ($category_anchors as $cat => $anchor): ?>
-                                    <option value="<?php echo htmlspecialchars($cat); ?>"
-                                        <?php echo ($is_known_category && $current_category === $cat) ? 'selected' : ''; ?>>
-                                        <?php echo htmlspecialchars($cat); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                                <option value="__other__"
-                                    <?php echo (!$is_known_category && $current_category !== '') ? 'selected' : ''; ?>>
-                                    Other…
-                                </option>
-                            </select>
-                            <input type="text" id="category-custom"
-                                   value="<?php echo !$is_known_category ? htmlspecialchars($current_category) : ''; ?>"
-                                   placeholder="Enter custom category name"
-                                   oninput="syncCategoryCustom(this.value)"
-                                   class="w-full mt-2 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary <?php echo ($is_known_category || $current_category === '') ? 'hidden' : ''; ?>">
-                            <p class="text-xs text-gray-400 mt-1">Selecting <strong>Technical Data Sheets</strong>, <strong>Product Catalogs</strong>, or <strong>Application Guides</strong> places the resource in that section on the public Resources page. Choose <strong>Other…</strong> to enter a custom category — those appear under the "Other Resources" section.</p>
-                            <script>
-                            function onCategoryChange() {
-                                const select = document.getElementById('category-select');
-                                const custom = document.getElementById('category-custom');
-                                const hidden = document.getElementById('category-value');
-                                if (select.value === '__other__') {
-                                    custom.classList.remove('hidden');
-                                    hidden.value = custom.value.trim();
-                                    custom.focus();
-                                } else {
-                                    custom.classList.add('hidden');
-                                    hidden.value = select.value;
-                                }
-                            }
-                            function syncCategoryCustom(value) {
-                                document.getElementById('category-value').value = value;
-                            }
-                            </script>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">File Type</label>
-                            <input type="text" name="file_type"
-                                   value="<?php echo htmlspecialchars($edit_resource['file_type'] ?? ''); ?>"
-                                   placeholder="e.g., PDF, DOCX"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
-                            <p class="text-xs text-gray-400 mt-1">Shown as a badge on the download card (e.g., PDF, DOCX).</p>
-                        </div>
-
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">File <span class="text-red-500">*</span></label>
-
-                            <!-- File source mode selector -->
-                            <div class="mb-3">
-                                <label class="block text-xs font-medium text-gray-500 mb-1">File source</label>
-                                <select id="file-source-mode" onchange="switchFileMode()" class="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm">
-                                    <option value="upload">Upload from file</option>
-                                    <option value="url">Enter file URL</option>
-                                </select>
-                            </div>
-
-                            <!-- File Picker (upload mode) -->
-                            <div id="file-picker-block" class="border-2 border-dashed border-gray-300 rounded-lg p-4 mb-3">
-                                <div class="text-center">
-                                    <input type="file" id="document-file-input" accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.pdf,.doc,.docx" class="hidden">
-                                    <label for="document-file-input" class="cursor-pointer inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
-                                        <i class="fas fa-upload mr-2"></i>Choose Document File
-                                    </label>
-                                    <p class="mt-2 text-xs text-gray-500">PDF, DOC, or DOCX (Max 10MB) — file uploads automatically when selected</p>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Left: form fields -->
+                    <div>
+                        <form method="POST" action="" onsubmit="return validateFileUpload()">
+                            <div class="space-y-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Title <span class="text-red-500">*</span></label>
+                                    <input type="text" name="title" id="title_input" required
+                                           value="<?php echo htmlspecialchars($edit_resource['title'] ?? ''); ?>"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                           placeholder="e.g., Granulated Activated Carbon — Technical Data Sheet"
+                                           oninput="updatePreview()">
+                                    <p class="text-xs text-gray-400 mt-1">The name shown on the download card.</p>
                                 </div>
-                                <div id="upload-progress" class="hidden mt-2">
-                                    <div class="bg-gray-200 rounded-full h-2">
-                                        <div id="upload-progress-bar" class="bg-primary h-2 rounded-full transition-all" style="width: 0%"></div>
-                                    </div>
-                                    <p id="upload-status" class="text-sm text-gray-600 mt-1"></p>
-                                </div>
-                            </div>
 
-                            <!-- URL Input (url mode — visible text field for manual entry) -->
-                            <div id="url-input-block" class="hidden mb-3">
-                                <input type="url" id="file-url-visible" value="<?php echo htmlspecialchars($edit_resource['file_url'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary" placeholder="https://example.com/datasheet.pdf" oninput="syncUrlInput(this.value)">
-                                <p class="mt-1 text-xs text-gray-500">Direct link to the downloadable file. Use <code>uploads/documents/…</code> for files stored on this site.</p>
-                            </div>
-
-                            <!-- Hidden field: the actual value submitted with the form -->
-                            <input type="hidden" name="file_url" id="file-url-input" value="<?php echo htmlspecialchars($edit_resource['file_url'] ?? ''); ?>">
-
-                            <script>
-                            let selectedDocFile = null;
-                            // Upload state: 'idle' | 'uploading' | 'success' | 'failed'
-                            let uploadState = 'idle';
-                            // Current file source mode: 'upload' | 'url'
-                            let fileMode = 'upload';
-
-                            function switchFileMode() {
-                                const mode = document.getElementById('file-source-mode').value;
-                                fileMode = mode;
-                                const fileBlock = document.getElementById('file-picker-block');
-                                const urlBlock = document.getElementById('url-input-block');
-                                if (mode === 'url') {
-                                    fileBlock.classList.add('hidden');
-                                    urlBlock.classList.remove('hidden');
-                                    // Carry the current value into the visible URL field
-                                    document.getElementById('file-url-visible').value = document.getElementById('file-url-input').value;
-                                } else {
-                                    urlBlock.classList.add('hidden');
-                                    fileBlock.classList.remove('hidden');
-                                    // Reset any failed upload state when switching back to upload mode
-                                    if (uploadState === 'failed') {
-                                        uploadState = 'idle';
-                                        document.getElementById('upload-progress').classList.add('hidden');
-                                    }
-                                }
-                            }
-
-                            // Keep the hidden submitted field in sync with the visible URL text box
-                            function syncUrlInput(value) {
-                                document.getElementById('file-url-input').value = value;
-                            }
-
-                            document.getElementById('document-file-input').addEventListener('change', function(e) {
-                                const file = e.target.files[0];
-                                if (file) {
-                                    selectedDocFile = file;
-                                    uploadState = 'idle';
-                                    // Auto-upload immediately after selection
-                                    uploadDocument();
-                                }
-                            });
-
-                            function uploadDocument() {
-                                if (!selectedDocFile) {
-                                    alert('Please select a document file first');
-                                    return;
-                                }
-
-                                const formData = new FormData();
-                                formData.append('document', selectedDocFile);
-
-                                const progressContainer = document.getElementById('upload-progress');
-                                const progressBar = document.getElementById('upload-progress-bar');
-                                const statusText = document.getElementById('upload-status');
-                                const fileLabel = document.querySelector('label[for="document-file-input"]');
-
-                                uploadState = 'uploading';
-                                progressContainer.classList.remove('hidden');
-                                statusText.textContent = 'Uploading...';
-                                statusText.classList.remove('text-green-600', 'text-red-600');
-                                progressBar.classList.remove('bg-green-500');
-                                progressBar.style.width = '0%';
-                                fileLabel.style.pointerEvents = 'none';
-                                fileLabel.style.opacity = '0.6';
-
-                                const xhr = new XMLHttpRequest();
-
-                                xhr.upload.addEventListener('progress', function(e) {
-                                    if (e.lengthComputable) {
-                                        const percentComplete = (e.loaded / e.total) * 100;
-                                        progressBar.style.width = percentComplete + '%';
-                                    }
-                                });
-
-                                xhr.addEventListener('load', function() {
-                                    if (xhr.status === 200) {
-                                        const response = JSON.parse(xhr.responseText);
-                                        if (response.success) {
-                                            document.getElementById('file-url-input').value = response.url;
-                                            statusText.textContent = 'Upload successful!';
-                                            statusText.classList.add('text-green-600');
-                                            progressBar.classList.add('bg-green-500');
-                                            uploadState = 'success';
-                                            setTimeout(() => {
-                                                progressContainer.classList.add('hidden');
-                                            }, 2000);
-                                        } else {
-                                            statusText.textContent = 'Upload failed: ' + response.error;
-                                            statusText.classList.add('text-red-600');
-                                            progressContainer.classList.remove('hidden');
-                                            uploadState = 'failed';
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Category <span class="text-red-500">*</span></label>
+                                        <?php
+                                        $current_category = $edit_resource['category'] ?? '';
+                                        $is_known_category = isset($category_anchors[$current_category]);
+                                        if (!$edit_resource && $current_category === '' && !empty($category_anchors)) {
+                                            $current_category = array_key_first($category_anchors);
+                                            $is_known_category = true;
                                         }
-                                    } else {
-                                        let errMsg = 'Server error';
-                                        try { errMsg = JSON.parse(xhr.responseText).error || errMsg; } catch (_) {}
-                                        statusText.textContent = 'Upload failed: ' + errMsg;
-                                        statusText.classList.add('text-red-600');
-                                        progressContainer.classList.remove('hidden');
-                                        uploadState = 'failed';
-                                    }
-                                    fileLabel.style.pointerEvents = '';
-                                    fileLabel.style.opacity = '';
-                                });
+                                        ?>
+                                        <input type="hidden" name="category" id="category-value" value="<?php echo htmlspecialchars($current_category); ?>">
+                                        <select id="category-select" onchange="onCategoryChange(); updatePreview()" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
+                                            <?php foreach ($category_anchors as $cat => $anchor): ?>
+                                                <option value="<?php echo htmlspecialchars($cat); ?>" <?php echo ($is_known_category && $current_category === $cat) ? 'selected' : ''; ?>><?php echo htmlspecialchars($cat); ?></option>
+                                            <?php endforeach; ?>
+                                            <option value="__other__" <?php echo (!$is_known_category && $current_category !== '') ? 'selected' : ''; ?>>Other…</option>
+                                        </select>
+                                        <input type="text" id="category-custom" value="<?php echo !$is_known_category ? htmlspecialchars($current_category) : ''; ?>" placeholder="Enter custom category name" oninput="syncCategoryCustom(this.value); updatePreview()" class="w-full mt-2 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary <?php echo ($is_known_category || $current_category === '') ? 'hidden' : ''; ?>">
+                                        <p class="text-xs text-gray-400 mt-1">Built-in categories get their own section. "Other…" lets you create a custom category.</p>
+                                    </div>
 
-                                xhr.addEventListener('error', function() {
-                                    statusText.textContent = 'Upload failed: Network error';
-                                    statusText.classList.add('text-red-600');
-                                    progressContainer.classList.remove('hidden');
-                                    uploadState = 'failed';
-                                    fileLabel.style.pointerEvents = '';
-                                    fileLabel.style.opacity = '';
-                                });
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">File Type</label>
+                                        <input type="text" name="file_type" id="file_type_input"
+                                               value="<?php echo htmlspecialchars($edit_resource['file_type'] ?? ''); ?>"
+                                               placeholder="e.g., PDF"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                               oninput="updatePreview()">
+                                        <p class="text-xs text-gray-400 mt-1">Shown as a badge on the card.</p>
+                                        <div class="mt-2 flex flex-wrap gap-1">
+                                            <button type="button" class="quick-pick" onclick="setFileType('PDF')">PDF</button>
+                                            <button type="button" class="quick-pick" onclick="setFileType('DOCX')">DOCX</button>
+                                            <button type="button" class="quick-pick" onclick="setFileType('DOC')">DOC</button>
+                                            <button type="button" class="quick-pick" onclick="setFileType('XLSX')">XLSX</button>
+                                            <button type="button" class="quick-pick" onclick="setFileType('PPT')">PPT</button>
+                                            <button type="button" class="quick-pick" onclick="setFileType('ZIP')">ZIP</button>
+                                        </div>
+                                    </div>
+                                </div>
 
-                                xhr.open('POST', 'api/upload_document.php');
-                                xhr.send(formData);
-                            }
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">File <span class="text-red-500">*</span></label>
 
-                            function validateFileUpload() {
-                                // Category validation (known category via select, or custom text)
-                                const catSelect = document.getElementById('category-select');
-                                const catCustom = document.getElementById('category-custom');
-                                const catHidden = document.getElementById('category-value');
-                                if (catSelect && catSelect.value === '__other__') {
-                                    if (!catCustom.value.trim()) {
-                                        alert('Please enter a custom category name, or pick a known category.');
-                                        catCustom.focus();
-                                        return false;
-                                    }
-                                    catHidden.value = catCustom.value.trim();
-                                } else if (catHidden && !catHidden.value.trim()) {
-                                    alert('Please choose a category.');
-                                    return false;
-                                }
+                                    <!-- File source mode selector -->
+                                    <div class="mb-3">
+                                        <label class="block text-xs font-medium text-gray-500 mb-1">File source</label>
+                                        <select id="file-source-mode" onchange="switchFileMode()" class="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm">
+                                            <option value="upload">Upload from file</option>
+                                            <option value="url">Enter file URL</option>
+                                        </select>
+                                    </div>
 
-                                const urlInput = document.getElementById('file-url-input');
+                                    <!-- File Picker (upload mode) -->
+                                    <div id="file-picker-block" class="border-2 border-dashed border-gray-300 rounded-lg p-4 mb-3">
+                                        <div class="text-center">
+                                            <input type="file" id="document-file-input" accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.pdf,.doc,.docx" class="hidden">
+                                            <label for="document-file-input" class="cursor-pointer inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
+                                                <i class="fas fa-upload mr-2"></i>Choose Document File
+                                            </label>
+                                            <p class="mt-2 text-xs text-gray-500">PDF, DOC, or DOCX (Max 10MB) — uploads automatically when selected</p>
+                                        </div>
+                                        <div id="upload-progress" class="hidden mt-2">
+                                            <div class="bg-gray-200 rounded-full h-2">
+                                                <div id="upload-progress-bar" class="bg-primary h-2 rounded-full transition-all" style="width: 0%"></div>
+                                            </div>
+                                            <p id="upload-status" class="text-sm text-gray-600 mt-1"></p>
+                                        </div>
+                                    </div>
 
-                                // In URL mode, just require a non-empty URL
-                                if (fileMode === 'url') {
-                                    if (!urlInput.value.trim()) {
-                                        alert('Please enter a file URL.');
-                                        return false;
-                                    }
-                                    return true;
-                                }
+                                    <!-- URL Input (url mode) -->
+                                    <div id="url-input-block" class="hidden mb-3">
+                                        <input type="url" id="file-url-visible" value="<?php echo htmlspecialchars($edit_resource['file_url'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary" placeholder="https://example.com/datasheet.pdf" oninput="syncUrlInput(this.value)">
+                                        <p class="mt-1 text-xs text-gray-500">Direct link to the downloadable file. Use <code>uploads/documents/…</code> for files stored on this site.</p>
+                                    </div>
 
-                                // Upload mode validations
-                                // Block save while an upload is still in progress
-                                if (uploadState === 'uploading') {
-                                    alert('Please wait for the file upload to finish before saving.');
-                                    return false;
-                                }
+                                    <!-- Hidden field: the actual value submitted with the form -->
+                                    <input type="hidden" name="file_url" id="file-url-input" value="<?php echo htmlspecialchars($edit_resource['file_url'] ?? ''); ?>">
+                                </div>
 
-                                // User picked a new file but the upload failed
-                                if (selectedDocFile && uploadState === 'failed') {
-                                    alert('The file upload failed. Please try again or pick a different file.');
-                                    return false;
-                                }
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Display Order</label>
+                                        <input type="number" name="display_order" min="0"
+                                               value="<?php echo htmlspecialchars($edit_resource['display_order'] ?? 0); ?>"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
+                                        <p class="text-xs text-gray-400 mt-1">Lower numbers appear first within the category. Use 10, 20, 30…</p>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="checkbox" name="is_active" value="1"
+                                                   <?php echo ($edit_resource && $edit_resource['is_active']) || !$edit_resource ? 'checked' : ''; ?>
+                                                   class="sr-only peer">
+                                            <span class="relative inline-flex items-center">
+                                                <span class="w-11 h-6 bg-gray-300 peer-checked:bg-primary rounded-full transition-colors"></span>
+                                                <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5"></span>
+                                            </span>
+                                            <span class="ml-3 text-sm text-gray-700">Active <span class="text-gray-400">(shown on the website)</span></span>
+                                        </label>
+                                    </div>
+                                </div>
 
-                                // No file at all (new record with no upload)
-                                if (!urlInput.value.trim()) {
-                                    alert('Please choose and upload a document file first.');
-                                    return false;
-                                }
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Description <span class="text-gray-400 font-normal">(optional)</span></label>
+                                    <textarea name="description" id="description_input" rows="4"
+                                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                              placeholder="e.g., Complete technical specifications including mesh size, iodine number, and ash content."
+                                              oninput="updatePreview()"><?php echo htmlspecialchars($edit_resource['description'] ?? ''); ?></textarea>
+                                    <p class="text-xs text-gray-400 mt-1">Short description shown under the title on the download card.</p>
+                                </div>
+                            </div>
 
-                                return true;
-                            }
-                            </script>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Display Order</label>
-                            <input type="number" name="display_order" min="0"
-                                   value="<?php echo htmlspecialchars($edit_resource['display_order'] ?? 0); ?>"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
-                            <p class="text-xs text-gray-400 mt-1">Lower numbers appear first within the category.</p>
-                        </div>
-
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Description <span class="text-gray-400 font-normal">(optional)</span></label>
-                            <textarea name="description" rows="4"
-                                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"><?php echo htmlspecialchars($edit_resource['description'] ?? ''); ?></textarea>
-                            <p class="text-xs text-gray-400 mt-1">Short description shown under the title on the download card.</p>
-                        </div>
-
-                        <div class="md:col-span-2">
-                            <label class="flex items-center cursor-pointer">
-                                <input type="checkbox" name="is_active" value="1"
-                                       <?php echo ($edit_resource && $edit_resource['is_active']) || !$edit_resource ? 'checked' : ''; ?>
-                                       class="sr-only peer">
-                                <span class="relative inline-flex items-center">
-                                    <span class="w-11 h-6 bg-gray-300 peer-checked:bg-primary rounded-full transition-colors"></span>
-                                    <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5"></span>
-                                </span>
-                                <span class="ml-3 text-sm text-gray-700">Active <span class="text-gray-400">(shown on the website)</span></span>
-                            </label>
-                        </div>
+                            <div class="mt-8 flex flex-col sm:flex-row gap-3">
+                                <button type="submit" class="bg-primary text-white px-6 py-2.5 rounded-lg hover:bg-secondary transition-colors inline-flex items-center justify-center">
+                                    <i class="fas fa-save mr-2"></i><?php echo $action === 'add' ? 'Add Resource' : 'Save Changes'; ?>
+                                </button>
+                                <a href="resources.php" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2.5 rounded-lg transition-colors inline-flex items-center justify-center">
+                                    <i class="fas fa-times mr-2"></i>Cancel
+                                </a>
+                            </div>
+                        </form>
                     </div>
 
-                    <div class="mt-8 flex flex-col sm:flex-row gap-3">
-                        <button type="submit" class="bg-primary text-white px-6 py-2.5 rounded-lg hover:bg-secondary transition-colors inline-flex items-center justify-center">
-                            <i class="fas fa-save mr-2"></i><?php echo $action === 'add' ? 'Add Resource' : 'Save Changes'; ?>
-                        </button>
-                        <a href="resources.php" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2.5 rounded-lg transition-colors inline-flex items-center justify-center">
-                            <i class="fas fa-times mr-2"></i>Cancel
-                        </a>
+                    <!-- Right: live preview -->
+                    <div>
+                        <p class="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                            <i class="fas fa-eye text-gray-400"></i> Live Preview
+                            <span class="text-xs text-gray-400 font-normal">(download card on the Resources page)</span>
+                        </p>
+                        <div class="resource-card bg-white border border-[#e6ece8] rounded-2xl p-8">
+                            <div class="text-center mb-6">
+                                <div class="download-icon w-16 h-16 rounded-2xl flex items-center justify-center mx-auto" style="background: linear-gradient(135deg, #3d7a66, #60796e);">
+                                    <i id="preview_icon" class="fas fa-file-pdf text-2xl text-white"></i>
+                                </div>
+                            </div>
+                            <h3 id="preview_title" class="text-xl font-semibold text-[#23332c] mb-3 text-center"><?php echo htmlspecialchars($edit_resource['title'] ?? 'Resource title'); ?></h3>
+                            <p id="preview_file_type" class="text-[#8a978f] mb-3 text-center text-sm <?php echo empty($edit_resource['file_type'] ?? '') ? 'hidden' : ''; ?>"><?php echo htmlspecialchars($edit_resource['file_type'] ?? ''); ?></p>
+                            <p id="preview_desc" class="text-[#7d8b84] mb-6 text-sm leading-relaxed <?php echo empty($edit_resource['description'] ?? '') ? 'hidden' : ''; ?>"><?php echo htmlspecialchars($edit_resource['description'] ?? ''); ?></p>
+                            <a id="preview_download" href="#" class="block w-full bg-[#23332c] hover:bg-[#3a4a41] text-white font-medium py-3 px-6 rounded-full transition-colors text-center inline-flex items-center justify-center gap-2">
+                                <i class="fas fa-download text-xs"></i><span id="preview_btn_text">Download</span>
+                            </a>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-2">The icon changes based on file type (PDF, DOC, etc.). The actual card on the public site may vary slightly.</p>
                     </div>
-                </form>
+                </div>
             </div>
+
+            <script>
+            // Quick-pick helpers
+            function setFileType(ft) {
+                document.getElementById('file_type_input').value = ft;
+                updatePreview();
+            }
+
+            // Live preview
+            function updatePreview() {
+                var title = document.getElementById('title_input').value || 'Resource title';
+                var desc = document.getElementById('description_input').value || '';
+                var fileType = document.getElementById('file_type_input').value || '';
+                var catSelect = document.getElementById('category-select');
+                var category = catSelect.value === '__other__' ? (document.getElementById('category-custom').value || 'Other') : catSelect.value;
+
+                document.getElementById('preview_title').textContent = title;
+
+                // File type
+                var ftEl = document.getElementById('preview_file_type');
+                if (fileType.trim()) {
+                    ftEl.textContent = fileType;
+                    ftEl.classList.remove('hidden');
+                } else {
+                    ftEl.classList.add('hidden');
+                }
+
+                // Description
+                var descEl = document.getElementById('preview_desc');
+                if (desc.trim()) {
+                    descEl.textContent = desc;
+                    descEl.classList.remove('hidden');
+                } else {
+                    descEl.classList.add('hidden');
+                }
+
+                // Icon based on file type
+                var icon = 'fas fa-file-alt';
+                var ftUpper = fileType.toUpperCase();
+                if (ftUpper === 'PDF') icon = 'fas fa-file-pdf';
+                else if (ftUpper === 'DOC' || ftUpper === 'DOCX') icon = 'fas fa-file-word';
+                else if (ftUpper === 'XLS' || ftUpper === 'XLSX') icon = 'fas fa-file-excel';
+                else if (ftUpper === 'PPT' || ftUpper === 'PPTX') icon = 'fas fa-file-powerpoint';
+                else if (ftUpper === 'ZIP') icon = 'fas fa-file-archive';
+                document.getElementById('preview_icon').className = icon + ' text-2xl text-white';
+
+                // Button text
+                document.getElementById('preview_btn_text').textContent = 'Download ' + (fileType || 'File');
+            }
+
+            // Category select logic
+            function onCategoryChange() {
+                const select = document.getElementById('category-select');
+                const custom = document.getElementById('category-custom');
+                const hidden = document.getElementById('category-value');
+                if (select.value === '__other__') {
+                    custom.classList.remove('hidden');
+                    hidden.value = custom.value.trim();
+                    custom.focus();
+                } else {
+                    custom.classList.add('hidden');
+                    hidden.value = select.value;
+                }
+            }
+            function syncCategoryCustom(value) {
+                document.getElementById('category-value').value = value;
+            }
+            </script>
+
+            <script>
+            // File upload logic
+            let selectedDocFile = null;
+            let uploadState = 'idle';
+            let fileMode = 'upload';
+
+            function switchFileMode() {
+                const mode = document.getElementById('file-source-mode').value;
+                fileMode = mode;
+                const fileBlock = document.getElementById('file-picker-block');
+                const urlBlock = document.getElementById('url-input-block');
+                if (mode === 'url') {
+                    fileBlock.classList.add('hidden');
+                    urlBlock.classList.remove('hidden');
+                    document.getElementById('file-url-visible').value = document.getElementById('file-url-input').value;
+                } else {
+                    urlBlock.classList.add('hidden');
+                    fileBlock.classList.remove('hidden');
+                    if (uploadState === 'failed') {
+                        uploadState = 'idle';
+                        document.getElementById('upload-progress').classList.add('hidden');
+                    }
+                }
+            }
+
+            function syncUrlInput(value) {
+                document.getElementById('file-url-input').value = value;
+            }
+
+            document.getElementById('document-file-input').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    selectedDocFile = file;
+                    uploadState = 'idle';
+                    uploadDocument();
+                }
+            });
+
+            function uploadDocument() {
+                if (!selectedDocFile) { alert('Please select a document file first'); return; }
+                const formData = new FormData();
+                formData.append('document', selectedDocFile);
+                const progressContainer = document.getElementById('upload-progress');
+                const progressBar = document.getElementById('upload-progress-bar');
+                const statusText = document.getElementById('upload-status');
+                const fileLabel = document.querySelector('label[for="document-file-input"]');
+                uploadState = 'uploading';
+                progressContainer.classList.remove('hidden');
+                statusText.textContent = 'Uploading...';
+                statusText.classList.remove('text-green-600', 'text-red-600');
+                progressBar.classList.remove('bg-green-500');
+                progressBar.style.width = '0%';
+                fileLabel.style.pointerEvents = 'none';
+                fileLabel.style.opacity = '0.6';
+                const xhr = new XMLHttpRequest();
+                xhr.upload.addEventListener('progress', function(e) {
+                    if (e.lengthComputable) { progressBar.style.width = ((e.loaded / e.total) * 100) + '%'; }
+                });
+                xhr.addEventListener('load', function() {
+                    if (xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.success) {
+                            document.getElementById('file-url-input').value = response.url;
+                            statusText.textContent = 'Upload successful!';
+                            statusText.classList.add('text-green-600');
+                            progressBar.classList.add('bg-green-500');
+                            uploadState = 'success';
+                            setTimeout(() => { progressContainer.classList.add('hidden'); }, 2000);
+                        } else {
+                            statusText.textContent = 'Upload failed: ' + response.error;
+                            statusText.classList.add('text-red-600');
+                            uploadState = 'failed';
+                        }
+                    } else {
+                        let errMsg = 'Server error';
+                        try { errMsg = JSON.parse(xhr.responseText).error || errMsg; } catch (_) {}
+                        statusText.textContent = 'Upload failed: ' + errMsg;
+                        statusText.classList.add('text-red-600');
+                        uploadState = 'failed';
+                    }
+                    fileLabel.style.pointerEvents = '';
+                    fileLabel.style.opacity = '';
+                });
+                xhr.addEventListener('error', function() {
+                    statusText.textContent = 'Upload failed: Network error';
+                    statusText.classList.add('text-red-600');
+                    uploadState = 'failed';
+                    fileLabel.style.pointerEvents = '';
+                    fileLabel.style.opacity = '';
+                });
+                xhr.open('POST', 'api/upload_document.php');
+                xhr.send(formData);
+            }
+
+            function validateFileUpload() {
+                const catSelect = document.getElementById('category-select');
+                const catCustom = document.getElementById('category-custom');
+                const catHidden = document.getElementById('category-value');
+                if (catSelect && catSelect.value === '__other__') {
+                    if (!catCustom.value.trim()) {
+                        alert('Please enter a custom category name, or pick a known category.');
+                        catCustom.focus();
+                        return false;
+                    }
+                    catHidden.value = catCustom.value.trim();
+                } else if (catHidden && !catHidden.value.trim()) {
+                    alert('Please choose a category.');
+                    return false;
+                }
+                const urlInput = document.getElementById('file-url-input');
+                if (fileMode === 'url') {
+                    if (!urlInput.value.trim()) { alert('Please enter a file URL.'); return false; }
+                    return true;
+                }
+                if (uploadState === 'uploading') { alert('Please wait for the file upload to finish before saving.'); return false; }
+                if (selectedDocFile && uploadState === 'failed') { alert('The file upload failed. Please try again or pick a different file.'); return false; }
+                if (!urlInput.value.trim()) { alert('Please choose and upload a document file first.'); return false; }
+                return true;
+            }
+            </script>
 
         <?php else: ?>
             <!-- List View -->

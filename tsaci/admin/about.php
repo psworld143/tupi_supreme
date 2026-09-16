@@ -12,6 +12,7 @@ $success = '';
 $status_param = $_GET['status'] ?? '';
 if ($status_param === 'saved')   $success = 'Content saved successfully!';
 if ($status_param === 'deleted') $success = 'Content deleted successfully!';
+if ($status_param === 'seeded')  $success = 'Default sections seeded successfully!';
 
 // Available about page sections (key => [label, anchor on public page])
 $about_sections = [
@@ -34,6 +35,28 @@ $about_sections = [
     'team_subtitle'           => ['Team Subtitle',            'team'],
 ];
 
+// Section type metadata: type => [fields to show, description, hint]
+// Types: 'title' (short text), 'subtitle' (short text), 'content' (rich HTML), 'icon' (FA class)
+$section_types = [
+    'page_header_title'       => ['type' => 'title',   'desc' => 'The large heading at the very top of the About page.'],
+    'page_header_subtitle'    => ['type' => 'subtitle', 'desc' => 'A short tagline below the page header title.'],
+    'company_story_title'     => ['type' => 'title',   'desc' => 'Heading for the "Our Story" section.'],
+    'company_story_content'   => ['type' => 'content', 'desc' => 'The main paragraph(s) telling the company\'s story. Supports rich formatting.'],
+    'company_story_icon'      => ['type' => 'icon',    'desc' => 'A Font Awesome icon class shown next to the story section.'],
+    'mission_title'           => ['type' => 'title',   'desc' => 'Heading for the Mission card.'],
+    'mission_content'         => ['type' => 'content', 'desc' => 'The mission statement text. Supports rich formatting.'],
+    'mission_icon'            => ['type' => 'icon',    'desc' => 'A Font Awesome icon class for the Mission card.'],
+    'vision_title'            => ['type' => 'title',   'desc' => 'Heading for the Vision card.'],
+    'vision_content'          => ['type' => 'content', 'desc' => 'The vision statement text. Supports rich formatting.'],
+    'vision_icon'             => ['type' => 'icon',    'desc' => 'A Font Awesome icon class for the Vision card.'],
+    'timeline_title'          => ['type' => 'title',   'desc' => 'Heading above the company timeline.'],
+    'timeline_subtitle'       => ['type' => 'subtitle', 'desc' => 'A short description below the timeline heading.'],
+    'values_title'            => ['type' => 'title',   'desc' => 'Heading for the Core Values section.'],
+    'values_subtitle'         => ['type' => 'subtitle', 'desc' => 'A short description below the values heading.'],
+    'team_title'              => ['type' => 'title',   'desc' => 'Heading for the Team section.'],
+    'team_subtitle'           => ['type' => 'subtitle', 'desc' => 'A short description below the team heading.'],
+];
+
 // Group sections by area for the list-view filter dropdown
 $section_groups = [
     'Page Header'    => ['page_header_title', 'page_header_subtitle'],
@@ -44,8 +67,12 @@ $section_groups = [
     'Team'           => ['team_title', 'team_subtitle'],
 ];
 
-// Handle form submissions (POST)
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['delete_id'] ?? '') === '') {
+// Handle form submissions (POST) — add/edit (excludes delete and seed actions)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['delete_id'] ?? '') === '' && ($_POST['seed_defaults'] ?? '') === '') {
+    // CSRF check
+    if (!verifyCsrfToken()) {
+        $error = 'Security token expired or invalid. Please reload the page and try again.';
+    } else {
     $section_name = sanitizeInput($_POST['section_name'] ?? '');
     $title = $_POST['title'] ?? '';
     $content = $_POST['content'] ?? '';
@@ -94,10 +121,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['delete_id'] ?? '') === '')
             }
         }
     }
+    }
 }
 
 // Handle delete (POST only — safer than GET)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['delete_id'] ?? '') !== '') {
+    // CSRF check
+    if (!verifyCsrfToken()) {
+        $error = 'Security token expired or invalid. Please reload the page and try again.';
+    } else {
     $del_id = intval($_POST['delete_id']);
     $stmt = $db->prepare("DELETE FROM about_content WHERE id = ?");
     $stmt->bind_param("i", $del_id);
@@ -106,6 +138,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['delete_id'] ?? '') !== '')
         redirect('about.php?status=deleted');
     } else {
         $error = 'Error deleting content: ' . $stmt->error;
+    }
+    }
+}
+
+// Handle seed default sections (POST only, CSRF-protected)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['seed_defaults'] ?? '') !== '') {
+    if (!verifyCsrfToken()) {
+        $error = 'Security token expired or invalid. Please reload the page and try again.';
+    } else {
+        // Insert every predefined section key that doesn't already exist (UNIQUE on section_name).
+        $existing = [];
+        $res = $db->query("SELECT section_name FROM about_content");
+        if ($res) {
+            while ($row = $res->fetch_assoc()) {
+                $existing[$row['section_name']] = true;
+            }
+        }
+        $inserted = 0;
+        $order = 1;
+        $stmt = $db->prepare("INSERT INTO about_content (section_name, title, content, image_url, display_order, is_active, updated_by) VALUES (?, NULL, NULL, NULL, ?, 1, ?)");
+        foreach ($about_sections as $key => $meta) {
+            if (!isset($existing[$key])) {
+                $stmt->bind_param("sii", $key, $order, $_SESSION['admin_id']);
+                $stmt->execute();
+                $inserted++;
+            }
+            $order++;
+        }
+        if ($inserted > 0) {
+            logActivity('create', 'about_content', null, "Seeded {$inserted} default about content sections");
+        }
+        redirect('about.php?status=seeded');
     }
 }
 
@@ -131,8 +195,16 @@ $total_pages = 1;
 $current_page_num = 1;
 $per_page = 10;
 
+// Section names already in use (used to disable duplicates in the Add dropdown)
+$used_section_names = [];
+$used_res = $db->query("SELECT section_name FROM about_content");
+if ($used_res) {
+    while ($row = $used_res->fetch_assoc()) {
+        $used_section_names[$row['section_name']] = true;
+    }
+}
+
 if ($action === 'list') {
-    $per_page = 10;
     $current_page_num = max(1, intval($_GET['page'] ?? 1));
     $filter_group = $_GET['filter_group'] ?? '';
     $search_q = trim($_GET['q'] ?? '');
@@ -192,14 +264,16 @@ if ($action === 'list') {
     }
 }
 
-// Quick stats for the list header
+// Quick stats for the list header (only needed in list view)
 $stats = ['total' => 0, 'active' => 0, 'inactive' => 0];
-$st = $db->query("SELECT COUNT(*) total, SUM(is_active) active FROM about_content");
-if ($st) {
-    $row = $st->fetch_assoc();
-    $stats['total'] = (int)$row['total'];
-    $stats['active'] = (int)$row['active'];
-    $stats['inactive'] = $stats['total'] - $stats['active'];
+if ($action === 'list') {
+    $st = $db->query("SELECT COUNT(*) total, SUM(is_active) active FROM about_content");
+    if ($st) {
+        $row = $st->fetch_assoc();
+        $stats['total'] = (int)$row['total'];
+        $stats['active'] = (int)$row['active'];
+        $stats['inactive'] = $stats['total'] - $stats['active'];
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -211,7 +285,13 @@ if ($st) {
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <?php if ($action === 'add' || $action === 'edit'): ?>
-    <script src="https://cdn.ckeditor.com/4.16.2/standard/ckeditor.js"></script>
+    <!-- Lightweight inline HTML editor (replaces EOL CKEditor 4) -->
+    <style>
+        .qe-toolbar button { padding: 4px 8px; border: 1px solid #d1d5db; background: #fff; border-radius: 4px; font-size: 13px; cursor: pointer; }
+        .qe-toolbar button:hover { background: #f3f4f6; }
+        .qe-editor { min-height: 160px; }
+        .qe-editor:focus { outline: none; border-color: #2c5530; }
+    </style>
     <?php endif; ?>
     <script>
         tailwind.config = {
@@ -288,22 +368,32 @@ if ($st) {
                 <p class="text-sm text-gray-500 mb-6">Fields marked <span class="text-red-500">*</span> are required.</p>
 
                 <form method="POST" action="">
+                    <?php echo csrfTokenField(); ?>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Section Name <span class="text-red-500">*</span></label>
-                            <select name="section_name" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
-                                <option value="">Select a section…</option>
-                                <?php foreach ($section_groups as $group => $keys): ?>
-                                    <optgroup label="<?php echo htmlspecialchars($group); ?>">
-                                        <?php foreach ($keys as $key): ?>
-                                            <option value="<?php echo $key; ?>" <?php echo ($edit_content && $edit_content['section_name'] === $key) ? 'selected' : ''; ?>>
-                                                <?php echo htmlspecialchars($about_sections[$key][0]); ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </optgroup>
-                                <?php endforeach; ?>
-                            </select>
-                            <p class="text-xs text-gray-400 mt-1">Choose which About page section this content belongs to.</p>
+                            <?php if ($action === 'edit' && $edit_content): ?>
+                                <!-- On edit, the section name is the row's identity — lock it to prevent UNIQUE collisions -->
+                                <input type="hidden" name="section_name" value="<?php echo htmlspecialchars($edit_content['section_name']); ?>">
+                                <input type="text" value="<?php echo htmlspecialchars($about_sections[$edit_content['section_name']][0] ?? $edit_content['section_name']); ?>"
+                                       disabled class="w-full px-3 py-2 border border-gray-200 rounded-md bg-gray-100 text-gray-600 cursor-not-allowed">
+                                <p class="text-xs text-gray-400 mt-1">Section name cannot be changed after creation.</p>
+                            <?php else: ?>
+                                <select name="section_name" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
+                                    <option value="">Select a section…</option>
+                                    <?php foreach ($section_groups as $group => $keys): ?>
+                                        <optgroup label="<?php echo htmlspecialchars($group); ?>">
+                                            <?php foreach ($keys as $key): ?>
+                                                <?php $is_used = isset($used_section_names[$key]); ?>
+                                                <option value="<?php echo $key; ?>" <?php echo $is_used ? 'disabled' : ''; ?>>
+                                                    <?php echo htmlspecialchars($about_sections[$key][0]); ?><?php echo $is_used ? ' (already exists)' : ''; ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </optgroup>
+                                    <?php endforeach; ?>
+                                </select>
+                                <p class="text-xs text-gray-400 mt-1">Choose which About page section this content belongs to. Greyed-out options already exist — edit them instead.</p>
+                            <?php endif; ?>
                         </div>
 
                         <div>
@@ -315,23 +405,76 @@ if ($st) {
                         </div>
                     </div>
 
-                    <div class="mt-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Title</label>
+                    <!-- Section description banner (context-aware, updated by JS) -->
+                    <div id="section_desc" class="mt-4 mb-2 p-3 rounded-lg bg-blue-50 border border-blue-200 hidden">
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
+                            <div>
+                                <p id="section_desc_text" class="text-sm text-blue-800"></p>
+                                <p id="section_desc_hint" class="text-xs text-blue-600 mt-1"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Title field (shown for title-type sections) -->
+                    <div class="mt-6" id="title_field_wrap">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Title <span class="text-gray-400 font-normal">(the heading text)</span></label>
                         <input type="text" name="title"
                                value="<?php echo htmlspecialchars($edit_content['title'] ?? ''); ?>"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
-                               placeholder="Section heading (leave blank if not needed)">
-                        <p class="text-xs text-gray-400 mt-1">The heading shown for this section on the About page.</p>
+                               placeholder="Enter the heading text…">
+                        <p class="text-xs text-gray-400 mt-1">This text appears as the heading on the public About page.</p>
                     </div>
 
-                    <div class="mt-6">
+                    <!-- Content field: rich HTML editor (for content-type sections) -->
+                    <div class="mt-6" id="content_rich_wrap">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Content</label>
+                        <div id="html_toolbar" class="qe-toolbar flex flex-wrap gap-1 mb-2 p-2 bg-gray-50 rounded-t-md border border-b-0 border-gray-300">
+                            <button type="button" data-cmd="bold" title="Bold"><b>B</b></button>
+                            <button type="button" data-cmd="italic" title="Italic"><i>I</i></button>
+                            <button type="button" data-cmd="underline" title="Underline"><u>U</u></button>
+                            <button type="button" data-cmd="insertUnorderedList" title="Bullet list"><i class="fas fa-list-ul"></i></button>
+                            <button type="button" data-cmd="insertOrderedList" title="Numbered list"><i class="fas fa-list-ol"></i></button>
+                            <button type="button" data-cmd="formatBlock" data-val="h3" title="Heading">H3</button>
+                            <button type="button" data-cmd="formatBlock" data-val="p" title="Paragraph">P</button>
+                            <button type="button" data-cmd="createLink" title="Link"><i class="fas fa-link"></i></button>
+                            <button type="button" data-cmd="removeFormat" title="Clear formatting"><i class="fas fa-eraser"></i></button>
+                        </div>
+                        <div id="content_html" contenteditable="false"
+                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary qe-editor bg-white prose max-w-none"></div>
                         <textarea name="content" id="content" rows="10"
                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"><?php echo htmlspecialchars_decode($edit_content['content'] ?? '', ENT_QUOTES); ?></textarea>
-                        <p class="text-xs text-gray-400 mt-1">For icon fields, use Font Awesome class names (e.g., <code class="bg-gray-100 px-1 rounded">fas fa-industry</code>).</p>
+                        <p class="text-xs text-gray-400 mt-1">Write the paragraph(s) for this section. Use the toolbar for formatting.</p>
                     </div>
 
-                    <div class="mt-6">
+                    <!-- Content field: plain text (for subtitle-type sections) -->
+                    <div class="mt-6 hidden" id="content_plain_wrap">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Subtitle Text</label>
+                        <textarea name="content_plain" id="content_plain" rows="3"
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                  placeholder="Enter the subtitle text…"
+                                  oninput="document.getElementById('content').value = this.value;"><?php echo htmlspecialchars_decode($edit_content['content'] ?? '', ENT_QUOTES); ?></textarea>
+                        <p class="text-xs text-gray-400 mt-1">A short line of text shown below the section heading.</p>
+                    </div>
+
+                    <!-- Content field: icon picker (for icon-type sections) -->
+                    <div class="mt-6 hidden" id="content_icon_wrap">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Font Awesome Icon Class</label>
+                        <div class="flex items-center gap-3">
+                            <input type="text" id="content_icon" 
+                                   value="<?php echo htmlspecialchars($edit_content['content'] ?? ''); ?>"
+                                   class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary font-mono"
+                                   placeholder="fas fa-industry"
+                                   oninput="updateIconPreview(this.value); document.getElementById('content').value = this.value;">
+                            <div id="icon_preview" class="flex items-center justify-center w-14 h-14 border border-gray-300 rounded-lg bg-gray-50 text-2xl text-primary">
+                                <i class="fas fa-industry"></i>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-2">Enter a Font Awesome icon class. <a href="https://fontawesome.com/v6/search?o=r&m=free" target="_blank" class="text-primary hover:underline">Browse icons</a>. Common choices: <code class="bg-gray-100 px-1 rounded cursor-pointer" onclick="document.getElementById('content_icon').value='fas fa-industry';updateIconPreview('fas fa-industry')">fas fa-industry</code>, <code class="bg-gray-100 px-1 rounded cursor-pointer" onclick="document.getElementById('content_icon').value='fas fa-bullseye';updateIconPreview('fas fa-bullseye')">fas fa-bullseye</code>, <code class="bg-gray-100 px-1 rounded cursor-pointer" onclick="document.getElementById('content_icon').value='fas fa-eye';updateIconPreview('fas fa-eye')">fas fa-eye</code>, <code class="bg-gray-100 px-1 rounded cursor-pointer" onclick="document.getElementById('content_icon').value='fas fa-leaf';updateIconPreview('fas fa-leaf')">fas fa-leaf</code>, <code class="bg-gray-100 px-1 rounded cursor-pointer" onclick="document.getElementById('content_icon').value='fas fa-globe';updateIconPreview('fas fa-globe')">fas fa-globe</code>.</p>
+                    </div>
+
+                    <!-- Image field (only shown for content-type sections that may use images) -->
+                    <div class="mt-6 hidden" id="image_field_wrap">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Image <span class="text-gray-400 font-normal">(optional)</span></label>
 
                         <!-- Image source mode selector -->
@@ -376,156 +519,6 @@ if ($st) {
 
                         <!-- Hidden field: the actual value submitted with the form -->
                         <input type="hidden" name="image_url" id="image-url-input" value="<?php echo htmlspecialchars($edit_content['image_url'] ?? ''); ?>">
-
-                        <script>
-                        let selectedFile = null;
-                        // Upload state: 'idle' | 'uploading' | 'success' | 'failed'
-                        let uploadState = 'idle';
-                        // Current image source mode: 'upload' | 'url'
-                        let imageMode = 'upload';
-
-                        function switchImageMode() {
-                            const mode = document.getElementById('image-source-mode').value;
-                            imageMode = mode;
-                            const fileBlock = document.getElementById('file-picker-block');
-                            const urlBlock = document.getElementById('url-input-block');
-                            if (mode === 'url') {
-                                fileBlock.classList.add('hidden');
-                                urlBlock.classList.remove('hidden');
-                                // Carry the current value into the visible URL field
-                                document.getElementById('image-url-visible').value = document.getElementById('image-url-input').value;
-                            } else {
-                                urlBlock.classList.add('hidden');
-                                fileBlock.classList.remove('hidden');
-                                // Reset any failed upload state when switching back to upload mode
-                                if (uploadState === 'failed') {
-                                    uploadState = 'idle';
-                                    document.getElementById('upload-progress').classList.add('hidden');
-                                }
-                            }
-                        }
-
-                        // Keep the hidden submitted field in sync with the visible URL text box
-                        function syncUrlInput(value) {
-                            document.getElementById('image-url-input').value = value;
-                            // Update the preview live
-                            const preview = document.getElementById('image-preview');
-                            if (value.trim()) {
-                                preview.src = value;
-                                preview.onerror = function() { this.style.display = 'none'; };
-                                preview.onload = function() {
-                                    this.style.display = 'block';
-                                    document.getElementById('image-preview-container').classList.remove('hidden');
-                                };
-                            } else {
-                                document.getElementById('image-preview-container').classList.add('hidden');
-                            }
-                        }
-
-                        document.getElementById('image-file-input').addEventListener('change', function(e) {
-                            const file = e.target.files[0];
-                            if (file) {
-                                selectedFile = file;
-                                uploadState = 'idle';
-
-                                const reader = new FileReader();
-                                reader.onload = function(e) {
-                                    const preview = document.getElementById('image-preview');
-                                    preview.src = e.target.result;
-                                    document.getElementById('image-preview-container').classList.remove('hidden');
-                                };
-                                reader.readAsDataURL(file);
-
-                                // Auto-upload immediately after selection
-                                uploadImage();
-                            }
-                        });
-
-                        function uploadImage() {
-                            if (!selectedFile) {
-                                alert('Please select an image file first');
-                                return;
-                            }
-
-                            const formData = new FormData();
-                            formData.append('image', selectedFile);
-
-                            const progressContainer = document.getElementById('upload-progress');
-                            const progressBar = document.getElementById('upload-progress-bar');
-                            const statusText = document.getElementById('upload-status');
-                            const fileLabel = document.querySelector('label[for="image-file-input"]');
-
-                            uploadState = 'uploading';
-                            progressContainer.classList.remove('hidden');
-                            statusText.textContent = 'Uploading...';
-                            statusText.classList.remove('text-green-600', 'text-red-600');
-                            progressBar.classList.remove('bg-green-500');
-                            progressBar.style.width = '0%';
-                            fileLabel.style.pointerEvents = 'none';
-                            fileLabel.style.opacity = '0.6';
-
-                            const xhr = new XMLHttpRequest();
-
-                            xhr.upload.addEventListener('progress', function(e) {
-                                if (e.lengthComputable) {
-                                    const percentComplete = (e.loaded / e.total) * 100;
-                                    progressBar.style.width = percentComplete + '%';
-                                }
-                            });
-
-                            xhr.addEventListener('load', function() {
-                                if (xhr.status === 200) {
-                                    const response = JSON.parse(xhr.responseText);
-                                    if (response.success) {
-                                        document.getElementById('image-url-input').value = response.url;
-                                        statusText.textContent = 'Upload successful!';
-                                        statusText.classList.add('text-green-600');
-                                        progressBar.classList.add('bg-green-500');
-                                        uploadState = 'success';
-                                        setTimeout(() => {
-                                            progressContainer.classList.add('hidden');
-                                        }, 2000);
-                                    } else {
-                                        statusText.textContent = 'Upload failed: ' + response.error;
-                                        statusText.classList.add('text-red-600');
-                                        progressContainer.classList.remove('hidden');
-                                        uploadState = 'failed';
-                                    }
-                                } else {
-                                    let errMsg = 'Server error';
-                                    try { errMsg = JSON.parse(xhr.responseText).error || errMsg; } catch (_) {}
-                                    statusText.textContent = 'Upload failed: ' + errMsg;
-                                    statusText.classList.add('text-red-600');
-                                    progressContainer.classList.remove('hidden');
-                                    uploadState = 'failed';
-                                }
-                                fileLabel.style.pointerEvents = '';
-                                fileLabel.style.opacity = '';
-                            });
-
-                            xhr.addEventListener('error', function() {
-                                statusText.textContent = 'Upload failed: Network error';
-                                statusText.classList.add('text-red-600');
-                                progressContainer.classList.remove('hidden');
-                                uploadState = 'failed';
-                                fileLabel.style.pointerEvents = '';
-                                fileLabel.style.opacity = '';
-                            });
-
-                            xhr.open('POST', 'api/upload_image.php');
-                            xhr.send(formData);
-                        }
-
-                        function clearImagePreview() {
-                            document.getElementById('image-preview-container').classList.add('hidden');
-                            document.getElementById('image-url-input').value = '';
-                            document.getElementById('image-url-visible').value = '';
-                            document.getElementById('image-file-input').value = '';
-                            selectedFile = null;
-                            uploadState = 'idle';
-                            document.getElementById('upload-progress').classList.add('hidden');
-                        }
-                        </script>
                     </div>
 
                     <div class="mt-6">
@@ -553,19 +546,270 @@ if ($st) {
             </div>
 
             <script>
+            // Section type metadata for context-aware form
+            var sectionTypes = <?php echo json_encode($section_types); ?>;
+            var editSection = <?php echo json_encode($edit_content['section_name'] ?? ''); ?>;
+
+            // Show/hide fields based on section type
+            function updateFormForSection(sectionKey) {
+                var meta = sectionTypes[sectionKey];
+                var descWrap = document.getElementById('section_desc');
+                var descText = document.getElementById('section_desc_text');
+                var descHint = document.getElementById('section_desc_hint');
+                var titleWrap = document.getElementById('title_field_wrap');
+                var richWrap = document.getElementById('content_rich_wrap');
+                var plainWrap = document.getElementById('content_plain_wrap');
+                var iconWrap = document.getElementById('content_icon_wrap');
+                var imageWrap = document.getElementById('image_field_wrap');
+
+                if (!meta) {
+                    descWrap.classList.add('hidden');
+                    titleWrap.classList.remove('hidden');
+                    richWrap.classList.remove('hidden');
+                    plainWrap.classList.add('hidden');
+                    iconWrap.classList.add('hidden');
+                    imageWrap.classList.remove('hidden');
+                    return;
+                }
+
+                // Show description banner
+                descWrap.classList.remove('hidden');
+                descText.textContent = meta.desc;
+
+                var type = meta.type;
+                if (type === 'title') {
+                    descHint.textContent = 'Use the Title field below. Content and Image are not needed.';
+                    titleWrap.classList.remove('hidden');
+                    richWrap.classList.add('hidden');
+                    plainWrap.classList.add('hidden');
+                    iconWrap.classList.add('hidden');
+                    imageWrap.classList.add('hidden');
+                } else if (type === 'subtitle') {
+                    descHint.textContent = 'Use the Subtitle Text field below. Title and Image are not needed.';
+                    titleWrap.classList.add('hidden');
+                    richWrap.classList.add('hidden');
+                    plainWrap.classList.remove('hidden');
+                    iconWrap.classList.add('hidden');
+                    imageWrap.classList.add('hidden');
+                    // Sync plain -> hidden content textarea
+                    var plain = document.getElementById('content_plain');
+                    document.getElementById('content').value = plain.value;
+                } else if (type === 'content') {
+                    descHint.textContent = 'Use the rich text editor below. Supports formatting (bold, lists, links, etc.).';
+                    titleWrap.classList.add('hidden');
+                    richWrap.classList.remove('hidden');
+                    plainWrap.classList.add('hidden');
+                    iconWrap.classList.add('hidden');
+                    imageWrap.classList.remove('hidden');
+                } else if (type === 'icon') {
+                    descHint.textContent = 'Enter a Font Awesome icon class. A live preview is shown next to the input.';
+                    titleWrap.classList.add('hidden');
+                    richWrap.classList.add('hidden');
+                    plainWrap.classList.add('hidden');
+                    iconWrap.classList.remove('hidden');
+                    imageWrap.classList.add('hidden');
+                    // Sync icon -> hidden content textarea
+                    var iconInput = document.getElementById('content_icon');
+                    document.getElementById('content').value = iconInput.value;
+                    updateIconPreview(iconInput.value);
+                }
+            }
+
+            // Live icon preview
+            function updateIconPreview(iconClass) {
+                var preview = document.getElementById('icon_preview');
+                preview.innerHTML = '<i class="' + iconClass + '"></i>';
+            }
+
+            // Lightweight HTML editor
             (function () {
-                // CKEditor for the content textarea
-                if (typeof CKEDITOR !== 'undefined') {
-                    CKEDITOR.replace('content');
-                } else {
-                    var check = setInterval(function () {
-                        if (typeof CKEDITOR !== 'undefined') {
-                            clearInterval(check);
-                            CKEDITOR.replace('content');
+                var textarea = document.getElementById('content');
+                var htmlBox = document.getElementById('content_html');
+                var toolbar = document.getElementById('html_toolbar');
+
+                function applyEditor() {
+                    var richWrap = document.getElementById('content_rich_wrap');
+                    if (richWrap.classList.contains('hidden')) {
+                        textarea.classList.remove('hidden');
+                        htmlBox.classList.add('hidden');
+                        toolbar.classList.add('hidden');
+                        htmlBox.setAttribute('contenteditable', 'false');
+                        return;
+                    }
+                    textarea.classList.add('hidden');
+                    htmlBox.classList.remove('hidden');
+                    toolbar.classList.remove('hidden');
+                    htmlBox.setAttribute('contenteditable', 'true');
+                    htmlBox.innerHTML = textarea.value;
+                }
+
+                if (toolbar) {
+                    toolbar.addEventListener('mousedown', function (e) {
+                        var btn = e.target.closest('button[data-cmd]');
+                        if (!btn) return;
+                        e.preventDefault();
+                        htmlBox.focus();
+                        var cmd = btn.getAttribute('data-cmd');
+                        var val = btn.getAttribute('data-val');
+                        if (cmd === 'createLink') {
+                            var url = prompt('Link URL:', 'https://');
+                            if (url) document.execCommand('createLink', false, url);
+                        } else if (val) {
+                            document.execCommand(cmd, false, val);
+                        } else {
+                            document.execCommand(cmd, false, null);
                         }
-                    }, 100);
+                    });
+                }
+
+                var form = document.querySelector('form[method="POST"]');
+                if (form) {
+                    form.addEventListener('submit', function () {
+                        if (!document.getElementById('content_rich_wrap').classList.contains('hidden')) {
+                            textarea.value = htmlBox.innerHTML;
+                        }
+                    });
+                }
+
+                // Initialize editor after section type is applied
+                setTimeout(applyEditor, 50);
+            })();
+
+            // Initialize form for the current section (edit mode or add mode)
+            (function () {
+                var sectionSelect = document.querySelector('select[name="section_name"]');
+                if (sectionSelect) {
+                    sectionSelect.addEventListener('change', function () { updateFormForSection(sectionSelect.value); });
+                }
+                // On edit, the section is locked — use the hidden value
+                var initialSection = editSection || (sectionSelect ? sectionSelect.value : '');
+                if (initialSection) {
+                    updateFormForSection(initialSection);
                 }
             })();
+            </script>
+
+            <script>
+            // Image upload logic (unchanged — only visible for content-type sections)
+            let selectedFile = null;
+            let uploadState = 'idle';
+            let imageMode = 'upload';
+
+            function switchImageMode() {
+                const mode = document.getElementById('image-source-mode').value;
+                imageMode = mode;
+                const fileBlock = document.getElementById('file-picker-block');
+                const urlBlock = document.getElementById('url-input-block');
+                if (mode === 'url') {
+                    fileBlock.classList.add('hidden');
+                    urlBlock.classList.remove('hidden');
+                    document.getElementById('image-url-visible').value = document.getElementById('image-url-input').value;
+                } else {
+                    urlBlock.classList.add('hidden');
+                    fileBlock.classList.remove('hidden');
+                    if (uploadState === 'failed') {
+                        uploadState = 'idle';
+                        document.getElementById('upload-progress').classList.add('hidden');
+                    }
+                }
+            }
+
+            function syncUrlInput(value) {
+                document.getElementById('image-url-input').value = value;
+                const preview = document.getElementById('image-preview');
+                if (value.trim()) {
+                    preview.src = value;
+                    preview.onerror = function() { this.style.display = 'none'; };
+                    preview.onload = function() {
+                        this.style.display = 'block';
+                        document.getElementById('image-preview-container').classList.remove('hidden');
+                    };
+                } else {
+                    document.getElementById('image-preview-container').classList.add('hidden');
+                }
+            }
+
+            document.getElementById('image-file-input').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    selectedFile = file;
+                    uploadState = 'idle';
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const preview = document.getElementById('image-preview');
+                        preview.src = e.target.result;
+                        document.getElementById('image-preview-container').classList.remove('hidden');
+                    };
+                    reader.readAsDataURL(file);
+                    uploadImage();
+                }
+            });
+
+            function uploadImage() {
+                if (!selectedFile) { alert('Please select an image file first'); return; }
+                const formData = new FormData();
+                formData.append('image', selectedFile);
+                const progressContainer = document.getElementById('upload-progress');
+                const progressBar = document.getElementById('upload-progress-bar');
+                const statusText = document.getElementById('upload-status');
+                const fileLabel = document.querySelector('label[for="image-file-input"]');
+                uploadState = 'uploading';
+                progressContainer.classList.remove('hidden');
+                statusText.textContent = 'Uploading...';
+                statusText.classList.remove('text-green-600', 'text-red-600');
+                progressBar.classList.remove('bg-green-500');
+                progressBar.style.width = '0%';
+                fileLabel.style.pointerEvents = 'none';
+                fileLabel.style.opacity = '0.6';
+                const xhr = new XMLHttpRequest();
+                xhr.upload.addEventListener('progress', function(e) {
+                    if (e.lengthComputable) { progressBar.style.width = ((e.loaded / e.total) * 100) + '%'; }
+                });
+                xhr.addEventListener('load', function() {
+                    if (xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.success) {
+                            document.getElementById('image-url-input').value = response.url;
+                            statusText.textContent = 'Upload successful!';
+                            statusText.classList.add('text-green-600');
+                            progressBar.classList.add('bg-green-500');
+                            uploadState = 'success';
+                            setTimeout(() => { progressContainer.classList.add('hidden'); }, 2000);
+                        } else {
+                            statusText.textContent = 'Upload failed: ' + response.error;
+                            statusText.classList.add('text-red-600');
+                            uploadState = 'failed';
+                        }
+                    } else {
+                        let errMsg = 'Server error';
+                        try { errMsg = JSON.parse(xhr.responseText).error || errMsg; } catch (_) {}
+                        statusText.textContent = 'Upload failed: ' + errMsg;
+                        statusText.classList.add('text-red-600');
+                        uploadState = 'failed';
+                    }
+                    fileLabel.style.pointerEvents = '';
+                    fileLabel.style.opacity = '';
+                });
+                xhr.addEventListener('error', function() {
+                    statusText.textContent = 'Upload failed: Network error';
+                    statusText.classList.add('text-red-600');
+                    uploadState = 'failed';
+                    fileLabel.style.pointerEvents = '';
+                    fileLabel.style.opacity = '';
+                });
+                xhr.open('POST', 'api/upload_image.php');
+                xhr.send(formData);
+            }
+
+            function clearImagePreview() {
+                document.getElementById('image-preview-container').classList.add('hidden');
+                document.getElementById('image-url-input').value = '';
+                document.getElementById('image-url-visible').value = '';
+                document.getElementById('image-file-input').value = '';
+                selectedFile = null;
+                uploadState = 'idle';
+                document.getElementById('upload-progress').classList.add('hidden');
+            }
             </script>
 
         <?php else: ?>
@@ -577,6 +821,15 @@ if ($st) {
                         <span class="px-3 py-1 text-xs rounded-full bg-gray-200 text-gray-700"><i class="fas fa-layer-group mr-1"></i><?php echo $stats['total']; ?> total</span>
                         <span class="px-3 py-1 text-xs rounded-full bg-green-100 text-green-800"><i class="fas fa-check mr-1"></i><?php echo $stats['active']; ?> active</span>
                         <span class="px-3 py-1 text-xs rounded-full bg-red-100 text-red-800"><i class="fas fa-pause mr-1"></i><?php echo $stats['inactive']; ?> inactive</span>
+                        <?php if ($stats['total'] < count($about_sections)): ?>
+                        <form method="POST" action="about.php" class="inline" onsubmit="return confirm('Create any missing default About page sections as empty rows? Existing sections are left untouched.');">
+                            <?php echo csrfTokenField(); ?>
+                            <input type="hidden" name="seed_defaults" value="1">
+                            <button type="submit" class="px-3 py-1 text-xs rounded-full bg-secondary text-white hover:bg-primary transition-colors" title="Add any missing default sections as empty rows">
+                                <i class="fas fa-magic mr-1"></i>Seed missing sections
+                            </button>
+                        </form>
+                        <?php endif; ?>
                     </div>
                     <form method="GET" action="about.php" class="flex flex-col sm:flex-row gap-2">
                         <div class="flex-1 flex flex-col sm:flex-row gap-2">
@@ -624,7 +877,15 @@ if ($st) {
                                 <td colspan="6" class="px-6 py-12 text-center">
                                     <i class="fas fa-inbox text-4xl text-gray-300 mb-3"></i>
                                     <p class="text-gray-500 mb-2">No content found.</p>
-                                    <a href="?action=add" class="text-primary hover:underline text-sm"><i class="fas fa-plus mr-1"></i>Add new content</a>
+                                    <div class="flex items-center justify-center gap-3">
+                                        <a href="?action=add" class="text-primary hover:underline text-sm"><i class="fas fa-plus mr-1"></i>Add new content</a>
+                                        <span class="text-gray-300">|</span>
+                                        <form method="POST" action="about.php" class="inline" onsubmit="return confirm('Create all default About page sections as empty rows? You can edit them afterwards.');">
+                                            <?php echo csrfTokenField(); ?>
+                                            <input type="hidden" name="seed_defaults" value="1">
+                                            <button type="submit" class="text-secondary hover:underline text-sm"><i class="fas fa-magic mr-1"></i>Seed all default sections</button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         <?php else: ?>
@@ -636,7 +897,7 @@ if ($st) {
                             ?>
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($section_label); ?></span>
+                                        <a href="?action=edit&id=<?php echo $content['id']; ?>" class="text-sm font-medium text-gray-900 hover:text-primary hover:underline"><?php echo htmlspecialchars($section_label); ?></a>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="text-sm text-gray-900"><?php echo htmlspecialchars($content['title'] ?: '—'); ?></span>
@@ -662,6 +923,7 @@ if ($st) {
                                             <i class="fas fa-eye"></i>
                                         </a>
                                         <form method="POST" action="about.php" class="inline" onsubmit="return confirm('Delete this content? This cannot be undone.');">
+                                            <?php echo csrfTokenField(); ?>
                                             <input type="hidden" name="delete_id" value="<?php echo $content['id']; ?>">
                                             <button type="submit" class="text-red-600 hover:text-red-800" title="Delete">
                                                 <i class="fas fa-trash"></i>

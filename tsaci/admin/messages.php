@@ -229,69 +229,93 @@ if ($st) {
             <!-- Message Detail View -->
             <div class="bg-white rounded-lg shadow-md p-6 mb-6">
                 <div class="flex justify-between items-start mb-6">
-                    <h2 class="text-2xl font-bold flex items-center gap-2">
-                        <i class="fas fa-envelope-open text-primary"></i> Message Details
-                    </h2>
-                    <a href="messages.php" class="text-gray-400 hover:text-gray-600" title="Close">
-                        <i class="fas fa-times text-2xl"></i>
+                    <div>
+                        <h2 class="text-2xl font-bold flex items-center gap-2">
+                            <i class="fas fa-envelope-open text-primary"></i> Message Details
+                        </h2>
+                        <p class="text-sm text-gray-500 mt-1">Received <?php echo formatDate($message['created_at'], 'F d, Y \a\t g:i A'); ?></p>
+                    </div>
+                    <a href="messages.php" class="text-gray-400 hover:text-gray-600" title="Back to list">
+                        <i class="fas fa-arrow-left mr-1"></i>Back to List
                     </a>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    <div>
-                        <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Name</label>
-                        <p class="text-lg text-gray-900"><?php echo htmlspecialchars($message['name']); ?></p>
-                    </div>
-                    <div>
-                        <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Email</label>
-                        <p class="text-lg text-gray-900">
-                            <a href="mailto:<?php echo htmlspecialchars($message['email']); ?>" class="text-primary hover:underline">
-                                <i class="fas fa-reply mr-1"></i><?php echo htmlspecialchars($message['email']); ?>
-                            </a>
-                        </p>
-                    </div>
-                    <?php if ($message['phone']): ?>
-                    <div>
-                        <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</label>
-                        <p class="text-lg text-gray-900">
-                            <a href="tel:<?php echo htmlspecialchars($message['phone']); ?>" class="text-primary hover:underline">
-                                <i class="fas fa-phone mr-1"></i><?php echo htmlspecialchars($message['phone']); ?>
-                            </a>
-                        </p>
-                    </div>
+                <!-- Status badges -->
+                <div class="flex flex-wrap gap-2 mb-6">
+                    <?php if (!$message['is_read']): ?>
+                        <span class="px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-800"><i class="fas fa-circle text-blue-500 text-[6px] mr-1"></i>Unread</span>
+                    <?php else: ?>
+                        <span class="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-600"><i class="fas fa-check mr-1"></i>Read</span>
                     <?php endif; ?>
-                    <?php if ($message['company']): ?>
-                    <div>
-                        <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Company</label>
-                        <p class="text-lg text-gray-900"><?php echo htmlspecialchars($message['company']); ?></p>
-                    </div>
+                    <?php if ($message['is_archived']): ?>
+                        <span class="px-3 py-1 text-xs rounded-full bg-gray-200 text-gray-700"><i class="fas fa-box mr-1"></i>Archived</span>
                     <?php endif; ?>
-                    <div class="md:col-span-2">
-                        <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</label>
-                        <p class="text-lg text-gray-900"><?php echo htmlspecialchars($message['subject']); ?></p>
+                </div>
+
+                <!-- Subject -->
+                <div class="mb-6 pb-4 border-b border-gray-200">
+                    <h3 class="text-xl font-semibold text-gray-900"><?php echo htmlspecialchars($message['subject']); ?></h3>
+                </div>
+
+                <!-- Sender info card -->
+                <div class="flex items-start gap-4 mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+                        <?php echo strtoupper(substr($message['name'], 0, 1)); ?>
                     </div>
-                    <div class="md:col-span-2">
-                        <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Received</label>
-                        <p class="text-gray-600"><i class="far fa-clock mr-1"></i><?php echo formatDate($message['created_at'], 'F d, Y \a\t g:i A'); ?></p>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                            <p class="text-lg font-semibold text-gray-900"><?php echo htmlspecialchars($message['name']); ?></p>
+                            <?php if ($message['company']): ?>
+                                <p class="text-sm text-gray-500"><?php echo htmlspecialchars($message['company']); ?></p>
+                            <?php endif; ?>
+                        </div>
+                        <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1 mt-1">
+                            <a href="mailto:<?php echo htmlspecialchars($message['email']); ?>" class="text-sm text-primary hover:underline inline-flex items-center gap-1">
+                                <i class="fas fa-envelope text-xs"></i><?php echo htmlspecialchars($message['email']); ?>
+                            </a>
+                            <?php if ($message['phone']): ?>
+                                <a href="tel:<?php echo htmlspecialchars($message['phone']); ?>" class="text-sm text-primary hover:underline inline-flex items-center gap-1">
+                                    <i class="fas fa-phone text-xs"></i><?php echo htmlspecialchars($message['phone']); ?>
+                                </a>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 </div>
 
+                <!-- Message body -->
                 <div class="mb-6">
                     <label class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 block">Message</label>
-                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                        <p class="text-gray-900 whitespace-pre-wrap"><?php echo htmlspecialchars($message['message']); ?></p>
+                    <div class="p-4 bg-white rounded-lg border border-gray-200">
+                        <p class="text-gray-900 whitespace-pre-wrap leading-relaxed"><?php echo htmlspecialchars($message['message']); ?></p>
                     </div>
                 </div>
 
+                <!-- Quick reply compose -->
+                <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <p class="text-sm font-medium text-blue-900 mb-2 flex items-center gap-2"><i class="fas fa-reply"></i> Quick Reply</p>
+                    <p class="text-xs text-blue-700 mb-3">Clicking "Reply by Email" opens your email client with the sender's address and subject pre-filled. You can also copy the email address below.</p>
+                    <div class="flex flex-wrap gap-2">
+                        <a href="mailto:<?php echo htmlspecialchars($message['email']); ?>?subject=Re: <?php echo rawurlencode($message['subject']); ?>" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition-colors inline-flex items-center text-sm">
+                            <i class="fas fa-reply mr-2"></i>Reply by Email
+                        </a>
+                        <?php if ($message['phone']): ?>
+                        <a href="tel:<?php echo htmlspecialchars($message['phone']); ?>" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors inline-flex items-center text-sm">
+                            <i class="fas fa-phone mr-2"></i>Call Sender
+                        </a>
+                        <?php endif; ?>
+                        <button type="button" onclick="copyEmail('<?php echo htmlspecialchars($message['email'], ENT_QUOTES); ?>')" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors inline-flex items-center text-sm">
+                            <i class="fas fa-copy mr-2"></i>Copy Email
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Action buttons -->
                 <div class="flex flex-wrap gap-3 pt-4 border-t border-gray-200">
-                    <a href="mailto:<?php echo htmlspecialchars($message['email']); ?>?subject=Re: <?php echo rawurlencode($message['subject']); ?>" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition-colors inline-flex items-center">
-                        <i class="fas fa-reply mr-2"></i>Reply by Email
-                    </a>
                     <?php if (!$message['is_read']): ?>
                     <form method="POST" action="messages.php" class="inline">
                         <input type="hidden" name="post_action" value="read">
                         <input type="hidden" name="id" value="<?php echo $message['id']; ?>">
-                        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors inline-flex items-center">
+                        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors inline-flex items-center text-sm">
                             <i class="fas fa-check mr-2"></i>Mark as Read
                         </button>
                     </form>
@@ -299,7 +323,7 @@ if ($st) {
                     <form method="POST" action="messages.php" class="inline">
                         <input type="hidden" name="post_action" value="unread">
                         <input type="hidden" name="id" value="<?php echo $message['id']; ?>">
-                        <button type="submit" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors inline-flex items-center">
+                        <button type="submit" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors inline-flex items-center text-sm">
                             <i class="fas fa-envelope mr-2"></i>Mark as Unread
                         </button>
                     </form>
@@ -308,7 +332,7 @@ if ($st) {
                     <form method="POST" action="messages.php" class="inline" onsubmit="return confirm('Archive this message? It can be restored from the Archived filter.');">
                         <input type="hidden" name="post_action" value="archive">
                         <input type="hidden" name="id" value="<?php echo $message['id']; ?>">
-                        <button type="submit" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors inline-flex items-center">
+                        <button type="submit" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors inline-flex items-center text-sm">
                             <i class="fas fa-box mr-2"></i>Archive
                         </button>
                     </form>
@@ -316,7 +340,7 @@ if ($st) {
                     <form method="POST" action="messages.php" class="inline">
                         <input type="hidden" name="post_action" value="unarchive">
                         <input type="hidden" name="id" value="<?php echo $message['id']; ?>">
-                        <button type="submit" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors inline-flex items-center">
+                        <button type="submit" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors inline-flex items-center text-sm">
                             <i class="fas fa-box-open mr-2"></i>Restore
                         </button>
                     </form>
@@ -324,16 +348,32 @@ if ($st) {
                     <form method="POST" action="messages.php" class="inline" onsubmit="return confirm('Delete this message permanently? This cannot be undone.');">
                         <input type="hidden" name="post_action" value="delete">
                         <input type="hidden" name="id" value="<?php echo $message['id']; ?>">
-                        <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors inline-flex items-center">
+                        <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors inline-flex items-center text-sm">
                             <i class="fas fa-trash mr-2"></i>Delete
                         </button>
                     </form>
                 </div>
             </div>
 
+            <script>
+            function copyEmail(email) {
+                navigator.clipboard.writeText(email).then(function() {
+                    alert('Email address copied to clipboard: ' + email);
+                }, function() {
+                    alert('Could not copy. Email: ' + email);
+                });
+            }
+            </script>
+
         <?php endif; ?>
 
         <?php if ($action === 'list'): ?>
+            <!-- Info banner -->
+            <div class="mb-4 p-3 rounded-lg bg-blue-50 border border-blue-200 flex items-start gap-2">
+                <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
+                <p class="text-sm text-blue-800">Messages submitted through the public <a href="../contact.php#contact-form" target="_blank" class="underline hover:text-blue-900">Contact form</a> appear here. Click a message to view full details and reply by email. Unread messages are highlighted in blue. Archived messages are kept but hidden from the active list.</p>
+            </div>
+
             <!-- List View -->
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
                 <!-- Stats + Filters -->
@@ -372,9 +412,8 @@ if ($st) {
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50 sticky top-0">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sender</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject & Preview</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -383,25 +422,36 @@ if ($st) {
                     <tbody class="bg-white divide-y divide-gray-200">
                         <?php if (empty($all_messages)): ?>
                             <tr>
-                                <td colspan="6" class="px-6 py-12 text-center">
+                                <td colspan="5" class="px-6 py-12 text-center">
                                     <i class="fas fa-inbox text-4xl text-gray-300 mb-3"></i>
                                     <p class="text-gray-500">No messages found.</p>
                                 </td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($all_messages as $msg): ?>
-                                <tr class="hover:bg-gray-50 <?php echo !$msg['is_read'] ? 'bg-blue-50' : ''; ?>">
+                                <tr class="hover:bg-gray-50 <?php echo !$msg['is_read'] ? 'bg-blue-50' : ''; ?> cursor-pointer" onclick="window.location='?action=view&id=<?php echo $msg['id']; ?>'">
                                     <td class="px-6 py-4">
-                                        <div class="text-sm font-medium text-gray-900">
-                                            <?php if (!$msg['is_read']): ?><i class="fas fa-circle text-blue-500 text-xs mr-1"></i><?php endif; ?>
-                                            <?php echo htmlspecialchars($msg['name']); ?>
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                                                <?php echo strtoupper(substr($msg['name'], 0, 1)); ?>
+                                            </div>
+                                            <div class="min-w-0">
+                                                <div class="text-sm font-medium text-gray-900 <?php echo !$msg['is_read'] ? 'font-bold' : ''; ?>">
+                                                    <?php echo htmlspecialchars($msg['name']); ?>
+                                                </div>
+                                                <?php if ($msg['company']): ?>
+                                                    <div class="text-xs text-gray-500 truncate"><?php echo htmlspecialchars($msg['company']); ?></div>
+                                                <?php endif; ?>
+                                            </div>
                                         </div>
-                                        <?php if ($msg['company']): ?>
-                                            <div class="text-xs text-gray-500"><?php echo htmlspecialchars($msg['company']); ?></div>
-                                        <?php endif; ?>
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-gray-900"><?php echo htmlspecialchars($msg['email']); ?></td>
-                                    <td class="px-6 py-4 text-sm text-gray-900 max-w-xs truncate"><?php echo htmlspecialchars($msg['subject']); ?></td>
+                                    <td class="px-6 py-4 max-w-md">
+                                        <div class="text-sm <?php echo !$msg['is_read'] ? 'font-semibold text-gray-900' : 'text-gray-700'; ?> truncate">
+                                            <?php if (!$msg['is_read']): ?><i class="fas fa-circle text-blue-500 text-[6px] mr-1"></i><?php endif; ?>
+                                            <?php echo htmlspecialchars($msg['subject']); ?>
+                                        </div>
+                                        <div class="text-xs text-gray-500 truncate mt-0.5"><?php echo htmlspecialchars(mb_strimwidth($msg['message'], 0, 100, '…')); ?></div>
+                                    </td>
                                     <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap"><?php echo formatDate($msg['created_at'], 'M d, Y'); ?></td>
                                     <td class="px-6 py-4">
                                         <?php if ($msg['is_archived']): ?>
@@ -412,7 +462,7 @@ if ($st) {
                                             <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600">Read</span>
                                         <?php endif; ?>
                                     </td>
-                                    <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
+                                    <td class="px-6 py-4 text-sm font-medium whitespace-nowrap" onclick="event.stopPropagation();">
                                         <a href="?action=view&id=<?php echo $msg['id']; ?>" class="text-primary hover:text-secondary mr-3" title="View">
                                             <i class="fas fa-eye"></i>
                                         </a>

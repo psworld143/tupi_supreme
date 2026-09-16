@@ -34,9 +34,17 @@ $system_tab_keys = ['granulated', 'husk', 'custom'];
 
 // Get products from database
 $all_products = getProducts();
-$granulated_products = array_filter($all_products, function($p) { return stripos($p['slug'], 'granulated') !== false || stripos($p['name'], 'Granulated') !== false; });
-$husk_products = array_filter($all_products, function($p) { return stripos($p['slug'], 'husk') !== false || stripos($p['slug'], 'coconut') !== false || stripos($p['name'], 'Coconut') !== false; });
-$custom_products = array_filter($all_products, function($p) { return stripos($p['slug'], 'custom') !== false || stripos($p['name'], 'Custom') !== false; });
+
+// Index tabs by tab_key so the system panes can use getProductsForTab
+// (which merges explicit category_id assignment with keyword matching).
+$tabs_by_key = [];
+foreach ($product_tabs as $t) {
+    $tabs_by_key[$t['tab_key']] = $t;
+}
+
+$granulated_products = isset($tabs_by_key['granulated']) ? getProductsForTab($all_products, $tabs_by_key['granulated']) : filterProductsByKeywords($all_products, 'granulated');
+$husk_products       = isset($tabs_by_key['husk'])       ? getProductsForTab($all_products, $tabs_by_key['husk'])       : filterProductsByKeywords($all_products, 'husk,coconut');
+$custom_products     = isset($tabs_by_key['custom'])     ? getProductsForTab($all_products, $tabs_by_key['custom'])     : filterProductsByKeywords($all_products, 'custom');
 
 // Get the main GAC product (first granulated product or use default)
 $gac_product = !empty($granulated_products) ? reset($granulated_products) : null;
@@ -676,11 +684,12 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
 
                 <?php
                 // Render panes for custom (non-system) tabs — each lists products
-                // whose name/slug matches the tab's keywords.
+                // assigned to the tab (category_id) OR whose name/slug matches the
+                // tab's keywords.
                 foreach ($product_tabs as $tab):
                     $key = $tab['tab_key'];
                     if (in_array($key, $system_tab_keys, true)) continue;
-                    $tab_products = filterProductsByKeywords($all_products, $tab['keywords'] ?? '');
+                    $tab_products = getProductsForTab($all_products, $tab);
                 ?>
                 <div id="<?php echo htmlspecialchars_safe($key); ?>" class="tab-pane hidden">
                     <div class="bg-[#60796e] text-white rounded-2xl p-8 lg:p-10 mb-12 text-center relative overflow-hidden reveal">

@@ -162,7 +162,14 @@ $view_url = '../about.php#timeline';
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <?php if ($action === 'add' || $action === 'edit'): ?>
-    <script src="https://cdn.ckeditor.com/4.16.2/standard/ckeditor.js"></script>
+    <!-- Lightweight inline HTML editor (replaces EOL CKEditor 4) -->
+    <style>
+        .qe-toolbar button { padding: 4px 8px; border: 1px solid #d1d5db; background: #fff; border-radius: 4px; font-size: 13px; cursor: pointer; }
+        .qe-toolbar button:hover { background: #f3f4f6; }
+        .qe-editor { min-height: 140px; }
+        .qe-editor:focus { outline: none; border-color: #2c5530; }
+        .qe-editor:empty:before { content: attr(data-placeholder); color: #9ca3af; }
+    </style>
     <?php endif; ?>
     <script>
         tailwind.config = {
@@ -236,81 +243,167 @@ $view_url = '../about.php#timeline';
             <!-- Add/Edit Form -->
             <div class="bg-white rounded-lg shadow-md p-6">
                 <h2 class="text-2xl font-bold mb-1"><?php echo $action === 'add' ? 'Add New' : 'Edit'; ?> Timeline Event</h2>
-                <p class="text-sm text-gray-500 mb-6">Fields marked <span class="text-red-500">*</span> are required.</p>
+                <p class="text-sm text-gray-500 mb-4">Fields marked <span class="text-red-500">*</span> are required.</p>
 
-                <form method="POST" action="">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Year <span class="text-red-500">*</span></label>
-                            <input type="number" name="year" required min="1900" max="2100"
-                                   value="<?php echo htmlspecialchars($edit_event['year'] ?? date('Y')); ?>"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
-                                   placeholder="e.g., 1999">
-                            <p class="text-xs text-gray-400 mt-1">The year this event occurred.</p>
+                <!-- Info banner -->
+                <div class="mb-6 p-3 rounded-lg bg-blue-50 border border-blue-200 flex items-start gap-2">
+                    <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
+                    <p class="text-sm text-blue-800">Timeline events appear in the <strong>"Our Journey"</strong> section on the public <a href="<?php echo $view_url; ?>" target="_blank" class="underline hover:text-blue-900">About page</a>. They're sorted by year (ascending), then by display order.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Left: form fields -->
+                    <div>
+                        <form method="POST" action="">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Year <span class="text-red-500">*</span></label>
+                                    <input type="number" name="year" id="year_input" required min="1900" max="2100"
+                                           value="<?php echo htmlspecialchars($edit_event['year'] ?? date('Y')); ?>"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                           placeholder="e.g., 1999"
+                                           oninput="updatePreview()">
+                                    <p class="text-xs text-gray-400 mt-1">The year this milestone occurred. Events are sorted oldest → newest.</p>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Display Order</label>
+                                    <input type="number" name="display_order" id="order_input" min="0"
+                                           value="<?php echo htmlspecialchars($edit_event['display_order'] ?? 0); ?>"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                           oninput="updatePreview()">
+                                    <p class="text-xs text-gray-400 mt-1">Tiebreaker for events in the same year. Lower = first. <button type="button" onclick="suggestOrder()" class="text-primary hover:underline">Auto-suggest from year</button>.</p>
+                                </div>
+                            </div>
+
+                            <div class="mt-6">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Title <span class="text-red-500">*</span></label>
+                                <input type="text" name="title" id="title_input" required
+                                       value="<?php echo htmlspecialchars($edit_event['title'] ?? ''); ?>"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                       placeholder="e.g., Company Founded"
+                                       oninput="updatePreview()">
+                                <p class="text-xs text-gray-400 mt-1">A short label for this milestone (shown as the heading).</p>
+                            </div>
+
+                            <div class="mt-6">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                                <div id="html_toolbar" class="qe-toolbar flex flex-wrap gap-1 mb-2 p-2 bg-gray-50 rounded-t-md border border-b-0 border-gray-300">
+                                    <button type="button" data-cmd="bold" title="Bold"><b>B</b></button>
+                                    <button type="button" data-cmd="italic" title="Italic"><i>I</i></button>
+                                    <button type="button" data-cmd="underline" title="Underline"><u>U</u></button>
+                                    <button type="button" data-cmd="insertUnorderedList" title="Bullet list"><i class="fas fa-list-ul"></i></button>
+                                    <button type="button" data-cmd="insertOrderedList" title="Numbered list"><i class="fas fa-list-ol"></i></button>
+                                    <button type="button" data-cmd="formatBlock" data-val="h4" title="Small heading">H4</button>
+                                    <button type="button" data-cmd="formatBlock" data-val="p" title="Paragraph">P</button>
+                                    <button type="button" data-cmd="createLink" title="Link"><i class="fas fa-link"></i></button>
+                                    <button type="button" data-cmd="removeFormat" title="Clear formatting"><i class="fas fa-eraser"></i></button>
+                                </div>
+                                <div id="desc_html" contenteditable="true" data-placeholder="Describe this milestone…"
+                                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary qe-editor bg-white prose max-w-none"
+                                     oninput="document.getElementById('description').value = this.innerHTML; updatePreview();"><?php echo htmlspecialchars_decode($edit_event['description'] ?? '', ENT_QUOTES); ?></div>
+                                <textarea name="description" id="description" rows="5" class="hidden"><?php echo htmlspecialchars_decode($edit_event['description'] ?? '', ENT_QUOTES); ?></textarea>
+                                <p class="text-xs text-gray-400 mt-1">A brief description of the event. Supports formatting (bold, lists, links).</p>
+                            </div>
+
+                            <div class="mt-6">
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" name="is_active" value="1"
+                                           <?php echo ($edit_event && $edit_event['is_active']) || !$edit_event ? 'checked' : ''; ?>
+                                           class="sr-only peer">
+                                    <span class="relative inline-flex items-center">
+                                        <span class="w-11 h-6 bg-gray-300 peer-checked:bg-primary rounded-full transition-colors"></span>
+                                        <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5"></span>
+                                    </span>
+                                    <span class="ml-3 text-sm text-gray-700">Active <span class="text-gray-400">(shown on the About page)</span></span>
+                                </label>
+                            </div>
+
+                            <div class="mt-8 flex flex-col sm:flex-row gap-3">
+                                <button type="submit" class="bg-primary text-white px-6 py-2.5 rounded-lg hover:bg-secondary transition-colors inline-flex items-center justify-center">
+                                    <i class="fas fa-save mr-2"></i><?php echo $action === 'add' ? 'Add Event' : 'Save Changes'; ?>
+                                </button>
+                                <a href="timeline.php" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2.5 rounded-lg transition-colors inline-flex items-center justify-center">
+                                    <i class="fas fa-times mr-2"></i>Cancel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Right: live preview -->
+                    <div>
+                        <p class="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                            <i class="fas fa-eye text-gray-400"></i> Live Preview
+                            <span class="text-xs text-gray-400 font-normal">(how this event looks on the About page)</span>
+                        </p>
+                        <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                            <div class="timeline-item relative mb-2">
+                                <div class="timeline-dot absolute -left-2 top-2 w-3 h-3 rounded-full bg-primary border-2 border-white shadow"></div>
+                                <div class="timeline-content bg-white border border-[#e6ece8] p-6 rounded-2xl relative ml-4">
+                                    <span class="eyebrow mb-3 inline-block px-2 py-0.5 text-xs rounded-full bg-primary/10 text-primary font-semibold" id="preview_year"><?php echo htmlspecialchars($edit_event['year'] ?? date('Y')); ?></span>
+                                    <h4 class="text-xl font-semibold text-[#23332c] mb-2 mt-2" id="preview_title"><?php echo htmlspecialchars($edit_event['title'] ?? 'Event title'); ?></h4>
+                                    <div class="text-[#7d8b84] leading-relaxed text-sm" id="preview_desc"><?php echo $edit_event['description'] ?? '<span class="text-gray-400">Event description appears here…</span>'; ?></div>
+                                </div>
+                            </div>
                         </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Display Order</label>
-                            <input type="number" name="display_order" min="0"
-                                   value="<?php echo htmlspecialchars($edit_event['display_order'] ?? 0); ?>"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
-                            <p class="text-xs text-gray-400 mt-1">Lower numbers appear first (events are sorted by year, then display order).</p>
-                        </div>
+                        <p class="text-xs text-gray-400 mt-2">The actual styling on the public page may differ slightly. This is an approximation.</p>
                     </div>
-
-                    <div class="mt-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Title <span class="text-red-500">*</span></label>
-                        <input type="text" name="title" required
-                               value="<?php echo htmlspecialchars($edit_event['title'] ?? ''); ?>"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
-                               placeholder="e.g., Company Founded">
-                        <p class="text-xs text-gray-400 mt-1">A short label for this milestone.</p>
-                    </div>
-
-                    <div class="mt-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                        <textarea name="description" id="description" rows="5"
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"><?php echo htmlspecialchars_decode($edit_event['description'] ?? '', ENT_QUOTES); ?></textarea>
-                        <p class="text-xs text-gray-400 mt-1">A brief description of the event. Rich text formatting is supported.</p>
-                    </div>
-
-                    <div class="mt-6">
-                        <label class="flex items-center cursor-pointer">
-                            <input type="checkbox" name="is_active" value="1"
-                                   <?php echo ($edit_event && $edit_event['is_active']) || !$edit_event ? 'checked' : ''; ?>
-                                   class="sr-only peer">
-                            <span class="relative inline-flex items-center">
-                                <span class="w-11 h-6 bg-gray-300 peer-checked:bg-primary rounded-full transition-colors"></span>
-                                <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5"></span>
-                            </span>
-                            <span class="ml-3 text-sm text-gray-700">Active <span class="text-gray-400">(shown on the About page)</span></span>
-                        </label>
-                    </div>
-
-                    <div class="mt-8 flex flex-col sm:flex-row gap-3">
-                        <button type="submit" class="bg-primary text-white px-6 py-2.5 rounded-lg hover:bg-secondary transition-colors inline-flex items-center justify-center">
-                            <i class="fas fa-save mr-2"></i><?php echo $action === 'add' ? 'Add Event' : 'Save Changes'; ?>
-                        </button>
-                        <a href="timeline.php" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2.5 rounded-lg transition-colors inline-flex items-center justify-center">
-                            <i class="fas fa-times mr-2"></i>Cancel
-                        </a>
-                    </div>
-                </form>
+                </div>
             </div>
 
             <script>
+            // Lightweight HTML editor toolbar
             (function () {
-                if (typeof CKEDITOR !== 'undefined') {
-                    CKEDITOR.replace('description');
-                } else {
-                    var check = setInterval(function () {
-                        if (typeof CKEDITOR !== 'undefined') {
-                            clearInterval(check);
-                            CKEDITOR.replace('description');
+                var toolbar = document.getElementById('html_toolbar');
+                var editor = document.getElementById('desc_html');
+                if (toolbar && editor) {
+                    toolbar.addEventListener('mousedown', function (e) {
+                        var btn = e.target.closest('button[data-cmd]');
+                        if (!btn) return;
+                        e.preventDefault();
+                        editor.focus();
+                        var cmd = btn.getAttribute('data-cmd');
+                        var val = btn.getAttribute('data-val');
+                        if (cmd === 'createLink') {
+                            var url = prompt('Link URL:', 'https://');
+                            if (url) document.execCommand('createLink', false, url);
+                        } else if (val) {
+                            document.execCommand(cmd, false, val);
+                        } else {
+                            document.execCommand(cmd, false, null);
                         }
-                    }, 100);
+                        document.getElementById('description').value = editor.innerHTML;
+                        updatePreview();
+                    });
+                }
+                // Sync editor -> hidden textarea before submit
+                var form = document.querySelector('form[method="POST"]');
+                if (form && editor) {
+                    form.addEventListener('submit', function () {
+                        document.getElementById('description').value = editor.innerHTML;
+                    });
                 }
             })();
+
+            // Live preview
+            function updatePreview() {
+                var year = document.getElementById('year_input').value || 'Year';
+                var title = document.getElementById('title_input').value || 'Event title';
+                var desc = document.getElementById('desc_html').innerHTML || '<span class="text-gray-400">Event description appears here…</span>';
+                document.getElementById('preview_year').textContent = year;
+                document.getElementById('preview_title').textContent = title;
+                document.getElementById('preview_desc').innerHTML = desc;
+            }
+
+            // Auto-suggest display order: use the last two digits of the year
+            function suggestOrder() {
+                var year = parseInt(document.getElementById('year_input').value, 10);
+                if (year > 0) {
+                    document.getElementById('order_input').value = year % 100;
+                } else {
+                    alert('Enter a year first.');
+                }
+            }
             </script>
 
         <?php else: ?>

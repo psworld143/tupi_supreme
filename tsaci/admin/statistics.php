@@ -192,6 +192,9 @@ $view_url = '../index.php#stats';
             .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #d2dcd5; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
             .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #c0ccc5; }
         }
+        /* Quick-pick suggestion buttons */
+        .quick-pick { padding: 3px 8px; font-size: 11px; border: 1px solid #d1d5db; background: #fff; border-radius: 4px; cursor: pointer; color: #4b5563; }
+        .quick-pick:hover { background: #f3f4f6; border-color: #9ca3af; }
     </style>
 
     <!-- Main Content -->
@@ -235,78 +238,172 @@ $view_url = '../index.php#stats';
             <!-- Add/Edit Form -->
             <div class="bg-white rounded-lg shadow-md p-6">
                 <h2 class="text-2xl font-bold mb-1"><?php echo $action === 'add' ? 'Add New' : 'Edit'; ?> Statistic</h2>
-                <p class="text-sm text-gray-500 mb-6">Fields marked <span class="text-red-500">*</span> are required.</p>
+                <p class="text-sm text-gray-500 mb-4">Fields marked <span class="text-red-500">*</span> are required.</p>
 
-                <form method="POST" action="">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Value <span class="text-red-500">*</span></label>
-                            <input type="text" name="value" required
-                                   value="<?php echo htmlspecialchars($edit_stat['value'] ?? ''); ?>"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
-                                   placeholder="e.g., 25+">
-                            <p class="text-xs text-gray-400 mt-1">The main number shown (can include +, %, etc.).</p>
-                        </div>
+                <!-- Info banner -->
+                <div class="mb-6 p-3 rounded-lg bg-blue-50 border border-blue-200 flex items-start gap-2">
+                    <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
+                    <p class="text-sm text-blue-800">Statistics appear as counters in the <strong>stats section</strong> on the public <a href="<?php echo $view_url; ?>" target="_blank" class="underline hover:text-blue-900">homepage</a>. They're shown in a 4-column grid, sorted by display order (left to right).</p>
+                </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Label <span class="text-red-500">*</span></label>
-                            <input type="text" name="label" required
-                                   value="<?php echo htmlspecialchars($edit_stat['label'] ?? ''); ?>"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
-                                   placeholder="e.g., Years Experience">
-                            <p class="text-xs text-gray-400 mt-1">The caption shown below the value.</p>
-                        </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Left: form fields -->
+                    <div>
+                        <form method="POST" action="">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Value <span class="text-red-500">*</span></label>
+                                    <input type="text" name="value" id="value_input" required
+                                           value="<?php echo htmlspecialchars($edit_stat['value'] ?? ''); ?>"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                           placeholder="e.g., 25+"
+                                           oninput="updatePreview()">
+                                    <p class="text-xs text-gray-400 mt-1">The big number shown. Can include <code class="bg-gray-100 px-1 rounded">+</code>, <code class="bg-gray-100 px-1 rounded">%</code>, <code class="bg-gray-100 px-1 rounded">/</code>, etc.</p>
+                                    <div class="mt-2 flex flex-wrap gap-1">
+                                        <button type="button" class="quick-pick" onclick="setVal('25+')">25+</button>
+                                        <button type="button" class="quick-pick" onclick="setVal('50+')">50+</button>
+                                        <button type="button" class="quick-pick" onclick="setVal('100+')">100+</button>
+                                        <button type="button" class="quick-pick" onclick="setVal('500+')">500+</button>
+                                        <button type="button" class="quick-pick" onclick="setVal('1000+')">1000+</button>
+                                        <button type="button" class="quick-pick" onclick="setVal('99%')">99%</button>
+                                    </div>
+                                </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Description <span class="text-gray-400 font-normal">(optional)</span></label>
-                            <input type="text" name="description"
-                                   value="<?php echo htmlspecialchars($edit_stat['description'] ?? ''); ?>"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
-                                   placeholder="e.g., Years of industry experience">
-                            <p class="text-xs text-gray-400 mt-1">Optional extra text shown below the label.</p>
-                        </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Label <span class="text-red-500">*</span></label>
+                                    <input type="text" name="label" id="label_input" required
+                                           value="<?php echo htmlspecialchars($edit_stat['label'] ?? ''); ?>"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                           placeholder="e.g., Years Experience"
+                                           oninput="updatePreview()">
+                                    <p class="text-xs text-gray-400 mt-1">The caption shown below the value (uppercase on the site).</p>
+                                    <div class="mt-2 flex flex-wrap gap-1">
+                                        <button type="button" class="quick-pick" onclick="setLabel('Years Experience')">Years Experience</button>
+                                        <button type="button" class="quick-pick" onclick="setLabel('Projects Completed')">Projects Completed</button>
+                                        <button type="button" class="quick-pick" onclick="setLabel('Happy Clients')">Happy Clients</button>
+                                        <button type="button" class="quick-pick" onclick="setLabel('Team Members')">Team Members</button>
+                                        <button type="button" class="quick-pick" onclick="setLabel('Tons Produced')">Tons Produced</button>
+                                    </div>
+                                </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Icon <span class="text-gray-400 font-normal">(optional)</span></label>
-                            <input type="text" name="icon"
-                                   value="<?php echo htmlspecialchars($edit_stat['icon'] ?? ''); ?>"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
-                                   placeholder="e.g., fas fa-calendar">
-                            <p class="text-xs text-gray-400 mt-1">Font Awesome icon class. Not currently displayed on the homepage.</p>
-                        </div>
+                                <div class="sm:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Description <span class="text-gray-400 font-normal">(optional)</span></label>
+                                    <input type="text" name="description" id="desc_input"
+                                           value="<?php echo htmlspecialchars($edit_stat['description'] ?? ''); ?>"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                           placeholder="e.g., Years of industry experience"
+                                           oninput="updatePreview()">
+                                    <p class="text-xs text-gray-400 mt-1">Optional smaller text shown below the label.</p>
+                                </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Display Order</label>
-                            <input type="number" name="display_order" min="0"
-                                   value="<?php echo htmlspecialchars($edit_stat['display_order'] ?? 0); ?>"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
-                            <p class="text-xs text-gray-400 mt-1">Lower numbers appear first (left to right).</p>
-                        </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Icon <span class="text-gray-400 font-normal">(optional)</span></label>
+                                    <div class="flex items-center gap-3">
+                                        <input type="text" name="icon" id="icon_input"
+                                               value="<?php echo htmlspecialchars($edit_stat['icon'] ?? ''); ?>"
+                                               class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary font-mono"
+                                               placeholder="fas fa-chart-bar"
+                                               oninput="updateIconPreview(this.value)">
+                                        <div id="icon_preview" class="flex items-center justify-center w-10 h-10 border border-gray-300 rounded-lg bg-gray-50 text-lg text-primary">
+                                            <i class="fas fa-chart-bar"></i>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-gray-400 mt-1">Font Awesome icon class. <a href="https://fontawesome.com/v6/search?o=r&m=free" target="_blank" class="text-primary hover:underline">Browse icons</a>. Note: not currently displayed on the homepage, but stored for future use.</p>
+                                    <div class="mt-2 flex flex-wrap gap-1">
+                                        <button type="button" class="quick-pick" onclick="setIcon('fas fa-chart-bar')">chart-bar</button>
+                                        <button type="button" class="quick-pick" onclick="setIcon('fas fa-calendar')">calendar</button>
+                                        <button type="button" class="quick-pick" onclick="setIcon('fas fa-users')">users</button>
+                                        <button type="button" class="quick-pick" onclick="setIcon('fas fa-industry')">industry</button>
+                                        <button type="button" class="quick-pick" onclick="setIcon('fas fa-leaf')">leaf</button>
+                                        <button type="button" class="quick-pick" onclick="setIcon('fas fa-globe')">globe</button>
+                                        <button type="button" class="quick-pick" onclick="setIcon('fas fa-award')">award</button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Display Order</label>
+                                    <input type="number" name="display_order" min="0"
+                                           value="<?php echo htmlspecialchars($edit_stat['display_order'] ?? 0); ?>"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
+                                    <p class="text-xs text-gray-400 mt-1">Lower numbers appear first (left to right). Use 10, 20, 30… to leave room for inserts.</p>
+                                </div>
+                            </div>
+
+                            <div class="mt-6">
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" name="is_active" value="1"
+                                           <?php echo ($edit_stat && $edit_stat['is_active']) || !$edit_stat ? 'checked' : ''; ?>
+                                           class="sr-only peer">
+                                    <span class="relative inline-flex items-center">
+                                        <span class="w-11 h-6 bg-gray-300 peer-checked:bg-primary rounded-full transition-colors"></span>
+                                        <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5"></span>
+                                    </span>
+                                    <span class="ml-3 text-sm text-gray-700">Active <span class="text-gray-400">(shown on the homepage)</span></span>
+                                </label>
+                            </div>
+
+                            <div class="mt-8 flex flex-col sm:flex-row gap-3">
+                                <button type="submit" class="bg-primary text-white px-6 py-2.5 rounded-lg hover:bg-secondary transition-colors inline-flex items-center justify-center">
+                                    <i class="fas fa-save mr-2"></i><?php echo $action === 'add' ? 'Add Statistic' : 'Save Changes'; ?>
+                                </button>
+                                <a href="statistics.php" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2.5 rounded-lg transition-colors inline-flex items-center justify-center">
+                                    <i class="fas fa-times mr-2"></i>Cancel
+                                </a>
+                            </div>
+                        </form>
                     </div>
 
-                    <div class="mt-6">
-                        <label class="flex items-center cursor-pointer">
-                            <input type="checkbox" name="is_active" value="1"
-                                   <?php echo ($edit_stat && $edit_stat['is_active']) || !$edit_stat ? 'checked' : ''; ?>
-                                   class="sr-only peer">
-                            <span class="relative inline-flex items-center">
-                                <span class="w-11 h-6 bg-gray-300 peer-checked:bg-primary rounded-full transition-colors"></span>
-                                <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5"></span>
-                            </span>
-                            <span class="ml-3 text-sm text-gray-700">Active <span class="text-gray-400">(shown on the homepage)</span></span>
-                        </label>
+                    <!-- Right: live preview -->
+                    <div>
+                        <p class="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                            <i class="fas fa-eye text-gray-400"></i> Live Preview
+                            <span class="text-xs text-gray-400 font-normal">(how this stat looks on the homepage)</span>
+                        </p>
+                        <!-- Approximation of the dark stats section on index.php -->
+                        <div class="rounded-lg p-6 bg-[#23332c] text-white">
+                            <div class="grid grid-cols-1 gap-4">
+                                <div class="text-center">
+                                    <div class="stat-value text-4xl lg:text-5xl font-bold mb-2" id="preview_value"><?php echo htmlspecialchars($edit_stat['value'] ?? '25+'); ?></div>
+                                    <div class="text-sm font-medium uppercase tracking-wider text-[#8bc34a]" id="preview_label"><?php echo htmlspecialchars($edit_stat['label'] ?? 'Years Experience'); ?></div>
+                                    <div class="text-sm text-white/60 mt-2 <?php echo empty($edit_stat['description'] ?? '') ? 'hidden' : ''; ?>" id="preview_desc_wrap">
+                                        <span id="preview_desc"><?php echo htmlspecialchars($edit_stat['description'] ?? ''); ?></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-2">On the homepage, up to 4 stats appear side by side in a row.</p>
                     </div>
-
-                    <div class="mt-8 flex flex-col sm:flex-row gap-3">
-                        <button type="submit" class="bg-primary text-white px-6 py-2.5 rounded-lg hover:bg-secondary transition-colors inline-flex items-center justify-center">
-                            <i class="fas fa-save mr-2"></i><?php echo $action === 'add' ? 'Add Statistic' : 'Save Changes'; ?>
-                        </button>
-                        <a href="statistics.php" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2.5 rounded-lg transition-colors inline-flex items-center justify-center">
-                            <i class="fas fa-times mr-2"></i>Cancel
-                        </a>
-                    </div>
-                </form>
+                </div>
             </div>
+
+            <script>
+            // Quick-pick helpers
+            function setVal(v) { document.getElementById('value_input').value = v; updatePreview(); }
+            function setLabel(l) { document.getElementById('label_input').value = l; updatePreview(); }
+            function setIcon(i) { document.getElementById('icon_input').value = i; updateIconPreview(i); }
+
+            // Live icon preview
+            function updateIconPreview(iconClass) {
+                var preview = document.getElementById('icon_preview');
+                preview.innerHTML = '<i class="' + iconClass + '"></i>';
+            }
+
+            // Live preview of the stat card
+            function updatePreview() {
+                var value = document.getElementById('value_input').value || '25+';
+                var label = document.getElementById('label_input').value || 'Years Experience';
+                var desc = document.getElementById('desc_input').value;
+                document.getElementById('preview_value').textContent = value;
+                document.getElementById('preview_label').textContent = label;
+                var descWrap = document.getElementById('preview_desc_wrap');
+                if (desc.trim()) {
+                    document.getElementById('preview_desc').textContent = desc;
+                    descWrap.classList.remove('hidden');
+                } else {
+                    descWrap.classList.add('hidden');
+                }
+            }
+            </script>
 
         <?php else: ?>
             <!-- List View -->

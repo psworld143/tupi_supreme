@@ -200,6 +200,8 @@ $view_url = '../certifications.php#iso-certifications';
             .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #d2dcd5; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
             .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #c0ccc5; }
         }
+        .quick-pick { padding: 3px 8px; font-size: 11px; border: 1px solid #d1d5db; background: #fff; border-radius: 4px; cursor: pointer; color: #4b5563; }
+        .quick-pick:hover { background: #f3f4f6; border-color: #9ca3af; }
     </style>
 
     <!-- Main Content -->
@@ -243,110 +245,487 @@ $view_url = '../certifications.php#iso-certifications';
             <!-- Add/Edit Form -->
             <div class="bg-white rounded-lg shadow-md p-6">
                 <h2 class="text-2xl font-bold mb-1"><?php echo $action === 'add' ? 'Add New' : 'Edit'; ?> Certification</h2>
-                <p class="text-sm text-gray-500 mb-6">Fields marked <span class="text-red-500">*</span> are required.</p>
+                <p class="text-sm text-gray-500 mb-4">Fields marked <span class="text-red-500">*</span> are required.</p>
 
-                <form method="POST" action="">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Title <span class="text-red-500">*</span></label>
-                            <input type="text" name="title" required
-                                   value="<?php echo htmlspecialchars($edit_cert['title'] ?? ''); ?>"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
-                                   placeholder="e.g., ISO 9001:2015 Quality Management">
-                            <p class="text-xs text-gray-400 mt-1">The certification name shown on the public page.</p>
-                        </div>
+                <!-- Info banner -->
+                <div class="mb-6 p-3 rounded-lg bg-blue-50 border border-blue-200 flex items-start gap-2">
+                    <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
+                    <p class="text-sm text-blue-800">Certifications are stored in the database and managed here. They appear as cards on the public <a href="<?php echo $view_url; ?>" target="_blank" class="underline hover:text-blue-900">Certifications page</a> — each card shows a badge/icon, title, issuing organization, description, and validity dates. Tip: use the <strong>Image</strong> field for a badge/logo image, and the <strong>Document</strong> field for a downloadable certificate PDF.</p>
+                </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Issuing Organization</label>
-                            <input type="text" name="issuing_organization"
-                                   value="<?php echo htmlspecialchars($edit_cert['issuing_organization'] ?? ''); ?>"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
-                                   placeholder="e.g., International Organization for Standardization">
-                            <p class="text-xs text-gray-400 mt-1">The body that issued the certification (optional).</p>
-                        </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Left: form fields -->
+                    <div>
+                        <form method="POST" action="">
+                            <div class="space-y-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Title <span class="text-red-500">*</span></label>
+                                    <input type="text" name="title" id="title_input" required
+                                           value="<?php echo htmlspecialchars($edit_cert['title'] ?? ''); ?>"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                           placeholder="e.g., ISO 9001:2015 Quality Management"
+                                           oninput="updatePreview()">
+                                    <p class="text-xs text-gray-400 mt-1">The certification name shown on the card.</p>
+                                </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Certificate Number</label>
-                            <input type="text" name="certificate_number"
-                                   value="<?php echo htmlspecialchars($edit_cert['certificate_number'] ?? ''); ?>"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
-                                   placeholder="e.g., CERT-2024-001">
-                            <p class="text-xs text-gray-400 mt-1">The official certificate number (optional).</p>
-                        </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Issuing Organization</label>
+                                        <input type="text" name="issuing_organization" id="org_input"
+                                               value="<?php echo htmlspecialchars($edit_cert['issuing_organization'] ?? ''); ?>"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                               placeholder="e.g., International Organization for Standardization"
+                                               oninput="updatePreview()">
+                                        <p class="text-xs text-gray-400 mt-1">The body that issued the certification (optional).</p>
+                                        <div class="mt-2 flex flex-wrap gap-1">
+                                            <button type="button" class="quick-pick" onclick="setOrg('International Organization for Standardization')">ISO</button>
+                                            <button type="button" class="quick-pick" onclick="setOrg('NSF International')">NSF</button>
+                                            <button type="button" class="quick-pick" onclick="setOrg('TÜV SÜD')">TÜV SÜD</button>
+                                            <button type="button" class="quick-pick" onclick="setOrg('SGS')">SGS</button>
+                                            <button type="button" class="quick-pick" onclick="setOrg('Bureau Veritas')">Bureau Veritas</button>
+                                        </div>
+                                    </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Issue Date</label>
-                            <input type="date" name="issue_date"
-                                   value="<?php echo htmlspecialchars($edit_cert['issue_date'] ?? ''); ?>"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
-                            <p class="text-xs text-gray-400 mt-1">When the certification was issued (optional).</p>
-                        </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Certificate Number</label>
+                                        <input type="text" name="certificate_number" id="cert_num_input"
+                                               value="<?php echo htmlspecialchars($edit_cert['certificate_number'] ?? ''); ?>"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                               placeholder="e.g., CERT-2024-001"
+                                               oninput="updatePreview()">
+                                        <p class="text-xs text-gray-400 mt-1">The official certificate number (optional).</p>
+                                    </div>
+                                </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Expiry Date</label>
-                            <input type="date" name="expiry_date"
-                                   value="<?php echo htmlspecialchars($edit_cert['expiry_date'] ?? ''); ?>"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
-                            <p class="text-xs text-gray-400 mt-1">Leave blank if the certification does not expire.</p>
-                        </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Issue Date</label>
+                                        <input type="date" name="issue_date" id="issue_date_input"
+                                               value="<?php echo htmlspecialchars($edit_cert['issue_date'] ?? ''); ?>"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                               onchange="updatePreview()">
+                                        <p class="text-xs text-gray-400 mt-1">When the certification was issued (optional).</p>
+                                    </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Image URL <span class="text-gray-400 font-normal">(optional)</span></label>
-                            <input type="url" name="image_url"
-                                   value="<?php echo htmlspecialchars($edit_cert['image_url'] ?? ''); ?>"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
-                                   placeholder="https://example.com/cert-badge.png">
-                            <p class="text-xs text-gray-400 mt-1">Badge or certificate image (optional).</p>
-                        </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Expiry Date</label>
+                                        <input type="date" name="expiry_date" id="expiry_date_input"
+                                               value="<?php echo htmlspecialchars($edit_cert['expiry_date'] ?? ''); ?>"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                               onchange="updatePreview()">
+                                        <p class="text-xs text-gray-400 mt-1">Leave blank if the certification does not expire.</p>
+                                    </div>
+                                </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Document URL <span class="text-gray-400 font-normal">(optional)</span></label>
-                            <input type="url" name="document_url"
-                                   value="<?php echo htmlspecialchars($edit_cert['document_url'] ?? ''); ?>"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
-                                   placeholder="https://example.com/certificate.pdf">
-                            <p class="text-xs text-gray-400 mt-1">Link to the downloadable certificate document (optional).</p>
-                        </div>
+                                <!-- Image (badge/logo) -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Badge Image <span class="text-gray-400 font-normal">(optional)</span></label>
+                                    <div class="mb-3">
+                                        <label class="block text-xs font-medium text-gray-500 mb-1">Image source</label>
+                                        <select id="image-source-mode" onchange="switchImageMode()" class="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm">
+                                            <option value="upload">Upload from file</option>
+                                            <option value="url">Enter image URL</option>
+                                        </select>
+                                    </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Display Order</label>
-                            <input type="number" name="display_order" min="0"
-                                   value="<?php echo htmlspecialchars($edit_cert['display_order'] ?? 0); ?>"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
-                            <p class="text-xs text-gray-400 mt-1">Lower numbers appear first.</p>
-                        </div>
+                                    <div id="image-preview-container" class="mb-3 <?php echo empty($edit_cert['image_url'] ?? '') ? 'hidden' : ''; ?>">
+                                        <img id="image-preview" src="<?php echo htmlspecialchars($edit_cert['image_url'] ?? ''); ?>" alt="Preview" class="max-w-full h-32 object-contain border border-gray-300 rounded-lg p-2 bg-gray-50">
+                                        <button type="button" onclick="clearImagePreview()" class="mt-2 text-sm text-red-600 hover:text-red-800"><i class="fas fa-times mr-1"></i>Remove Image</button>
+                                    </div>
 
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Description <span class="text-gray-400 font-normal">(optional)</span></label>
-                            <textarea name="description" rows="4"
-                                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"><?php echo htmlspecialchars($edit_cert['description'] ?? ''); ?></textarea>
-                            <p class="text-xs text-gray-400 mt-1">Short description of what the certification covers.</p>
-                        </div>
+                                    <div id="file-picker-block" class="border-2 border-dashed border-gray-300 rounded-lg p-4 mb-3">
+                                        <div class="text-center">
+                                            <input type="file" id="image-file-input" accept="image/jpeg,image/png,image/gif,image/webp" class="hidden">
+                                            <label for="image-file-input" class="cursor-pointer inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
+                                                <i class="fas fa-upload mr-2"></i>Choose Image File
+                                            </label>
+                                            <p class="mt-2 text-xs text-gray-500">JPEG, PNG, GIF, or WebP (Max 10MB). Recommended: square badge/logo images.</p>
+                                        </div>
+                                        <div id="upload-progress" class="hidden mt-2">
+                                            <div class="bg-gray-200 rounded-full h-2">
+                                                <div id="upload-progress-bar" class="bg-primary h-2 rounded-full transition-all" style="width: 0%"></div>
+                                            </div>
+                                            <p id="upload-status" class="text-sm text-gray-600 mt-1"></p>
+                                        </div>
+                                    </div>
 
-                        <div class="md:col-span-2">
-                            <label class="flex items-center cursor-pointer">
-                                <input type="checkbox" name="is_active" value="1"
-                                       <?php echo ($edit_cert && $edit_cert['is_active']) || !$edit_cert ? 'checked' : ''; ?>
-                                       class="sr-only peer">
-                                <span class="relative inline-flex items-center">
-                                    <span class="w-11 h-6 bg-gray-300 peer-checked:bg-primary rounded-full transition-colors"></span>
-                                    <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5"></span>
-                                </span>
-                                <span class="ml-3 text-sm text-gray-700">Active <span class="text-gray-400">(shown on the website)</span></span>
-                            </label>
-                        </div>
+                                    <div id="url-input-block" class="hidden mb-3">
+                                        <input type="url" id="image-url-visible" value="<?php echo htmlspecialchars($edit_cert['image_url'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary" placeholder="https://example.com/cert-badge.png" oninput="syncImageUrl(this.value)">
+                                        <p class="mt-1 text-xs text-gray-500">Paste a full image URL (https://...).</p>
+                                    </div>
+
+                                    <input type="hidden" name="image_url" id="image-url-input" value="<?php echo htmlspecialchars($edit_cert['image_url'] ?? ''); ?>">
+                                </div>
+
+                                <!-- Document (certificate PDF) -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Certificate Document <span class="text-gray-400 font-normal">(optional)</span></label>
+                                    <div class="mb-3">
+                                        <label class="block text-xs font-medium text-gray-500 mb-1">Document source</label>
+                                        <select id="doc-source-mode" onchange="switchDocMode()" class="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm">
+                                            <option value="upload">Upload from file</option>
+                                            <option value="url">Enter document URL</option>
+                                        </select>
+                                    </div>
+
+                                    <div id="doc-picker-block" class="border-2 border-dashed border-gray-300 rounded-lg p-4 mb-3">
+                                        <div class="text-center">
+                                            <input type="file" id="doc-file-input" accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.pdf,.doc,.docx" class="hidden">
+                                            <label for="doc-file-input" class="cursor-pointer inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
+                                                <i class="fas fa-upload mr-2"></i>Choose Document File
+                                            </label>
+                                            <p class="mt-2 text-xs text-gray-500">PDF, DOC, or DOCX (Max 10MB) — uploads automatically when selected</p>
+                                        </div>
+                                        <div id="doc-upload-progress" class="hidden mt-2">
+                                            <div class="bg-gray-200 rounded-full h-2">
+                                                <div id="doc-upload-progress-bar" class="bg-primary h-2 rounded-full transition-all" style="width: 0%"></div>
+                                            </div>
+                                            <p id="doc-upload-status" class="text-sm text-gray-600 mt-1"></p>
+                                        </div>
+                                    </div>
+
+                                    <div id="doc-url-block" class="hidden mb-3">
+                                        <input type="url" id="doc-url-visible" value="<?php echo htmlspecialchars($edit_cert['document_url'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary" placeholder="https://example.com/certificate.pdf" oninput="syncDocUrl(this.value)">
+                                        <p class="mt-1 text-xs text-gray-500">Direct link to the certificate document.</p>
+                                    </div>
+
+                                    <input type="hidden" name="document_url" id="doc-url-input" value="<?php echo htmlspecialchars($edit_cert['document_url'] ?? ''); ?>">
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Display Order</label>
+                                        <input type="number" name="display_order" min="0"
+                                               value="<?php echo htmlspecialchars($edit_cert['display_order'] ?? 0); ?>"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
+                                        <p class="text-xs text-gray-400 mt-1">Lower numbers appear first. Use 10, 20, 30…</p>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="checkbox" name="is_active" value="1"
+                                                   <?php echo ($edit_cert && $edit_cert['is_active']) || !$edit_cert ? 'checked' : ''; ?>
+                                                   class="sr-only peer">
+                                            <span class="relative inline-flex items-center">
+                                                <span class="w-11 h-6 bg-gray-300 peer-checked:bg-primary rounded-full transition-colors"></span>
+                                                <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5"></span>
+                                            </span>
+                                            <span class="ml-3 text-sm text-gray-700">Active <span class="text-gray-400">(shown on the website)</span></span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Description <span class="text-gray-400 font-normal">(optional)</span></label>
+                                    <textarea name="description" id="description_input" rows="4"
+                                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                              placeholder="e.g., Certified since 2010, demonstrating our commitment to consistent quality management and continuous improvement."
+                                              oninput="updatePreview()"><?php echo htmlspecialchars($edit_cert['description'] ?? ''); ?></textarea>
+                                    <p class="text-xs text-gray-400 mt-1">Short description of what the certification covers.</p>
+                                </div>
+                            </div>
+
+                            <div class="mt-8 flex flex-col sm:flex-row gap-3">
+                                <button type="submit" class="bg-primary text-white px-6 py-2.5 rounded-lg hover:bg-secondary transition-colors inline-flex items-center justify-center">
+                                    <i class="fas fa-save mr-2"></i><?php echo $action === 'add' ? 'Add Certification' : 'Save Changes'; ?>
+                                </button>
+                                <a href="certifications.php" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2.5 rounded-lg transition-colors inline-flex items-center justify-center">
+                                    <i class="fas fa-times mr-2"></i>Cancel
+                                </a>
+                            </div>
+                        </form>
                     </div>
 
-                    <div class="mt-8 flex flex-col sm:flex-row gap-3">
-                        <button type="submit" class="bg-primary text-white px-6 py-2.5 rounded-lg hover:bg-secondary transition-colors inline-flex items-center justify-center">
-                            <i class="fas fa-save mr-2"></i><?php echo $action === 'add' ? 'Add Certification' : 'Save Changes'; ?>
-                        </button>
-                        <a href="certifications.php" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2.5 rounded-lg transition-colors inline-flex items-center justify-center">
-                            <i class="fas fa-times mr-2"></i>Cancel
-                        </a>
+                    <!-- Right: live preview -->
+                    <div>
+                        <p class="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                            <i class="fas fa-eye text-gray-400"></i> Live Preview
+                            <span class="text-xs text-gray-400 font-normal">(certification card)</span>
+                        </p>
+                        <div class="cert-card bg-white border border-[#e6ece8] rounded-2xl p-8">
+                            <div class="flex items-start">
+                                <div class="cert-badge w-16 h-16 rounded-2xl flex items-center justify-center mr-5 flex-shrink-0 overflow-hidden" style="background: linear-gradient(135deg, #3d7a66, #60796e);">
+                                    <img id="preview_badge_img" src="<?php echo htmlspecialchars($edit_cert['image_url'] ?? ''); ?>" alt="" class="w-full h-full object-cover <?php echo empty($edit_cert['image_url'] ?? '') ? 'hidden' : ''; ?>">
+                                    <i id="preview_badge_icon" class="fas fa-certificate text-2xl text-white <?php echo empty($edit_cert['image_url'] ?? '') ? '' : 'hidden'; ?>"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 id="preview_title" class="text-xl font-semibold text-[#23332c] mb-1"><?php echo htmlspecialchars($edit_cert['title'] ?? 'Certification title'); ?></h3>
+                                    <p id="preview_org" class="text-[#3d7a66] text-sm font-medium mb-3 <?php echo empty($edit_cert['issuing_organization'] ?? '') ? 'hidden' : ''; ?>"><?php echo htmlspecialchars($edit_cert['issuing_organization'] ?? ''); ?></p>
+                                    <p id="preview_desc" class="text-[#5a6b62] mb-4 leading-relaxed text-sm <?php echo empty($edit_cert['description'] ?? '') ? 'hidden' : ''; ?>"><?php echo htmlspecialchars($edit_cert['description'] ?? ''); ?></p>
+                                    <div id="preview_dates" class="text-sm text-[#7d8b84] space-y-1 <?php echo empty($edit_cert['issue_date'] ?? '') && empty($edit_cert['expiry_date'] ?? '') ? 'hidden' : ''; ?>">
+                                        <p id="preview_issue" class="flex items-center <?php echo empty($edit_cert['issue_date'] ?? '') ? 'hidden' : ''; ?>"><i class="fas fa-calendar-check text-[#3d7a66] mr-2 text-xs"></i>Issued: <span class="ml-1" id="preview_issue_text"></span></p>
+                                        <p id="preview_expiry" class="flex items-center <?php echo empty($edit_cert['expiry_date'] ?? '') ? 'hidden' : ''; ?>"><i class="fas fa-calendar-times text-[#3d7a66] mr-2 text-xs"></i>Valid until: <span class="ml-1" id="preview_expiry_text"></span></p>
+                                    </div>
+                                    <p id="preview_cert_num" class="text-xs text-[#8a978f] mt-3 <?php echo empty($edit_cert['certificate_number'] ?? '') ? 'hidden' : ''; ?>">Certificate #: <span id="preview_cert_num_text"><?php echo htmlspecialchars($edit_cert['certificate_number'] ?? ''); ?></span></p>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-2">The card style mirrors the certification cards on the public Certifications page. If a badge image is uploaded, it replaces the default icon.</p>
                     </div>
-                </form>
+                </div>
             </div>
+
+            <script>
+            // Quick-pick helpers
+            function setOrg(name) {
+                document.getElementById('org_input').value = name;
+                updatePreview();
+            }
+
+            // Live preview
+            function updatePreview() {
+                var title = document.getElementById('title_input').value || 'Certification title';
+                var org = document.getElementById('org_input').value || '';
+                var desc = document.getElementById('description_input').value || '';
+                var certNum = document.getElementById('cert_num_input').value || '';
+                var issueDate = document.getElementById('issue_date_input').value || '';
+                var expiryDate = document.getElementById('expiry_date_input').value || '';
+                var imgUrl = document.getElementById('image-url-input').value;
+
+                document.getElementById('preview_title').textContent = title;
+
+                var orgEl = document.getElementById('preview_org');
+                if (org.trim()) { orgEl.textContent = org; orgEl.classList.remove('hidden'); }
+                else { orgEl.classList.add('hidden'); }
+
+                var descEl = document.getElementById('preview_desc');
+                if (desc.trim()) { descEl.textContent = desc; descEl.classList.remove('hidden'); }
+                else { descEl.classList.add('hidden'); }
+
+                // Dates
+                var datesEl = document.getElementById('preview_dates');
+                var issueEl = document.getElementById('preview_issue');
+                var expiryEl = document.getElementById('preview_expiry');
+                var hasIssue = issueDate.trim() !== '';
+                var hasExpiry = expiryDate.trim() !== '';
+                datesEl.classList.toggle('hidden', !hasIssue && !hasExpiry);
+                issueEl.classList.toggle('hidden', !hasIssue);
+                expiryEl.classList.toggle('hidden', !hasExpiry);
+                if (hasIssue) document.getElementById('preview_issue_text').textContent = formatDate(issueDate);
+                if (hasExpiry) document.getElementById('preview_expiry_text').textContent = formatDate(expiryDate);
+
+                // Cert number
+                var cnEl = document.getElementById('preview_cert_num');
+                if (certNum.trim()) {
+                    document.getElementById('preview_cert_num_text').textContent = certNum;
+                    cnEl.classList.remove('hidden');
+                } else {
+                    cnEl.classList.add('hidden');
+                }
+
+                // Badge image vs icon
+                var badgeImg = document.getElementById('preview_badge_img');
+                var badgeIcon = document.getElementById('preview_badge_icon');
+                if (imgUrl.trim()) {
+                    badgeImg.src = imgUrl;
+                    badgeImg.classList.remove('hidden');
+                    badgeIcon.classList.add('hidden');
+                } else {
+                    badgeImg.classList.add('hidden');
+                    badgeIcon.classList.remove('hidden');
+                }
+            }
+
+            function formatDate(d) {
+                if (!d) return '';
+                var parts = d.split('-');
+                if (parts.length !== 3) return d;
+                var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                return months[parseInt(parts[1])-1] + ' ' + parts[2] + ', ' + parts[0];
+            }
+            </script>
+
+            <script>
+            // ===== Image upload (badge image) =====
+            let selectedImageFile = null;
+            let imageUploadState = 'idle';
+            let imageMode = 'upload';
+
+            function switchImageMode() {
+                const mode = document.getElementById('image-source-mode').value;
+                imageMode = mode;
+                const fileBlock = document.getElementById('file-picker-block');
+                const urlBlock = document.getElementById('url-input-block');
+                if (mode === 'url') {
+                    fileBlock.classList.add('hidden');
+                    urlBlock.classList.remove('hidden');
+                    document.getElementById('image-url-visible').value = document.getElementById('image-url-input').value;
+                } else {
+                    urlBlock.classList.add('hidden');
+                    fileBlock.classList.remove('hidden');
+                    if (imageUploadState === 'failed') {
+                        imageUploadState = 'idle';
+                        document.getElementById('upload-progress').classList.add('hidden');
+                    }
+                }
+            }
+
+            function syncImageUrl(value) {
+                document.getElementById('image-url-input').value = value;
+                const preview = document.getElementById('image-preview');
+                if (value.trim()) {
+                    preview.src = value;
+                    preview.onerror = function() { this.style.display = 'none'; };
+                    preview.onload = function() {
+                        this.style.display = 'block';
+                        document.getElementById('image-preview-container').classList.remove('hidden');
+                    };
+                } else {
+                    document.getElementById('image-preview-container').classList.add('hidden');
+                }
+                updatePreview();
+            }
+
+            document.getElementById('image-file-input').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    selectedImageFile = file;
+                    imageUploadState = 'idle';
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const preview = document.getElementById('image-preview');
+                        preview.src = e.target.result;
+                        document.getElementById('image-preview-container').classList.remove('hidden');
+                    };
+                    reader.readAsDataURL(file);
+                    uploadImageFile();
+                }
+            });
+
+            function uploadImageFile() {
+                if (!selectedImageFile) { alert('Please select an image file first'); return; }
+                const formData = new FormData();
+                formData.append('image', selectedImageFile);
+                const pc = document.getElementById('upload-progress');
+                const pb = document.getElementById('upload-progress-bar');
+                const st = document.getElementById('upload-status');
+                const fl = document.querySelector('label[for="image-file-input"]');
+                imageUploadState = 'uploading';
+                pc.classList.remove('hidden');
+                st.textContent = 'Uploading...';
+                st.classList.remove('text-green-600', 'text-red-600');
+                pb.style.width = '0%';
+                fl.style.pointerEvents = 'none'; fl.style.opacity = '0.6';
+                const xhr = new XMLHttpRequest();
+                xhr.upload.addEventListener('progress', function(e) {
+                    if (e.lengthComputable) { pb.style.width = ((e.loaded / e.total) * 100) + '%'; }
+                });
+                xhr.addEventListener('load', function() {
+                    if (xhr.status === 200) {
+                        const r = JSON.parse(xhr.responseText);
+                        if (r.success) {
+                            document.getElementById('image-url-input').value = r.url;
+                            st.textContent = 'Upload successful!'; st.classList.add('text-green-600');
+                            imageUploadState = 'success';
+                            setTimeout(() => { pc.classList.add('hidden'); }, 2000);
+                            updatePreview();
+                        } else {
+                            st.textContent = 'Upload failed: ' + r.error; st.classList.add('text-red-600'); imageUploadState = 'failed';
+                        }
+                    } else {
+                        let m = 'Server error'; try { m = JSON.parse(xhr.responseText).error || m; } catch (_) {}
+                        st.textContent = 'Upload failed: ' + m; st.classList.add('text-red-600'); imageUploadState = 'failed';
+                    }
+                    fl.style.pointerEvents = ''; fl.style.opacity = '';
+                });
+                xhr.addEventListener('error', function() {
+                    st.textContent = 'Upload failed: Network error'; st.classList.add('text-red-600'); imageUploadState = 'failed';
+                    fl.style.pointerEvents = ''; fl.style.opacity = '';
+                });
+                xhr.open('POST', 'api/upload_image.php');
+                xhr.send(formData);
+            }
+
+            function clearImagePreview() {
+                document.getElementById('image-preview-container').classList.add('hidden');
+                document.getElementById('image-url-input').value = '';
+                document.getElementById('image-url-visible').value = '';
+                document.getElementById('image-file-input').value = '';
+                selectedImageFile = null;
+                imageUploadState = 'idle';
+                document.getElementById('upload-progress').classList.add('hidden');
+                updatePreview();
+            }
+
+            // ===== Document upload (certificate PDF) =====
+            let selectedDocFile = null;
+            let docUploadState = 'idle';
+            let docMode = 'upload';
+
+            function switchDocMode() {
+                const mode = document.getElementById('doc-source-mode').value;
+                docMode = mode;
+                const fileBlock = document.getElementById('doc-picker-block');
+                const urlBlock = document.getElementById('doc-url-block');
+                if (mode === 'url') {
+                    fileBlock.classList.add('hidden');
+                    urlBlock.classList.remove('hidden');
+                    document.getElementById('doc-url-visible').value = document.getElementById('doc-url-input').value;
+                } else {
+                    urlBlock.classList.add('hidden');
+                    fileBlock.classList.remove('hidden');
+                    if (docUploadState === 'failed') {
+                        docUploadState = 'idle';
+                        document.getElementById('doc-upload-progress').classList.add('hidden');
+                    }
+                }
+            }
+
+            function syncDocUrl(value) {
+                document.getElementById('doc-url-input').value = value;
+            }
+
+            document.getElementById('doc-file-input').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    selectedDocFile = file;
+                    docUploadState = 'idle';
+                    uploadDocFile();
+                }
+            });
+
+            function uploadDocFile() {
+                if (!selectedDocFile) { alert('Please select a document file first'); return; }
+                const formData = new FormData();
+                formData.append('document', selectedDocFile);
+                const pc = document.getElementById('doc-upload-progress');
+                const pb = document.getElementById('doc-upload-progress-bar');
+                const st = document.getElementById('doc-upload-status');
+                const fl = document.querySelector('label[for="doc-file-input"]');
+                docUploadState = 'uploading';
+                pc.classList.remove('hidden');
+                st.textContent = 'Uploading...';
+                st.classList.remove('text-green-600', 'text-red-600');
+                pb.style.width = '0%';
+                fl.style.pointerEvents = 'none'; fl.style.opacity = '0.6';
+                const xhr = new XMLHttpRequest();
+                xhr.upload.addEventListener('progress', function(e) {
+                    if (e.lengthComputable) { pb.style.width = ((e.loaded / e.total) * 100) + '%'; }
+                });
+                xhr.addEventListener('load', function() {
+                    if (xhr.status === 200) {
+                        const r = JSON.parse(xhr.responseText);
+                        if (r.success) {
+                            document.getElementById('doc-url-input').value = r.url;
+                            st.textContent = 'Upload successful!'; st.classList.add('text-green-600');
+                            docUploadState = 'success';
+                            setTimeout(() => { pc.classList.add('hidden'); }, 2000);
+                        } else {
+                            st.textContent = 'Upload failed: ' + r.error; st.classList.add('text-red-600'); docUploadState = 'failed';
+                        }
+                    } else {
+                        let m = 'Server error'; try { m = JSON.parse(xhr.responseText).error || m; } catch (_) {}
+                        st.textContent = 'Upload failed: ' + m; st.classList.add('text-red-600'); docUploadState = 'failed';
+                    }
+                    fl.style.pointerEvents = ''; fl.style.opacity = '';
+                });
+                xhr.addEventListener('error', function() {
+                    st.textContent = 'Upload failed: Network error'; st.classList.add('text-red-600'); docUploadState = 'failed';
+                    fl.style.pointerEvents = ''; fl.style.opacity = '';
+                });
+                xhr.open('POST', 'api/upload_document.php');
+                xhr.send(formData);
+            }
+            </script>
 
         <?php else: ?>
             <!-- List View -->
