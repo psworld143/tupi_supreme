@@ -18,8 +18,10 @@ $nav_items = [
     ['index.php',          'fa-home',           'Dashboard'],
     ['pages.php',          'fa-file-alt',       'Pages'],
     ['about.php',          'fa-info-circle',    'About Page'],
+    ['team-members.php',   'fa-users',          'Team Members'],
     ['timeline.php',       'fa-history',        'Our Journey'],
     ['statistics.php',     'fa-chart-bar',      'Statistics'],
+    ['homepage-features.php','fa-star',         'Homepage Features'],
     ['carousel.php',       'fa-images',         'Carousel'],
     ['products.php',       'fa-cube',           'Products'],
     ['product-tabs.php',   'fa-folder',         'Product Tabs'],
@@ -27,12 +29,17 @@ $nav_items = [
     ['case-studies.php',   'fa-book',           'Case Studies'],
     ['gallery.php',        'fa-photo-video',    'Gallery'],
     ['resources.php',      'fa-file-download',  'Resources'],
+    ['faqs.php',           'fa-question-circle','FAQs'],
+    ['office-hours.php',   'fa-clock',          'Office Hours'],
+    ['subject-options.php','fa-list-ul',        'Subject Options'],
+    ['contact-info.php',   'fa-address-book',   'Contact Info'],
     ['certifications.php', 'fa-certificate',    'Certifications'],
 ];
 
 $account_items = [
-    ['settings.php', 'fa-cog',          'Settings'],
-    ['logout.php',   'fa-sign-out-alt', 'Logout'],
+    ['site-settings.php', 'fa-sliders-h',   'Site Settings'],
+    ['settings.php',      'fa-cog',         'Settings'],
+    ['logout.php',        'fa-sign-out-alt','Logout'],
 ];
 ?>
 <!-- Poppins font + admin theme -->

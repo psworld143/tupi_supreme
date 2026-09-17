@@ -244,15 +244,40 @@ $subject_options = getContactSubjectOptions(); // Get contact form subject optio
             border-bottom: none;
         }
 
-        /* FAQ accordion */
+        /* FAQ accordion — smooth expand via grid-rows, no JS height math */
         .faq-item {
-            transition: border-color 0.3s ease;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
         .faq-item:hover {
             border-color: #3d7a66;
         }
-        .faq-button:hover {
-            background-color: #f7faf8;
+        .faq-item.open {
+            border-color: #3d7a66;
+            box-shadow: 0 8px 24px -12px rgba(35, 51, 44, 0.18);
+        }
+        .faq-content {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .faq-item.open .faq-content {
+            grid-template-rows: 1fr;
+        }
+        .faq-content-inner {
+            overflow: hidden;
+        }
+        .faq-icon {
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .faq-item.open .faq-icon {
+            transform: rotate(180deg);
+        }
+        .faq-button:focus-visible {
+            outline: 2px solid #3d7a66;
+            outline-offset: -2px;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .faq-content, .faq-icon { transition: none; }
         }
 
         /* Scroll-triggered reveal */
@@ -589,18 +614,30 @@ $subject_options = getContactSubjectOptions(); // Get contact form subject optio
                             $faqId = 'contact-faq' . ($index + 1);
                         ?>
                             <div class="faq-item bg-white border border-[#e6ece8] rounded-2xl overflow-hidden reveal <?php echo 'reveal-delay-' . ((($index % 3) + 1)); ?>">
-                                <button class="faq-button w-full px-6 py-5 text-left transition-colors focus:outline-none" onclick="toggleFAQ('<?php echo $faqId; ?>')">
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-base font-semibold text-[#23332c] pr-4"><?php echo htmlspecialchars_safe($faq['question']); ?></span>
-                                        <i class="fas fa-chevron-down text-[#3d7a66] transform transition-transform flex-shrink-0" id="<?php echo $faqId; ?>-icon"></i>
+                                <button class="faq-button w-full px-6 py-5 text-left" id="<?php echo $faqId; ?>-button" aria-expanded="false" aria-controls="<?php echo $faqId; ?>-content" onclick="toggleFAQ(this)">
+                                    <div class="flex justify-between items-center gap-4">
+                                        <span class="min-w-0">
+                                            <?php if (!empty($faq['category'])): ?>
+                                                <span class="inline-block text-[11px] font-medium uppercase tracking-wider text-[#3d7a66] bg-[#eef3f0] rounded-full px-2.5 py-0.5 mb-2"><?php echo htmlspecialchars_safe($faq['category']); ?></span>
+                                            <?php endif; ?>
+                                            <span class="block text-base font-semibold text-[#23332c] pr-2"><?php echo htmlspecialchars_safe($faq['question']); ?></span>
+                                        </span>
+                                        <span class="w-8 h-8 rounded-full bg-[#eef3f0] flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-chevron-down faq-icon text-[#3d7a66] text-sm"></i>
+                                        </span>
                                     </div>
                                 </button>
-                                <div class="px-6 pb-5 hidden" id="<?php echo $faqId; ?>-content">
-                                    <p class="text-[#7d8b84] leading-relaxed text-sm"><?php echo nl2br_safe($faq['answer']); ?></p>
+                                <div class="faq-content" id="<?php echo $faqId; ?>-content" role="region" aria-labelledby="<?php echo $faqId; ?>-button">
+                                    <div class="faq-content-inner">
+                                        <p class="px-6 pb-5 text-[#7d8b84] leading-relaxed text-sm"><?php echo nl2br_safe($faq['answer']); ?></p>
+                                    </div>
                                 </div>
                             </div>
                         <?php endforeach; ?>
                     </div>
+                    <p class="text-center text-[#7d8b84] text-sm mt-10 reveal">
+                        Can't find what you're looking for? <a href="#contact-form" class="text-[#3d7a66] font-medium hover:underline">Send us a message</a>
+                    </p>
                 </div>
             <?php else: ?>
                 <div class="text-center py-12 reveal">
@@ -616,16 +653,19 @@ $subject_options = getContactSubjectOptions(); // Get contact form subject optio
     <?php include 'includes/footer.php'; ?>
 
     <script>
-        function toggleFAQ(faqId) {
-            const content = document.getElementById(faqId + '-content');
-            const icon = document.getElementById(faqId + '-icon');
-            
-            if (content.classList.contains('hidden')) {
-                content.classList.remove('hidden');
-                icon.style.transform = 'rotate(180deg)';
-            } else {
-                content.classList.add('hidden');
-                icon.style.transform = 'rotate(0deg)';
+        function toggleFAQ(btn) {
+            const item = btn.closest('.faq-item');
+            const isOpen = item.classList.toggle('open');
+            btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+
+            // Accordion behavior: close any other open items in this section
+            if (isOpen) {
+                item.parentElement.querySelectorAll('.faq-item.open').forEach(function(other) {
+                    if (other !== item) {
+                        other.classList.remove('open');
+                        other.querySelector('.faq-button').setAttribute('aria-expanded', 'false');
+                    }
+                });
             }
         }
 

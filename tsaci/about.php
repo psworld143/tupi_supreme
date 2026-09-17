@@ -513,10 +513,19 @@ $company_full_name = getSiteSetting('company_name', 'Tupi Supreme Activated Carb
                         <?php if ($member['bio']): ?>
                             <p class="text-[#7d8b84] leading-relaxed text-sm mb-4"><?php echo htmlspecialchars_safe($member['bio']); ?></p>
                         <?php endif; ?>
-                        <?php if ($member['email']): ?>
-                            <a href="mailto:<?php echo htmlspecialchars_safe($member['email']); ?>" class="inline-flex items-center gap-2 text-[#3d7a66] hover:text-[#23332c] text-sm font-medium transition-colors">
-                                <i class="fas fa-envelope text-xs"></i> Email
-                            </a>
+                        <?php if ($member['email'] || $member['linkedin_url']): ?>
+                            <div class="flex items-center justify-center gap-4">
+                                <?php if ($member['email']): ?>
+                                    <a href="mailto:<?php echo htmlspecialchars_safe($member['email']); ?>" class="inline-flex items-center gap-2 text-[#3d7a66] hover:text-[#23332c] text-sm font-medium transition-colors">
+                                        <i class="fas fa-envelope text-xs"></i> Email
+                                    </a>
+                                <?php endif; ?>
+                                <?php if ($member['linkedin_url']): ?>
+                                    <a href="<?php echo htmlspecialchars_safe($member['linkedin_url']); ?>" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-[#3d7a66] hover:text-[#23332c] text-sm font-medium transition-colors">
+                                        <i class="fab fa-linkedin text-xs"></i> LinkedIn
+                                    </a>
+                                <?php endif; ?>
+                            </div>
                         <?php endif; ?>
                     </div>
                 <?php endforeach; ?>
