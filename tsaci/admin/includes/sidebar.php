@@ -19,6 +19,7 @@ $nav_items = [
     ['pages.php',          'fa-file-alt',       'Pages'],
     ['about.php',          'fa-info-circle',    'About Page'],
     ['team-members.php',   'fa-users',          'Team Members'],
+    ['company-values.php', 'fa-gem',            'Company Values'],
     ['timeline.php',       'fa-history',        'Our Journey'],
     ['statistics.php',     'fa-chart-bar',      'Statistics'],
     ['homepage-features.php','fa-star',         'Homepage Features'],
@@ -26,6 +27,7 @@ $nav_items = [
     ['products.php',       'fa-cube',           'Products'],
     ['product-tabs.php',   'fa-folder',         'Product Tabs'],
     ['services.php',       'fa-concierge-bell', 'Services'],
+    ['testimonials.php',   'fa-quote-left',     'Testimonials'],
     ['case-studies.php',   'fa-book',           'Case Studies'],
     ['gallery.php',        'fa-photo-video',    'Gallery'],
     ['resources.php',      'fa-file-download',  'Resources'],
@@ -33,13 +35,16 @@ $nav_items = [
     ['office-hours.php',   'fa-clock',          'Office Hours'],
     ['subject-options.php','fa-list-ul',        'Subject Options'],
     ['contact-info.php',   'fa-address-book',   'Contact Info'],
+    ['social-media.php',   'fa-share-alt',      'Social Media'],
+    ['footer-links.php',   'fa-link',           'Footer Links'],
     ['certifications.php', 'fa-certificate',    'Certifications'],
 ];
 
 $account_items = [
-    ['site-settings.php', 'fa-sliders-h',   'Site Settings'],
-    ['settings.php',      'fa-cog',         'Settings'],
-    ['logout.php',        'fa-sign-out-alt','Logout'],
+    ['site-settings.php',    'fa-sliders-h',   'Site Settings'],
+    ['login-background.php', 'fa-image',       'Login Background'],
+    ['settings.php',         'fa-cog',         'Settings'],
+    ['logout.php',           'fa-sign-out-alt','Logout'],
 ];
 ?>
 <!-- Poppins font + admin theme -->

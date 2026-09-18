@@ -52,6 +52,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
+// Login page background settings (managed in admin/login-background.php)
+$login_bg = [
+    'login_bg_enabled'  => '0',
+    'login_bg_image'    => '',
+    'login_bg_overlay'  => '80',
+    'login_bg_gradient' => '1',
+    'login_bg_color'    => '#f5f7f5',
+];
+$db = getDB();
+$res = $db->query("SELECT setting_key, setting_value FROM site_settings WHERE setting_key IN ('login_bg_enabled','login_bg_image','login_bg_overlay','login_bg_gradient','login_bg_color')");
+if ($res) {
+    while ($row = $res->fetch_assoc()) {
+        $login_bg[$row['setting_key']] = $row['setting_value'];
+    }
+}
+$login_bg_enabled = $login_bg['login_bg_enabled'] === '1' && trim($login_bg['login_bg_image']) !== '';
+$login_bg_gradient = $login_bg['login_bg_gradient'] === '1';
+$login_bg_alpha = number_format(max(0, min(100, (int) $login_bg['login_bg_overlay'])) / 100, 2);
+$login_bg_url = str_replace(["'", "\\", "\n", "\r", "<", ">"], '', $login_bg['login_bg_image']);
+$login_bg_color = preg_match('/^#[0-9a-fA-F]{6}$/', $login_bg['login_bg_color']) ? $login_bg['login_bg_color'] : '#f5f7f5';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -84,7 +105,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         body {
             font-family: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+            <?php if ($login_bg_enabled): ?>
+                <?php if ($login_bg_gradient): ?>
+            background: linear-gradient(135deg, rgba(35, 51, 44, <?php echo $login_bg_alpha; ?>), rgba(61, 122, 102, <?php echo $login_bg_alpha; ?>)), url('<?php echo $login_bg_url; ?>') center/cover no-repeat fixed;
+                <?php else: ?>
+            background: <?php echo $login_bg_color; ?> url('<?php echo $login_bg_url; ?>') center/cover no-repeat fixed;
+                <?php endif; ?>
+            <?php else: ?>
+                <?php if ($login_bg_gradient): ?>
             background: linear-gradient(135deg, #23332c, #3d7a66);
+                <?php else: ?>
+            background: <?php echo $login_bg_color; ?>;
+                <?php endif; ?>
+            <?php endif; ?>
             color: #23332c;
             min-height: 100vh;
         }
@@ -163,6 +196,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background: linear-gradient(135deg, #3d7a66, #60796e);
             transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
+        /* Plain (no-gradient) mode — flattens every gradient/white-on-dark element */
+        .plain-bg .icon-container {
+            background: #3d7a66;
+        }
+        .plain-bg .eyebrow {
+            background-color: rgba(61, 122, 102, 0.12);
+            color: #3d7a66;
+        }
         .login-card:hover .icon-container {
             transform: scale(1.06) rotate(-3deg);
         }
@@ -203,11 +245,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+<body class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden<?php echo $login_bg_gradient ? '' : ' plain-bg'; ?>">
+    <?php if ($login_bg_gradient): ?>
     <!-- Floating gradient orbs for depth -->
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
     <div class="page-pattern absolute inset-0 opacity-30"></div>
+    <?php endif; ?>
 
     <div class="max-w-md w-full login-card p-10 rounded-3xl shadow-2xl relative z-10 fade-in fade-in-delay-1">
         <div>
