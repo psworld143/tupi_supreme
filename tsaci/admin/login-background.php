@@ -175,24 +175,30 @@ $view_url = 'login.php';
                         <div class="space-y-6">
                             <!-- Enable toggles -->
                             <div class="space-y-3 p-4 rounded-lg border border-gray-200 bg-gray-50">
-                                <label class="flex items-center cursor-pointer">
+                                <label class="flex items-center cursor-pointer select-none">
                                     <input type="checkbox" name="login_bg_enabled" id="login_bg_enabled" value="1"
                                            <?php echo $bg_enabled ? 'checked' : ''; ?>
                                            class="sr-only peer" onchange="updatePreview()">
-                                    <span class="relative inline-flex items-center">
-                                        <span class="w-11 h-6 bg-gray-300 peer-checked:bg-primary rounded-full transition-colors"></span>
-                                        <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5"></span>
-                                    </span>
+                                    <span class="relative w-11 h-6 rounded-full bg-gray-300 transition-colors duration-300 ease-in-out
+                                                 peer-checked:bg-primary peer-focus-visible:ring-2 peer-focus-visible:ring-primary/40 peer-focus-visible:ring-offset-2
+                                                 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:w-5 after:h-5
+                                                 after:bg-white after:rounded-full after:shadow
+                                                 after:transition-transform after:duration-300 after:ease-in-out
+                                                 peer-checked:after:translate-x-5
+                                                 hover:after:scale-110 active:after:scale-95"></span>
                                     <span class="ml-3 text-sm font-medium text-gray-700">Use background image <span class="text-gray-400 font-normal">(off = gradient or solid color only)</span></span>
                                 </label>
-                                <label class="flex items-center cursor-pointer">
+                                <label class="flex items-center cursor-pointer select-none">
                                     <input type="checkbox" name="login_bg_gradient" id="login_bg_gradient" value="1"
                                            <?php echo $bg_gradient ? 'checked' : ''; ?>
                                            class="sr-only peer" onchange="updatePreview()">
-                                    <span class="relative inline-flex items-center">
-                                        <span class="w-11 h-6 bg-gray-300 peer-checked:bg-primary rounded-full transition-colors"></span>
-                                        <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5"></span>
-                                    </span>
+                                    <span class="relative w-11 h-6 rounded-full bg-gray-300 transition-colors duration-300 ease-in-out
+                                                 peer-checked:bg-primary peer-focus-visible:ring-2 peer-focus-visible:ring-primary/40 peer-focus-visible:ring-offset-2
+                                                 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:w-5 after:h-5
+                                                 after:bg-white after:rounded-full after:shadow
+                                                 after:transition-transform after:duration-300 after:ease-in-out
+                                                 peer-checked:after:translate-x-5
+                                                 hover:after:scale-110 active:after:scale-95"></span>
                                     <span class="ml-3 text-sm font-medium text-gray-700">Use gradient design <span class="text-gray-400 font-normal">(off = clean image / solid color)</span></span>
                                 </label>
                                 <div class="flex items-center gap-3 pl-14">

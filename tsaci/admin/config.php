@@ -44,6 +44,31 @@ ini_set('display_errors', 1);
 
 // Start Session
 if (session_status() === PHP_SESSION_NONE) {
+    // Some hosts (e.g. LiteSpeed/lsphp) set a default session.save_path that
+    // this account cannot opendir(), which makes PHP's session garbage
+    // collector emit "ps_files_cleanup_dir: Permission denied" notices.
+    // Use a path we control: outside the web root when possible, otherwise a
+    // protected folder inside the project.
+    $docRoot = !empty($_SERVER['DOCUMENT_ROOT']) ? realpath($_SERVER['DOCUMENT_ROOT']) : false;
+    $sessionPath = $docRoot
+        ? dirname($docRoot) . DIRECTORY_SEPARATOR . 'tsaci_sessions'
+        : __DIR__ . '/../sessions';
+    if (!is_dir($sessionPath)) {
+        @mkdir($sessionPath, 0700, true);
+    }
+    if (!is_dir($sessionPath) || !is_writable($sessionPath)) {
+        $sessionPath = __DIR__ . '/../sessions';
+        if (!is_dir($sessionPath)) {
+            @mkdir($sessionPath, 0700, true);
+        }
+        // Block web access to the fallback folder (it lives under the docroot)
+        if (is_dir($sessionPath) && !file_exists($sessionPath . '/.htaccess')) {
+            @file_put_contents($sessionPath . '/.htaccess', "Require all denied\nDeny from all\n");
+        }
+    }
+    if (is_dir($sessionPath) && is_writable($sessionPath)) {
+        session_save_path($sessionPath);
+    }
     session_name(SESSION_NAME);
     session_start();
 }

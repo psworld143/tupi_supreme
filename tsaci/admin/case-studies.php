@@ -367,15 +367,18 @@ $view_url = '../case-studies.php#main';
                                         <p class="text-xs text-gray-400 mt-1">Lower numbers appear first. Use 10, 20, 30…</p>
                                     </div>
                                     <div class="flex items-end">
-                                        <label class="flex items-center cursor-pointer">
+                                        <label class="flex items-center cursor-pointer select-none">
                                             <input type="checkbox" name="is_featured" value="1" id="featured_input"
                                                    <?php echo ($edit_case && $edit_case['is_featured']) ? 'checked' : ''; ?>
                                                    class="sr-only peer"
                                                    onchange="updatePreview()">
-                                            <span class="relative inline-flex items-center">
-                                                <span class="w-11 h-6 bg-gray-300 peer-checked:bg-yellow-500 rounded-full transition-colors"></span>
-                                                <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5"></span>
-                                            </span>
+                                            <span class="relative w-11 h-6 rounded-full bg-gray-300 transition-colors duration-300 ease-in-out
+                                                         peer-checked:bg-yellow-500 peer-focus-visible:ring-2 peer-focus-visible:ring-yellow-500/40 peer-focus-visible:ring-offset-2
+                                                         after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:w-5 after:h-5
+                                                         after:bg-white after:rounded-full after:shadow
+                                                         after:transition-transform after:duration-300 after:ease-in-out
+                                                         peer-checked:after:translate-x-5
+                                                         hover:after:scale-110 active:after:scale-95"></span>
                                             <span class="ml-3 text-sm text-gray-700">Featured <span class="text-gray-400">(highlighted with star)</span></span>
                                         </label>
                                     </div>
@@ -442,14 +445,17 @@ $view_url = '../case-studies.php#main';
                                 </div>
 
                                 <div>
-                                    <label class="flex items-center cursor-pointer">
+                                    <label class="flex items-center cursor-pointer select-none">
                                         <input type="checkbox" name="is_active" value="1"
                                                <?php echo ($edit_case && $edit_case['is_active']) || !$edit_case ? 'checked' : ''; ?>
                                                class="sr-only peer">
-                                        <span class="relative inline-flex items-center">
-                                            <span class="w-11 h-6 bg-gray-300 peer-checked:bg-primary rounded-full transition-colors"></span>
-                                            <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5"></span>
-                                        </span>
+                                        <span class="relative w-11 h-6 rounded-full bg-gray-300 transition-colors duration-300 ease-in-out
+                                                     peer-checked:bg-primary peer-focus-visible:ring-2 peer-focus-visible:ring-primary/40 peer-focus-visible:ring-offset-2
+                                                     after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:w-5 after:h-5
+                                                     after:bg-white after:rounded-full after:shadow
+                                                     after:transition-transform after:duration-300 after:ease-in-out
+                                                     peer-checked:after:translate-x-5
+                                                     hover:after:scale-110 active:after:scale-95"></span>
                                         <span class="ml-3 text-sm text-gray-700">Active <span class="text-gray-400">(shown on the website)</span></span>
                                     </label>
                                 </div>
