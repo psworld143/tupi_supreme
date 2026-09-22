@@ -515,7 +515,6 @@ $show_missing = ($_GET['show_missing'] ?? '0') === '1';
 
     <style>
         @media (min-width: 1024px) {
-            .lg\:ml-64 { height: calc(100vh - 2rem) !important; overflow-y: auto !important; }
             .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #d2dcd5 transparent; }
             .lg\:ml-64::-webkit-scrollbar { width: 8px; }
             .lg\:ml-64::-webkit-scrollbar-track { background: transparent; }
@@ -563,7 +562,7 @@ $show_missing = ($_GET['show_missing'] ?? '0') === '1';
 
         <?php if ($action === 'add' || $action === 'edit'): ?>
             <!-- Add/Edit Form -->
-            <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="p-6">
                 <h2 class="text-2xl font-bold mb-1"><?php echo $action === 'add' ? 'Add New' : 'Edit'; ?> Page Content</h2>
                 <p class="text-sm text-gray-500 mb-4">Fields marked <span class="text-red-500">*</span> are required.</p>
 
@@ -714,7 +713,7 @@ $show_missing = ($_GET['show_missing'] ?? '0') === '1';
                             <i class="fas fa-eye text-gray-400"></i> Live Preview
                             <span class="text-xs text-gray-400 font-normal">(how this content renders)</span>
                         </p>
-                        <div class="border border-gray-200 rounded-lg overflow-hidden">
+                         <div class="border border-gray-200 rounded-lg overflow-hidden">
                             <!-- Preview header showing page + section -->
                             <div class="px-4 py-3 bg-gray-50 border-b border-gray-200">
                                 <div class="flex items-center gap-2 flex-wrap">

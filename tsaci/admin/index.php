@@ -79,10 +79,6 @@ while ($row = $result->fetch_assoc()) {
          height as the fixed sidebar so both panels align top/bottom. -->
     <style>
         @media (min-width: 1024px) {
-            .lg\:ml-64 {
-                height: calc(100vh - 2rem) !important;
-                overflow-y: auto !important;
-            }
             /* Thin, themed scrollbar for the in-card scroll area */
             .lg\:ml-64 {
                 scrollbar-width: thin;

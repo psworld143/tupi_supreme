@@ -197,7 +197,6 @@ $view_url = '../services.php#main';
 
     <style>
         @media (min-width: 1024px) {
-            .lg\:ml-64 { height: calc(100vh - 2rem) !important; overflow-y: auto !important; }
             .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #d2dcd5 transparent; }
             .lg\:ml-64::-webkit-scrollbar { width: 8px; }
             .lg\:ml-64::-webkit-scrollbar-track { background: transparent; }
@@ -245,7 +244,7 @@ $view_url = '../services.php#main';
 
         <?php if ($action === 'add' || $action === 'edit'): ?>
             <!-- Add/Edit Form -->
-            <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="p-6">
                 <h2 class="text-2xl font-bold mb-1"><?php echo $action === 'add' ? 'Add New' : 'Edit'; ?> Service</h2>
                 <p class="text-sm text-gray-500 mb-4">Fields marked <span class="text-red-500">*</span> are required.</p>
 

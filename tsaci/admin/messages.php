@@ -244,7 +244,6 @@ if ($st) {
 
     <style>
         @media (min-width: 1024px) {
-            .lg\:ml-64 { height: calc(100vh - 2rem) !important; overflow-y: auto !important; }
             .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #d2dcd5 transparent; }
             .lg\:ml-64::-webkit-scrollbar { width: 8px; }
             .lg\:ml-64::-webkit-scrollbar-track { background: transparent; }

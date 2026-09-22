@@ -5,10 +5,18 @@ if (!defined('ADMIN_ACCESS')) {
 $current_user = getCurrentUser();
 $current_page = basename($_SERVER['PHP_SELF']);
 
-// Get unread messages count
+// Get unread messages count + recent items for the header notification dropdown
 $db = getDB();
 $result = $db->query("SELECT COUNT(*) as count FROM contact_messages WHERE is_read = 0 AND is_archived = 0");
 $unread_messages = $result->fetch_assoc()['count'];
+
+$recent_unread = [];
+$recent_res = $db->query("SELECT id, name, subject, created_at FROM contact_messages WHERE is_read = 0 AND is_archived = 0 ORDER BY created_at DESC LIMIT 5");
+if ($recent_res) {
+    while ($row = $recent_res->fetch_assoc()) {
+        $recent_unread[] = $row;
+    }
+}
 
 $display_name = $current_user['full_name'] ?: $current_user['username'];
 $avatar_initial = strtoupper(substr($display_name, 0, 1));
@@ -44,8 +52,16 @@ $account_items = [
     ['site-settings.php',    'fa-sliders-h',   'Site Settings'],
     ['login-background.php', 'fa-image',       'Login Background'],
     ['settings.php',         'fa-cog',         'Settings'],
-    ['logout.php',           'fa-sign-out-alt','Logout'],
 ];
+
+// Friendly page title for the top header bar
+$header_title = 'Admin';
+foreach (array_merge($nav_items, [['messages.php', '', 'Messages']], $account_items) as $item) {
+    if ($current_page === $item[0]) {
+        $header_title = $item[2];
+        break;
+    }
+}
 ?>
 <!-- Poppins font + admin theme -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -53,7 +69,7 @@ $account_items = [
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <!-- Sidebar -->
-<aside id="sidebar" class="fixed top-0 bottom-0 left-0 lg:top-4 lg:bottom-4 lg:left-4 z-40 w-64 transition-all duration-300 -translate-x-full lg:translate-x-0 bg-[#f5f7f5] text-[#45524b] lg:rounded-2xl lg:shadow-lg lg:border lg:border-black/5 flex flex-col">
+<aside id="sidebar" class="fixed top-0 bottom-0 left-0 z-40 w-64 transition-all duration-300 -translate-x-full lg:translate-x-0 bg-[#f5f7f5] text-[#45524b] lg:border-r lg:border-black/5 flex flex-col">
     <!-- Profile header (pinned — stays put while the nav scrolls) -->
     <div class="sidebar-header flex items-center gap-3 px-5 pt-5 pb-4 flex-shrink-0">
         <div class="w-11 h-11 rounded-full bg-[#23332c] text-white flex items-center justify-center font-semibold text-lg flex-shrink-0">
@@ -113,6 +129,66 @@ $account_items = [
     </div>
 </aside>
 
+<!-- Top header bar — spans the content area (right of the sidebar on desktop) -->
+<header id="admin-topbar" class="fixed top-0 left-0 right-0 lg:left-64 z-20 h-14 bg-white/95 backdrop-blur border-b border-[#e6ece8] flex items-center gap-3 pl-16 pr-4 lg:pl-6 lg:pr-8">
+    <p class="min-w-0 flex-1 truncate text-sm font-semibold text-[#23332c]"><?php echo htmlspecialchars($header_title); ?></p>
+
+    <a href="../index.php" target="_blank" class="hidden sm:inline-flex items-center gap-1.5 text-xs font-medium text-[#66746c] hover:text-[#23332c] transition-colors">
+        <i class="fas fa-external-link-alt"></i> View Website
+    </a>
+    <span class="hidden sm:block w-px h-5 bg-[#e6ece8]"></span>
+
+    <!-- Notifications -->
+    <div class="relative flex-shrink-0">
+        <button id="notif-toggle" type="button" title="Notifications" class="relative w-8 h-8 rounded-full flex items-center justify-center text-[#66746c] hover:bg-[#eff4f1] hover:text-[#23332c] transition-colors">
+            <i class="fas fa-bell text-sm"></i>
+            <?php if ($unread_messages > 0): ?>
+                <span class="absolute -top-0.5 -right-0.5 min-w-[1rem] h-4 px-0.5 rounded-full bg-red-500 text-white text-[9px] font-semibold flex items-center justify-center"><?php echo $unread_messages > 99 ? '99+' : $unread_messages; ?></span>
+            <?php endif; ?>
+        </button>
+        <div id="notif-dropdown" class="hidden absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-white rounded-2xl border border-[#e6ece8] shadow-lg overflow-hidden z-50">
+            <div class="px-4 py-3 border-b border-[#e6ece8] flex items-center justify-between">
+                <p class="text-xs font-semibold text-[#23332c]">Notifications</p>
+                <?php if ($unread_messages > 0): ?>
+                    <span class="text-[10px] font-medium text-[#8a978f]"><?php echo $unread_messages; ?> unread</span>
+                <?php endif; ?>
+            </div>
+            <div class="max-h-80 overflow-y-auto">
+                <?php if (empty($recent_unread)): ?>
+                    <div class="px-4 py-8 text-center">
+                        <i class="far fa-bell-slash text-[#c0ccc5] text-xl"></i>
+                        <p class="text-xs text-[#8a978f] mt-2">No new messages</p>
+                    </div>
+                <?php else: ?>
+                    <?php foreach ($recent_unread as $n): ?>
+                        <a href="messages.php?action=view&id=<?php echo (int)$n['id']; ?>" class="flex items-start gap-3 px-4 py-3 hover:bg-[#f7faf8] transition-colors border-b border-[#f0f4f1] last:border-0">
+                            <div class="w-8 h-8 rounded-full bg-[#eef3f0] text-[#3d7a66] flex items-center justify-center text-xs font-semibold flex-shrink-0"><?php echo htmlspecialchars(strtoupper(substr($n['name'], 0, 1))); ?></div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-xs font-semibold text-[#23332c] truncate"><?php echo htmlspecialchars($n['name']); ?></p>
+                                <p class="text-xs text-[#66746c] truncate"><?php echo htmlspecialchars($n['subject']); ?></p>
+                                <p class="text-[10px] text-[#8a978f] mt-0.5"><?php echo formatDate($n['created_at'], 'M d, g:i A'); ?></p>
+                            </div>
+                        </a>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+            <a href="messages.php" class="block px-4 py-2.5 text-center text-xs font-medium text-[#3d7a66] hover:bg-[#f7faf8] border-t border-[#e6ece8] transition-colors">View all messages</a>
+        </div>
+    </div>
+
+    <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-full bg-[#23332c] text-white flex items-center justify-center text-xs font-semibold flex-shrink-0"><?php echo htmlspecialchars($avatar_initial); ?></div>
+        <div class="hidden sm:block leading-tight min-w-0">
+            <p class="text-xs font-semibold text-[#23332c] truncate max-w-[10rem]"><?php echo htmlspecialchars($display_name); ?></p>
+            <p class="text-[10px] text-[#8a978f] truncate"><?php echo htmlspecialchars($role_label); ?></p>
+        </div>
+    </div>
+
+    <a href="logout.php" title="Logout" class="w-8 h-8 rounded-full flex items-center justify-center text-[#66746c] hover:bg-red-50 hover:text-red-500 transition-colors flex-shrink-0">
+        <i class="fas fa-sign-out-alt text-sm"></i>
+    </a>
+</header>
+
 <!-- Sidebar Overlay (Mobile) -->
 <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden hidden"></div>
 
@@ -128,14 +204,25 @@ $account_items = [
         background-color: #60796e !important;
     }
 
-    /* Main content sits in a large white rounded card, like the reference */
+    /* Main content is a full-height white panel flush with the viewport edges */
     .lg\:ml-64 {
         background: #ffffff;
-        border-radius: 1.5rem;
-        margin: 0.75rem;
-        min-height: calc(100vh - 1.5rem);
+        margin: 0;
+        min-height: 100vh;
+        /* Clear the fixed top header (3.5rem bar + breathing room) */
+        padding-top: 4.5rem !important;
         /* Animate its margin so it moves in sync with the collapsing sidebar */
         transition: margin-left 0.3s ease;
+    }
+
+    /* Top header bar — slides in sync with the collapsing sidebar */
+    #admin-topbar {
+        transition: left 0.3s ease;
+    }
+
+    /* Dock the mobile menu button inside the top header bar */
+    #sidebar-toggle {
+        top: 0.375rem;
     }
 
     /* Inner cards become flat, minimal panels */
@@ -145,6 +232,13 @@ $account_items = [
         border: 1px solid #e6ece8;
         border-radius: 1rem;
     }
+
+    /* Thin themed scrollbar for the page + inner scroll areas */
+    html { scrollbar-width: thin; scrollbar-color: #d2dcd5 transparent; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background-color: #d2dcd5; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
+    ::-webkit-scrollbar-thumb:hover { background-color: #c0ccc5; }
 
     /* Sidebar scrollbar — matches the light sidebar background */
     #sidebar .sidebar-scroll {
@@ -167,10 +261,10 @@ $account_items = [
     }
 
     @media (min-width: 1024px) {
-        /* Clear the floating sidebar (1rem offset + 16rem panel + 1rem gap) */
+        /* Clear the full-height sidebar (16rem panel, flush edges) */
         .lg\:ml-64 {
-            margin: 1rem 1rem 1rem 18rem !important;
-            min-height: calc(100vh - 2rem);
+            margin: 0 0 0 16rem !important;
+            min-height: 100vh;
         }
 
         /* Collapsed (desktop-only) state: shrink sidebar to an icon rail */
@@ -199,7 +293,10 @@ $account_items = [
             padding-right: 0;
         }
         body.sidebar-collapsed .lg\:ml-64 {
-            margin-left: 6rem !important;
+            margin-left: 4rem !important;
+        }
+        body.sidebar-collapsed #admin-topbar {
+            left: 4rem;
         }
     }
 </style>
@@ -279,6 +376,28 @@ $account_items = [
     window.addEventListener('resize', function() {
         if (window.innerWidth >= 1024) {
             closeSidebar();
+        }
+    });
+
+    // Notification dropdown
+    const notifToggle = document.getElementById('notif-toggle');
+    const notifDropdown = document.getElementById('notif-dropdown');
+
+    notifToggle?.addEventListener('click', function(e) {
+        e.stopPropagation();
+        notifDropdown.classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', function(e) {
+        if (notifDropdown && !notifDropdown.classList.contains('hidden')
+            && !notifDropdown.contains(e.target)) {
+            notifDropdown.classList.add('hidden');
+        }
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && notifDropdown) {
+            notifDropdown.classList.add('hidden');
         }
     });
 
