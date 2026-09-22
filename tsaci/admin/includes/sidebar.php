@@ -409,4 +409,39 @@ foreach (array_merge($nav_items, [['messages.php', '', 'Messages']], $account_it
             closeSidebar();
         }
     });
+
+    // Sidebar scroll position persistence — nav links trigger full page loads,
+    // which would reset the scrollable nav to the top. Keep the current
+    // scrollTop in sessionStorage and restore it after each navigation.
+    const sidebarScroll = document.querySelector('#sidebar .sidebar-scroll');
+    const SCROLL_KEY = 'tsaci_sidebar_scroll';
+
+    function saveSidebarScroll() {
+        if (sidebarScroll) {
+            sessionStorage.setItem(SCROLL_KEY, String(sidebarScroll.scrollTop));
+        }
+    }
+
+    function restoreSidebarScroll() {
+        if (!sidebarScroll) return;
+        const pos = parseInt(sessionStorage.getItem(SCROLL_KEY), 10);
+        if (!isNaN(pos) && pos > 0) {
+            sidebarScroll.scrollTop = pos;
+        }
+    }
+
+    // Restore immediately (the sidebar markup is already parsed above this
+    // script) and again on full load in case late-loading content changed
+    // the scrollable height.
+    restoreSidebarScroll();
+    window.addEventListener('load', restoreSidebarScroll);
+
+    // Keep the saved position current as the user scrolls.
+    sidebarScroll?.addEventListener('scroll', saveSidebarScroll, { passive: true });
+
+    // Capture the position right before navigation/unload as a safety net.
+    sidebarScroll?.addEventListener('click', function(e) {
+        if (e.target.closest('a')) saveSidebarScroll();
+    });
+    window.addEventListener('pagehide', saveSidebarScroll);
 </script>
