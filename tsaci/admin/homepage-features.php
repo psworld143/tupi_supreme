@@ -196,7 +196,9 @@ $view_url = '../index.php#features';
     </style>
 
     <!-- Main Content -->
-    <div class="lg:ml-64 p-4 lg:p-8">
+    <div class="relative lg:ml-64 p-4 lg:p-8">
+        <?php $logo_pulse_logo = '../uploads/images/tupi_supreme_logo.png'; $logo_pulse_mode = 'absolute'; include '../includes/logo_pulse_loader.php'; ?>
+
         <!-- Page Header -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-6">
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
