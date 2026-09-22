@@ -1,5 +1,6 @@
 <?php
 require_once 'config.php';
+require_once __DIR__ . '/includes/mailer.php';
 requireLogin();
 
 $db = getDB();
@@ -14,6 +15,16 @@ if ($status_param === 'read')     $success = 'Message marked as read.';
 if ($status_param === 'archived') $success = 'Message archived.';
 if ($status_param === 'deleted')  $success = 'Message deleted.';
 if ($status_param === 'unarchived') $success = 'Message restored.';
+
+// Session flashes (used by the reply action for detailed errors)
+if (!empty($_SESSION['flash_success'])) {
+    $success = $_SESSION['flash_success'];
+    unset($_SESSION['flash_success']);
+}
+if (!empty($_SESSION['flash_error'])) {
+    $error = $_SESSION['flash_error'];
+    unset($_SESSION['flash_error']);
+}
 
 // Handle POST actions (mark read, archive, unarchive, delete)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -49,6 +60,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute();
             logActivity('delete', 'contact_messages', $post_id, 'Deleted message');
             redirect('messages.php?status=deleted');
+        } elseif ($post_action === 'reply') {
+            $back = 'messages.php?action=view&id=' . $post_id;
+            if (!verifyCsrfToken()) {
+                $_SESSION['flash_error'] = 'Invalid form token. Please try again.';
+                redirect($back);
+            }
+            if (!smtpRepliesEnabled()) {
+                $_SESSION['flash_error'] = 'SMTP replies are not configured. Set SMTP credentials in admin/mail_config.php.';
+                redirect($back);
+            }
+            $reply_subject = trim($_POST['reply_subject'] ?? '');
+            $reply_body = trim($_POST['reply_body'] ?? '');
+            if ($reply_subject === '' || $reply_body === '') {
+                $_SESSION['flash_error'] = 'Subject and message body are required.';
+                redirect($back);
+            }
+            $stmt = $db->prepare("SELECT name, email FROM contact_messages WHERE id = ?");
+            $stmt->bind_param("i", $post_id);
+            $stmt->execute();
+            $target = $stmt->get_result()->fetch_assoc();
+            if (!$target) {
+                $_SESSION['flash_error'] = 'Message not found.';
+                redirect('messages.php');
+            }
+            $result = sendMessageReply($target['email'], $target['name'], $reply_subject, $reply_body);
+            if ($result['success']) {
+                logActivity('reply', 'contact_messages', $post_id, 'Sent email reply to ' . $target['email']);
+                $_SESSION['flash_success'] = 'Reply sent to ' . $target['email'] . ' via Gmail SMTP.';
+            } else {
+                $_SESSION['flash_error'] = 'Failed to send reply: ' . $result['error'];
+            }
+            redirect($back);
         }
     }
 }
@@ -73,6 +116,19 @@ if ($action === 'view' && $id) {
     if (!$message) {
         $error = 'Message not found.';
         $action = 'list';
+    }
+
+    // Pre-drafted reply template (greeting + signature + quoted original)
+    if ($message) {
+        $first_name = trim(explode(' ', trim($message['name']))[0]);
+        $reply_template = "Dear {$first_name},\n\n"
+            . "Thank you for contacting Tupi Supreme Activated Carbon, Inc. regarding \"{$message['subject']}\".\n\n"
+            . "\n\n"
+            . "Best regards,\n"
+            . SMTP_FROM_NAME . "\n"
+            . "Tupi Supreme Activated Carbon, Inc.\n\n"
+            . "--- Original message ---\n"
+            . "> " . str_replace("\n", "\n> ", trim($message['message']));
     }
 }
 
@@ -290,10 +346,44 @@ if ($st) {
                     </div>
                 </div>
 
-                <!-- Quick reply compose -->
+                <!-- Reply compose -->
                 <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <p class="text-sm font-medium text-blue-900 mb-2 flex items-center gap-2"><i class="fas fa-reply"></i> Quick Reply</p>
-                    <p class="text-xs text-blue-700 mb-3">Clicking "Reply by Email" opens your email client with the sender's address and subject pre-filled. You can also copy the email address below.</p>
+                    <p class="text-sm font-medium text-blue-900 mb-2 flex items-center gap-2"><i class="fas fa-reply"></i> Reply</p>
+                    <?php if (smtpRepliesEnabled()): ?>
+                    <p class="text-xs text-blue-700 mb-3">Send a reply directly from <strong><?php echo htmlspecialchars(SMTP_FROM_EMAIL !== '' ? SMTP_FROM_EMAIL : SMTP_USERNAME); ?></strong> via Gmail SMTP.</p>
+                    <form method="POST" action="messages.php" onsubmit="return confirm('Send this reply to <?php echo htmlspecialchars($message['email'], ENT_QUOTES); ?>?');">
+                        <?php echo csrfTokenField(); ?>
+                        <input type="hidden" name="post_action" value="reply">
+                        <input type="hidden" name="id" value="<?php echo $message['id']; ?>">
+                        <div class="mb-3">
+                            <label class="block text-xs font-medium text-gray-600 mb-1">To</label>
+                            <div class="text-sm text-gray-800 px-3 py-2 bg-white border border-gray-200 rounded-md">
+                                <?php echo htmlspecialchars($message['name']); ?> &lt;<?php echo htmlspecialchars($message['email']); ?>&gt;
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="reply_subject" class="block text-xs font-medium text-gray-600 mb-1">Subject</label>
+                            <input type="text" id="reply_subject" name="reply_subject" required
+                                   value="Re: <?php echo htmlspecialchars($message['subject']); ?>"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary">
+                        </div>
+                        <div class="mb-3">
+                            <label for="reply_body" class="block text-xs font-medium text-gray-600 mb-1">Message</label>
+                            <textarea id="reply_body" name="reply_body" rows="12" required
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary"><?php echo htmlspecialchars($reply_template); ?></textarea>
+                            <p class="text-xs text-gray-500 mt-1">Edit the draft as needed — the quoted original at the bottom is included in the email.</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button type="submit" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition-colors inline-flex items-center text-sm">
+                                <i class="fas fa-paper-plane mr-2"></i>Send Reply
+                            </button>
+                            <a href="mailto:<?php echo htmlspecialchars($message['email']); ?>?subject=Re: <?php echo rawurlencode($message['subject']); ?>" class="text-gray-500 hover:text-gray-700 text-xs inline-flex items-center gap-1 ml-2">
+                                <i class="fas fa-external-link-alt"></i>or open in mail client
+                            </a>
+                        </div>
+                    </form>
+                    <?php else: ?>
+                    <p class="text-xs text-blue-700 mb-3">SMTP replies are not configured. To send replies directly from here, set your Gmail address and app password in <code class="bg-blue-100 px-1 rounded">admin/mail_config.php</code>. Meanwhile, you can reply via your own mail client:</p>
                     <div class="flex flex-wrap gap-2">
                         <a href="mailto:<?php echo htmlspecialchars($message['email']); ?>?subject=Re: <?php echo rawurlencode($message['subject']); ?>" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition-colors inline-flex items-center text-sm">
                             <i class="fas fa-reply mr-2"></i>Reply by Email
@@ -307,6 +397,7 @@ if ($st) {
                             <i class="fas fa-copy mr-2"></i>Copy Email
                         </button>
                     </div>
+                    <?php endif; ?>
                 </div>
 
                 <!-- Action buttons -->

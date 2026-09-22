@@ -82,12 +82,14 @@ Standalone CMS back-office. Separate `config.php` (defines `ADMIN_ACCESS`, start
 | `carousel.php` | Manages `carousel_slides` |
 | `timeline.php` | Manages `timeline_events` |
 | `statistics.php` | Manages `statistics` rows |
-| `messages.php` | Views `contact_messages` |
+| `messages.php` | Views `contact_messages`; can send email replies via Gmail SMTP |
+| `mail_config.php` | Gmail SMTP credentials & sender identity for admin replies |
 | `setup_admin.php` | Bootstrap/seed admin user |
 | `seed_map_url.php` | One-off seeder for contact map URL |
 
 ### 3.2 Admin Subfolders
 - `admin/includes/navbar.php`, `admin/includes/sidebar.php` — admin chrome
+- `admin/includes/mailer.php` — `sendMessageReply()` helper using vendored PHPMailer (`tsaci/includes/PHPMailer/`, v6.10.0, no composer)
 - `admin/api/get_stats.php` — JSON stats endpoint (auth required)
 - `admin/api/upload_image.php` — image upload endpoint
 
