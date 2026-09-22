@@ -118,17 +118,22 @@ if ($action === 'view' && $id) {
         $action = 'list';
     }
 
-    // Pre-drafted reply template (greeting + signature + quoted original)
+    // Pre-drafted reply templates (greeting + signature + quoted original)
+    $reply_template = '';
+    $reply_templates = [];
+    $reply_quoted = '';
     if ($message) {
         $first_name = trim(explode(' ', trim($message['name']))[0]);
-        $reply_template = "Dear {$first_name},\n\n"
-            . "Thank you for contacting Tupi Supreme Activated Carbon, Inc. regarding \"{$message['subject']}\".\n\n"
-            . "\n\n"
-            . "Best regards,\n"
-            . SMTP_FROM_NAME . "\n"
-            . "Tupi Supreme Activated Carbon, Inc.\n\n"
-            . "--- Original message ---\n"
-            . "> " . str_replace("\n", "\n> ", trim($message['message']));
+        $signature = "Best regards,\n" . SMTP_FROM_NAME . "\nTupi Supreme Activated Carbon, Inc.";
+        $reply_quoted = "\n\n--- Original message ---\n> " . str_replace("\n", "\n> ", trim($message['message']));
+        $reply_templates = [
+            'general'   => "Dear {$first_name},\n\nThank you for contacting Tupi Supreme Activated Carbon, Inc. regarding \"{$message['subject']}\".\n\n\n\n{$signature}",
+            'quotation' => "Dear {$first_name},\n\nThank you for your interest in our activated carbon products. Regarding your inquiry about \"{$message['subject']}\", please find our pricing details below:\n\n\n\nShould you need a formal quotation or bulk/volume pricing, just let us know.\n\n{$signature}",
+            'specs'     => "Dear {$first_name},\n\nThank you for your inquiry about \"{$message['subject']}\". Here are the technical specifications you requested:\n\n\n\nIf you need our full product data sheets or have further technical questions, we're happy to help.\n\n{$signature}",
+            'more_info' => "Dear {$first_name},\n\nThank you for reaching out to Tupi Supreme Activated Carbon, Inc. To assist you better regarding \"{$message['subject']}\", could you please provide a few more details:\n\n- \n- \n- \n\n{$signature}",
+            'blank'     => "Dear {$first_name},\n\n\n\n{$signature}",
+        ];
+        $reply_template = $reply_templates['general'] . $reply_quoted;
     }
 }
 
@@ -368,6 +373,17 @@ if ($st) {
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary">
                         </div>
                         <div class="mb-3">
+                            <label for="reply_preset" class="block text-xs font-medium text-gray-600 mb-1">Template</label>
+                            <select id="reply_preset" class="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary">
+                                <option value="general" selected>General response</option>
+                                <option value="quotation">Quotation / pricing request</option>
+                                <option value="specs">Product specs / technical inquiry</option>
+                                <option value="more_info">Request more information</option>
+                                <option value="blank">Blank</option>
+                            </select>
+                            <p class="text-xs text-gray-500 mt-1">Choosing a template replaces the draft below.</p>
+                        </div>
+                        <div class="mb-3">
                             <label for="reply_body" class="block text-xs font-medium text-gray-600 mb-1">Message</label>
                             <textarea id="reply_body" name="reply_body" rows="12" required
                                       class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary"><?php echo htmlspecialchars($reply_template); ?></textarea>
@@ -452,6 +468,16 @@ if ($st) {
                     alert('Email address copied to clipboard: ' + email);
                 }, function() {
                     alert('Could not copy. Email: ' + email);
+                });
+            }
+
+            var replyTemplates = <?php echo json_encode($reply_templates, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
+            var replyQuoted = <?php echo json_encode($reply_quoted, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
+            var presetSelect = document.getElementById('reply_preset');
+            if (presetSelect) {
+                presetSelect.addEventListener('change', function() {
+                    var tpl = replyTemplates[this.value] || replyTemplates.general;
+                    document.getElementById('reply_body').value = tpl + replyQuoted;
                 });
             }
             </script>
