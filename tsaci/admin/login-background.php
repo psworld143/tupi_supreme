@@ -8,20 +8,57 @@ $success = '';
 
 // Status flash from PRG redirect (avoids form resubmission on refresh)
 if (($_GET['status'] ?? '') === 'saved') {
-    $success = 'Login background saved successfully!';
+    $success = 'Login page settings saved successfully!';
 }
 
-// Load current settings (defaults: disabled, no image, 80% overlay)
-$settings = [
-    'login_bg_enabled'  => '0',
-    'login_bg_image'    => '',
-    'login_bg_overlay'  => '80',
-    'login_bg_color'    => '#f5f7f5',
+// Editable login-page settings — defaults mirror login.php
+$defaults = [
+    'login_bg_enabled'         => '0',
+    'login_bg_image'           => '',
+    'login_bg_overlay'         => '80',
+    'login_bg_color'           => '#152e1e',
+    'login_bg_gradient_from'   => '#2c5530',
+    'login_bg_gradient_to'     => '#152e1e',
+    'login_logo'               => '../uploads/images/tupi_supreme_logo.png',
+    'login_logo_mode'          => 'both',
+    'login_logo_alt'           => '../uploads/images/tupi_supreme_logo.png',
+    'login_accent_color'       => '#8bc34a',
+    'login_form_bg_color'      => '#f3f8f4',
+    'login_button_color'       => '#2c5530',
+    'login_brand_line'         => 'Official website of Tupi Supreme Activated Carbon, Inc.',
+    'login_brand_eyebrow'      => 'TSACI Admin Portal',
+    'login_brand_title'        => 'One sign-in for',
+    'login_brand_title_accent' => 'your whole website.',
+    'login_brand_description'  => 'Pages, products, services, gallery, messages, and settings — manage the entire TSACI website from a single admin console.',
+    'login_pill_1_icon'        => 'fa-file-alt',
+    'login_pill_1_text'        => 'Content & Pages',
+    'login_pill_2_icon'        => 'fa-cube',
+    'login_pill_2_text'        => 'Products & Services',
+    'login_pill_3_icon'        => 'fa-envelope',
+    'login_pill_3_text'        => 'Messages',
+    'login_brand_quote'        => 'Premium activated carbon solutions for cleaner water and a greener tomorrow.',
+    'login_brand_footer'       => 'Tupi Supreme Activated Carbon, Inc. · Admin Console',
+    'login_form_eyebrow'       => 'Admin Access',
+    'login_form_heading'       => 'Welcome back,',
+    'login_form_subtext'       => 'Sign in to your admin dashboard',
+    'login_button_text'        => 'Sign in to Dashboard',
+    'login_help_text'          => 'Trouble signing in?',
+    'login_help_link_text'     => 'Contact support',
+    'login_help_link_url'      => '../contact.php',
 ];
-$res = $db->query("SELECT setting_key, setting_value FROM site_settings WHERE setting_key IN ('login_bg_enabled','login_bg_image','login_bg_overlay','login_bg_color')");
+
+$color_keys = ['login_bg_color', 'login_bg_gradient_from', 'login_bg_gradient_to', 'login_accent_color', 'login_form_bg_color', 'login_button_color'];
+$icon_keys  = ['login_pill_1_icon', 'login_pill_2_icon', 'login_pill_3_icon'];
+$url_keys   = ['login_logo', 'login_logo_alt', 'login_help_link_url', 'login_bg_image'];
+
+// Load current settings
+$settings = $defaults;
+$res = $db->query("SELECT setting_key, setting_value FROM site_settings WHERE setting_key LIKE 'login\_%'");
 if ($res) {
     while ($row = $res->fetch_assoc()) {
-        $settings[$row['setting_key']] = $row['setting_value'];
+        if (array_key_exists($row['setting_key'], $defaults)) {
+            $settings[$row['setting_key']] = $row['setting_value'];
+        }
     }
 }
 
@@ -30,20 +67,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verifyCsrfToken()) {
         $error = 'Security token expired or invalid. Please reload the page and try again.';
     } else {
-        $enabled = isset($_POST['login_bg_enabled']) ? '1' : '0';
-        $image = sanitizeInput($_POST['login_bg_image'] ?? '');
-        $overlay = (string) max(0, min(100, intval($_POST['login_bg_overlay'] ?? 80)));
-        $color = sanitizeInput($_POST['login_bg_color'] ?? '#f5f7f5');
-        if (!preg_match('/^#[0-9a-fA-F]{6}$/', $color)) {
-            $color = '#f5f7f5';
+        $pairs = [];
+        foreach ($defaults as $key => $def) {
+            $raw = $_POST[$key] ?? $def;
+            $val = is_string($raw) ? trim($raw) : $def;
+            if (in_array($key, $color_keys, true)) {
+                if (!preg_match('/^#[0-9a-fA-F]{6}$/', $val)) {
+                    $val = $def;
+                }
+            } elseif (in_array($key, $icon_keys, true)) {
+                if (!preg_match('/^fa[a-z0-9-]*$/', $val)) {
+                    $val = $def;
+                }
+            } elseif (in_array($key, $url_keys, true)) {
+                $val = str_replace(["'", "\\", "\n", "\r", "<", ">"], '', $val);
+                if ($key === 'login_help_link_url' && $val !== ''
+                    && (stripos($val, 'javascript:') === 0 || stripos($val, 'data:') === 0)) {
+                    $val = $def;
+                }
+            }
+            $pairs[$key] = $val;
         }
-
-        $pairs = [
-            'login_bg_enabled'  => $enabled,
-            'login_bg_image'    => $image,
-            'login_bg_overlay'  => $overlay,
-            'login_bg_color'    => $color,
-        ];
+        $pairs['login_bg_enabled'] = isset($_POST['login_bg_enabled']) ? '1' : '0';
+        $pairs['login_bg_overlay'] = (string) max(0, min(100, intval($_POST['login_bg_overlay'] ?? 80)));
+        $pairs['login_logo_mode']  = ($_POST['login_logo_mode'] ?? 'both') === 'separate' ? 'separate' : 'both';
 
         $stmt = $db->prepare("INSERT INTO site_settings (setting_key, setting_value, updated_by) VALUES (?, ?, ?)
                               ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value), updated_by = VALUES(updated_by)");
@@ -58,25 +105,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($ok) {
-            logActivity('update', 'site_settings', 0, 'Updated login page background settings');
+            logActivity('update', 'site_settings', 0, 'Updated login page settings');
             redirect('login-background.php?status=saved');
         }
     }
 
     // Repopulate form after failed save
-    $settings['login_bg_enabled'] = $enabled;
-    $settings['login_bg_image'] = $image;
-    $settings['login_bg_overlay'] = $overlay;
-    $settings['login_bg_color'] = $color;
+    if (isset($pairs)) {
+        $settings = array_merge($settings, $pairs);
+    }
 }
 
-$bg_enabled = $settings['login_bg_enabled'] === '1';
-$bg_image = $settings['login_bg_image'];
-$bg_overlay = (int) $settings['login_bg_overlay'];
-$bg_color = $settings['login_bg_color'];
-$overlay_alpha = number_format($bg_overlay / 100, 2);
+// Escaped-value helper for form fields
+$s = function ($key) use ($settings) {
+    return htmlspecialchars($settings[$key] ?? '', ENT_QUOTES);
+};
 
-// Login page is the target of these settings
+$bg_enabled = $settings['login_bg_enabled'] === '1';
 $view_url = 'login.php';
 ?>
 <!DOCTYPE html>
@@ -84,7 +129,7 @@ $view_url = 'login.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Background - <?php echo SITE_NAME; ?></title>
+    <title>Login Page - <?php echo SITE_NAME; ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script>
@@ -116,6 +161,9 @@ $view_url = 'login.php';
             .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #c0ccc5; }
         }
         .bg-preview { background-size: cover; background-position: center; }
+        .field { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem; }
+        .field:focus { outline: none; border-color: #2c5530; box-shadow: 0 0 0 1px #2c5530; }
+        .field-label { display: block; font-size: 0.75rem; font-weight: 500; color: #4b5563; margin-bottom: 0.25rem; }
     </style>
 
     <!-- Main Content -->
@@ -127,9 +175,9 @@ $view_url = 'login.php';
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-3">
-                        <i class="fas fa-image text-primary"></i> Login Background
+                        <i class="fas fa-sign-in-alt text-primary"></i> Login Page
                     </h1>
-                    <p class="text-sm text-gray-500 mt-1">Customize the background image behind the admin login page.</p>
+                    <p class="text-sm text-gray-500 mt-1">Customize the admin login page — background, logo, colors, and all text content.</p>
                 </div>
                 <a href="<?php echo $view_url; ?>" target="_blank" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors inline-flex items-center justify-center">
                     <i class="fas fa-external-link-alt mr-2"></i>View Login Page
@@ -151,25 +199,19 @@ $view_url = 'login.php';
             </div>
         <?php endif; ?>
 
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-2xl font-bold mb-1">Login Page Background</h2>
-            <p class="text-sm text-gray-500 mb-4">Shown behind the login card on the <a href="<?php echo $view_url; ?>" target="_blank" class="underline hover:text-gray-700">admin login page</a>.</p>
+        <form method="POST" action="login-background.php" onsubmit="return validateImageUpload()">
+            <?php echo csrfTokenField(); ?>
 
-            <!-- Info banner -->
-            <div class="mb-6 p-3 rounded-lg bg-blue-50 border border-blue-200 flex items-start gap-2">
-                <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
-                <p class="text-sm text-blue-800">
-                    When enabled, your image replaces the solid background color on the login page. The <strong>Image Visibility</strong> slider controls how strongly a dark overlay covers the image — the same behavior as the homepage carousel slides.
-                </p>
-            </div>
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                <div class="xl:col-span-2 space-y-6">
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Left: form fields -->
-                <div>
-                    <form method="POST" action="login-background.php" onsubmit="return validateImageUpload()">
-                        <?php echo csrfTokenField(); ?>
-                        <div class="space-y-6">
-                            <!-- Enable toggles -->
+                    <!-- Section: Brand panel background -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h2 class="text-xl font-bold mb-1 flex items-center gap-2"><i class="fas fa-image text-primary"></i> Brand Panel Background</h2>
+                        <p class="text-sm text-gray-500 mb-4">The dark left panel. Use a color gradient, or enable a background image with a dark overlay.</p>
+
+                        <div class="space-y-5">
+                            <!-- Enable toggle -->
                             <div class="space-y-3 p-4 rounded-lg border border-gray-200 bg-gray-50">
                                 <label class="flex items-center cursor-pointer select-none">
                                     <input type="checkbox" name="login_bg_enabled" id="login_bg_enabled" value="1"
@@ -182,14 +224,32 @@ $view_url = 'login.php';
                                                  after:transition-transform after:duration-300 after:ease-in-out
                                                  peer-checked:after:translate-x-5
                                                  hover:after:scale-110 active:after:scale-95"></span>
-                                    <span class="ml-3 text-sm font-medium text-gray-700">Use background image <span class="text-gray-400 font-normal">(off = solid color only)</span></span>
+                                    <span class="ml-3 text-sm font-medium text-gray-700">Use background image <span class="text-gray-400 font-normal">(off = gradient only)</span></span>
                                 </label>
-                                <div class="flex items-center gap-3 pl-14">
-                                    <input type="color" name="login_bg_color" id="login_bg_color"
-                                           value="<?php echo htmlspecialchars($bg_color); ?>"
-                                           class="h-8 w-14 rounded border border-gray-300 cursor-pointer bg-white"
-                                           oninput="updatePreview()">
-                                    <span class="text-sm text-gray-600">Background color</span>
+                            </div>
+
+                            <!-- Colors -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="field-label" for="login_bg_color">Base color</label>
+                                    <div class="flex items-center gap-2">
+                                        <input type="color" name="login_bg_color" id="login_bg_color" value="<?php echo $s('login_bg_color'); ?>" class="h-9 w-14 rounded border border-gray-300 cursor-pointer bg-white" oninput="updatePreview()">
+                                        <span class="text-xs text-gray-400">Under image</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="field-label" for="login_bg_gradient_from">Gradient start</label>
+                                    <div class="flex items-center gap-2">
+                                        <input type="color" name="login_bg_gradient_from" id="login_bg_gradient_from" value="<?php echo $s('login_bg_gradient_from'); ?>" class="h-9 w-14 rounded border border-gray-300 cursor-pointer bg-white" oninput="updatePreview()">
+                                        <span class="text-xs text-gray-400">No image</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="field-label" for="login_bg_gradient_to">Gradient end</label>
+                                    <div class="flex items-center gap-2">
+                                        <input type="color" name="login_bg_gradient_to" id="login_bg_gradient_to" value="<?php echo $s('login_bg_gradient_to'); ?>" class="h-9 w-14 rounded border border-gray-300 cursor-pointer bg-white" oninput="updatePreview()">
+                                        <span class="text-xs text-gray-400">No image</span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -197,7 +257,6 @@ $view_url = 'login.php';
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Background Image</label>
 
-                                <!-- Image source mode selector -->
                                 <div class="mb-3">
                                     <label class="block text-xs font-medium text-gray-500 mb-1">Image source</label>
                                     <select id="image-source-mode" onchange="switchImageMode()" class="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm">
@@ -206,22 +265,20 @@ $view_url = 'login.php';
                                     </select>
                                 </div>
 
-                                <!-- Image Preview -->
-                                <div id="image-preview-container" class="mb-3 <?php echo empty($bg_image) ? 'hidden' : ''; ?>">
-                                    <img id="image-preview" src="<?php echo htmlspecialchars($bg_image); ?>" alt="Preview" class="max-w-full h-48 object-contain border border-gray-300 rounded-lg p-2 bg-gray-50">
+                                <div id="image-preview-container" class="mb-3 <?php echo trim($settings['login_bg_image']) === '' ? 'hidden' : ''; ?>">
+                                    <img id="image-preview" src="<?php echo $s('login_bg_image'); ?>" alt="Preview" class="max-w-full h-48 object-contain border border-gray-300 rounded-lg p-2 bg-gray-50">
                                     <button type="button" onclick="clearImagePreview()" class="mt-2 text-sm text-red-600 hover:text-red-800">
                                         <i class="fas fa-times mr-1"></i>Remove Image
                                     </button>
                                 </div>
 
-                                <!-- File Picker (upload mode) -->
                                 <div id="file-picker-block" class="border-2 border-dashed border-gray-300 rounded-lg p-4 mb-3">
                                     <div class="text-center">
                                         <input type="file" id="image-file-input" accept="image/jpeg,image/png,image/gif,image/webp" class="hidden">
                                         <label for="image-file-input" class="cursor-pointer inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
                                             <i class="fas fa-upload mr-2"></i>Choose Image File
                                         </label>
-                                        <p class="mt-2 text-xs text-gray-500">JPEG, PNG, GIF, or WebP (Max 10MB) — file uploads automatically when selected. Recommended: wide landscape images (≥1600px).</p>
+                                        <p class="mt-2 text-xs text-gray-500">JPEG, PNG, GIF, or WebP (Max 10MB) — uploads automatically. Recommended: wide landscape images (≥1600px).</p>
                                     </div>
                                     <div id="upload-progress" class="hidden mt-2">
                                         <div class="bg-gray-200 rounded-full h-2">
@@ -231,92 +288,330 @@ $view_url = 'login.php';
                                     </div>
                                 </div>
 
-                                <!-- URL Input (url mode) -->
                                 <div id="url-input-block" class="hidden mb-3">
-                                    <input type="url" id="image-url-visible" value="<?php echo htmlspecialchars($bg_image); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary" placeholder="https://example.com/image.jpg" oninput="syncUrlInput(this.value)">
+                                    <input type="url" id="image-url-visible" value="<?php echo $s('login_bg_image'); ?>" class="field" placeholder="https://example.com/image.jpg" oninput="syncUrlInput(this.value)">
                                     <p class="mt-1 text-xs text-gray-500">Paste a full image URL (https://...).</p>
                                 </div>
 
-                                <!-- Hidden field: the actual value submitted with the form -->
-                                <input type="hidden" name="login_bg_image" id="image-url-input" value="<?php echo htmlspecialchars($bg_image); ?>">
+                                <input type="hidden" name="login_bg_image" id="image-url-input" value="<?php echo $s('login_bg_image'); ?>">
                             </div>
 
-                            <!-- Image visibility: overlay opacity (same as carousel) -->
+                            <!-- Overlay opacity -->
                             <div id="overlay-block">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
                                     Image Visibility <span class="text-gray-400 font-normal">(overlay opacity)</span>
                                 </label>
                                 <div class="flex items-center gap-3">
                                     <input type="range" name="login_bg_overlay" id="overlay_opacity" min="0" max="100" step="1"
-                                           value="<?php echo htmlspecialchars($bg_overlay); ?>"
+                                           value="<?php echo htmlspecialchars($settings['login_bg_overlay']); ?>"
                                            oninput="updateOpacityDisplay(this.value)"
                                            class="w-full max-w-xs accent-primary">
-                                    <span id="overlay_opacity_value" class="text-sm font-medium text-gray-700 w-12 text-right"><?php echo htmlspecialchars($bg_overlay); ?>%</span>
+                                    <span id="overlay_opacity_value" class="text-sm font-medium text-gray-700 w-12 text-right"><?php echo htmlspecialchars($settings['login_bg_overlay']); ?>%</span>
                                 </div>
-                                <p class="text-xs text-gray-400 mt-1">Controls how strongly the dark overlay covers the image. <strong>0%</strong> = image fully visible, <strong>100%</strong> = image fully hidden behind the overlay. Default 80%.</p>
+                                <p class="text-xs text-gray-400 mt-1"><strong>0%</strong> = image fully visible, <strong>100%</strong> = fully covered by dark overlay. Default 80%.</p>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="mt-8 flex flex-col sm:flex-row gap-3">
-                            <button type="submit" class="bg-primary text-white px-6 py-2.5 rounded-lg hover:bg-secondary transition-colors inline-flex items-center justify-center">
-                                <i class="fas fa-save mr-2"></i>Save Background
-                            </button>
-                            <a href="index.php" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2.5 rounded-lg transition-colors inline-flex items-center justify-center">
-                                <i class="fas fa-times mr-2"></i>Cancel
-                            </a>
+                    <!-- Section: Logo -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h2 class="text-xl font-bold mb-1 flex items-center gap-2"><i class="fas fa-certificate text-primary"></i> Logo</h2>
+                        <p class="text-sm text-gray-500 mb-4">Shown in the circles on both panels.</p>
+
+                        <div class="mb-4">
+                            <label class="field-label" for="login_logo_mode">Edit logos</label>
+                            <select name="login_logo_mode" id="login_logo_mode" onchange="updateLogoMode()" class="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary text-sm">
+                                <option value="both" <?php echo $settings['login_logo_mode'] !== 'separate' ? 'selected' : ''; ?>>Same logo for both panels</option>
+                                <option value="separate" <?php echo $settings['login_logo_mode'] === 'separate' ? 'selected' : ''; ?>>Edit each panel separately</option>
+                            </select>
                         </div>
-                    </form>
-                </div>
 
-                <!-- Right: live preview -->
-                <div>
-                    <p class="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                        <i class="fas fa-eye text-gray-400"></i> Live Preview
-                        <span class="text-xs text-gray-400 font-normal">(admin login page)</span>
-                    </p>
-                    <!-- Approximation of login.php -->
-                    <div class="rounded-lg overflow-hidden border border-gray-200">
-                        <div id="login_preview" class="bg-preview relative h-96 flex items-center justify-center p-6"
-                             style="background-color: <?php echo htmlspecialchars($bg_color); ?>; background-image: <?php
-                                 echo ($bg_enabled && $bg_image)
-                                     ? "linear-gradient(rgba(35, 51, 44, {$overlay_alpha}), rgba(35, 51, 44, {$overlay_alpha})), url('" . htmlspecialchars($bg_image) . "')"
-                                     : "none";
-                             ?>; background-size: cover; background-position: center;">
-                            <!-- Mini login card replica -->
-                            <div class="rounded-2xl p-6 w-full max-w-[240px] text-center" style="background-color: rgba(255,255,255,0.95);">
-                                <div id="preview_icon" class="w-12 h-12 rounded-xl mx-auto flex items-center justify-center" style="background: #3d7a66;">
-                                    <i class="fas fa-shield-alt text-white"></i>
+                        <!-- Shared / brand panel logo -->
+                        <div>
+                            <label class="field-label" id="login_logo_label">Logo</label>
+                            <div class="flex items-center gap-4">
+                                <img id="logo-preview" src="<?php echo $s('login_logo'); ?>" alt="Logo preview" class="h-14 w-14 object-contain border border-gray-200 rounded-full bg-white p-1 flex-shrink-0">
+                                <div class="flex-1">
+                                    <input type="text" name="login_logo" id="login_logo" value="<?php echo $s('login_logo'); ?>" class="field" placeholder="../uploads/images/tupi_supreme_logo.png" oninput="updatePreview(); document.getElementById('logo-preview').src = this.value;">
+                                    <p class="mt-1 text-xs text-gray-400">Image path or full URL.</p>
                                 </div>
-                                <span id="preview_eyebrow" class="inline-block mt-3 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-wider rounded-full" style="background-color: rgba(61,122,102,0.12); color: #3d7a66;">Secure Access</span>
-                                <p class="text-sm font-bold mt-2" style="color: #23332c;">Admin Console Login</p>
-                                <div class="mt-3 space-y-2">
-                                    <div class="h-7 rounded-lg" style="background: #f7faf8; border: 1px solid #d6ded9;"></div>
-                                    <div class="h-7 rounded-lg" style="background: #f7faf8; border: 1px solid #d6ded9;"></div>
-                                    <div class="h-7 rounded-full" style="background: #23332c;"></div>
+                                <label for="logo-file-input" class="cursor-pointer inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors text-sm flex-shrink-0">
+                                    <i class="fas fa-upload mr-2"></i>Upload
+                                </label>
+                                <input type="file" id="logo-file-input" accept="image/jpeg,image/png,image/gif,image/webp" class="hidden">
+                            </div>
+                            <p id="logo-upload-status" class="text-xs mt-2"></p>
+                        </div>
+
+                        <!-- Sign-in panel logo (separate mode only) -->
+                        <div id="logo-alt-block" class="mt-5 pt-4 border-t border-gray-100 <?php echo $settings['login_logo_mode'] === 'separate' ? '' : 'hidden'; ?>">
+                            <label class="field-label">Sign-in panel logo</label>
+                            <div class="flex items-center gap-4">
+                                <img id="logo-alt-preview" src="<?php echo $s('login_logo_alt'); ?>" alt="Sign-in logo preview" class="h-14 w-14 object-contain border border-gray-200 rounded-full bg-white p-1 flex-shrink-0">
+                                <div class="flex-1">
+                                    <input type="text" name="login_logo_alt" id="login_logo_alt" value="<?php echo $s('login_logo_alt'); ?>" class="field" placeholder="../uploads/images/tupi_supreme_logo.png" oninput="updatePreview(); document.getElementById('logo-alt-preview').src = this.value;">
+                                    <p class="mt-1 text-xs text-gray-400">Image path or full URL. Empty = falls back to the brand panel logo.</p>
+                                </div>
+                                <label for="logo-alt-file-input" class="cursor-pointer inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors text-sm flex-shrink-0">
+                                    <i class="fas fa-upload mr-2"></i>Upload
+                                </label>
+                                <input type="file" id="logo-alt-file-input" accept="image/jpeg,image/png,image/gif,image/webp" class="hidden">
+                            </div>
+                            <p id="logo-alt-upload-status" class="text-xs mt-2"></p>
+                        </div>
+                    </div>
+
+                    <!-- Section: Brand panel content -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h2 class="text-xl font-bold mb-1 flex items-center gap-2"><i class="fas fa-pen text-primary"></i> Brand Panel Content</h2>
+                        <p class="text-sm text-gray-500 mb-4">Text on the dark left panel. Leave a field empty to hide it.</p>
+
+                        <div class="space-y-4">
+                            <div>
+                                <label class="field-label" for="login_brand_line">Top line</label>
+                                <input type="text" name="login_brand_line" id="login_brand_line" value="<?php echo $s('login_brand_line'); ?>" class="field" oninput="updatePreview()">
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="field-label" for="login_brand_eyebrow">Eyebrow (small label)</label>
+                                    <input type="text" name="login_brand_eyebrow" id="login_brand_eyebrow" value="<?php echo $s('login_brand_eyebrow'); ?>" class="field" oninput="updatePreview()">
+                                </div>
+                                <div>
+                                    <label class="field-label" for="login_accent_color">Accent color</label>
+                                    <div class="flex items-center gap-2">
+                                        <input type="color" name="login_accent_color" id="login_accent_color" value="<?php echo $s('login_accent_color'); ?>" class="h-9 w-14 rounded border border-gray-300 cursor-pointer bg-white" oninput="updatePreview()">
+                                        <span class="text-xs text-gray-400">Headline highlight &amp; pill icons</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="field-label" for="login_brand_title">Headline (line 1)</label>
+                                    <input type="text" name="login_brand_title" id="login_brand_title" value="<?php echo $s('login_brand_title'); ?>" class="field" oninput="updatePreview()">
+                                </div>
+                                <div>
+                                    <label class="field-label" for="login_brand_title_accent">Headline (accented line 2)</label>
+                                    <input type="text" name="login_brand_title_accent" id="login_brand_title_accent" value="<?php echo $s('login_brand_title_accent'); ?>" class="field" oninput="updatePreview()">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="field-label" for="login_brand_description">Description paragraph</label>
+                                <textarea name="login_brand_description" id="login_brand_description" rows="2" class="field" oninput="updatePreview()"><?php echo $s('login_brand_description'); ?></textarea>
+                            </div>
+
+                            <div>
+                                <label class="field-label">Feature pills <span class="text-gray-400 font-normal">(icon class + text; empty text hides the pill)</span></label>
+                                <div class="space-y-2">
+                                    <?php for ($i = 1; $i <= 3; $i++): ?>
+                                        <div class="flex items-center gap-2">
+                                            <input type="text" name="login_pill_<?php echo $i; ?>_icon" id="login_pill_<?php echo $i; ?>_icon" value="<?php echo $s("login_pill_{$i}_icon"); ?>" class="field w-36 font-mono text-xs" placeholder="fa-star" oninput="updatePreview()">
+                                            <input type="text" name="login_pill_<?php echo $i; ?>_text" id="login_pill_<?php echo $i; ?>_text" value="<?php echo $s("login_pill_{$i}_text"); ?>" class="field" placeholder="Pill <?php echo $i; ?> text" oninput="updatePreview()">
+                                        </div>
+                                    <?php endfor; ?>
+                                </div>
+                                <p class="mt-1 text-xs text-gray-400">Icons are Font Awesome classes, e.g. <code>fa-leaf</code>, <code>fa-certificate</code>, <code>fa-envelope</code>.</p>
+                            </div>
+
+                            <div>
+                                <label class="field-label" for="login_brand_quote">Bottom quote</label>
+                                <textarea name="login_brand_quote" id="login_brand_quote" rows="2" class="field" oninput="updatePreview()"><?php echo $s('login_brand_quote'); ?></textarea>
+                            </div>
+                            <div>
+                                <label class="field-label" for="login_brand_footer">Footer line</label>
+                                <input type="text" name="login_brand_footer" id="login_brand_footer" value="<?php echo $s('login_brand_footer'); ?>" class="field" oninput="updatePreview()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section: Sign-in panel -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h2 class="text-xl font-bold mb-1 flex items-center gap-2"><i class="fas fa-lock text-primary"></i> Sign-in Panel</h2>
+                        <p class="text-sm text-gray-500 mb-4">The light panel containing the login form.</p>
+
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="field-label" for="login_form_eyebrow">Eyebrow (small label)</label>
+                                    <input type="text" name="login_form_eyebrow" id="login_form_eyebrow" value="<?php echo $s('login_form_eyebrow'); ?>" class="field" oninput="updatePreview()">
+                                </div>
+                                <div>
+                                    <label class="field-label" for="login_form_heading">Heading</label>
+                                    <input type="text" name="login_form_heading" id="login_form_heading" value="<?php echo $s('login_form_heading'); ?>" class="field" oninput="updatePreview()">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="field-label" for="login_form_subtext">Subtext</label>
+                                <input type="text" name="login_form_subtext" id="login_form_subtext" value="<?php echo $s('login_form_subtext'); ?>" class="field" oninput="updatePreview()">
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="field-label" for="login_button_text">Button text</label>
+                                    <input type="text" name="login_button_text" id="login_button_text" value="<?php echo $s('login_button_text'); ?>" class="field" oninput="updatePreview()">
+                                </div>
+                                <div>
+                                    <label class="field-label" for="login_button_color">Button color</label>
+                                    <div class="flex items-center gap-2">
+                                        <input type="color" name="login_button_color" id="login_button_color" value="<?php echo $s('login_button_color'); ?>" class="h-9 w-14 rounded border border-gray-300 cursor-pointer bg-white" oninput="updatePreview()">
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="field-label" for="login_form_bg_color">Panel background</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" name="login_form_bg_color" id="login_form_bg_color" value="<?php echo $s('login_form_bg_color'); ?>" class="h-9 w-14 rounded border border-gray-300 cursor-pointer bg-white" oninput="updatePreview()">
+                                    <span class="text-xs text-gray-400">Background behind the form</span>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="field-label" for="login_help_text">Help text</label>
+                                    <input type="text" name="login_help_text" id="login_help_text" value="<?php echo $s('login_help_text'); ?>" class="field" oninput="updatePreview()">
+                                </div>
+                                <div>
+                                    <label class="field-label" for="login_help_link_text">Help link text</label>
+                                    <input type="text" name="login_help_link_text" id="login_help_link_text" value="<?php echo $s('login_help_link_text'); ?>" class="field" oninput="updatePreview()">
+                                </div>
+                                <div>
+                                    <label class="field-label" for="login_help_link_url">Help link URL</label>
+                                    <input type="text" name="login_help_link_url" id="login_help_link_url" value="<?php echo $s('login_help_link_url'); ?>" class="field" placeholder="../contact.php" oninput="updatePreview()">
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <p class="text-xs text-gray-400 mt-2">Simplified replica of the login page.</p>
+
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <button type="submit" class="bg-primary text-white px-6 py-2.5 rounded-lg hover:bg-secondary transition-colors inline-flex items-center justify-center">
+                            <i class="fas fa-save mr-2"></i>Save Login Page
+                        </button>
+                        <a href="index.php" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2.5 rounded-lg transition-colors inline-flex items-center justify-center">
+                            <i class="fas fa-times mr-2"></i>Cancel
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Right: live preview -->
+                <div class="xl:sticky xl:top-20 self-start">
+                    <p class="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                        <i class="fas fa-eye text-gray-400"></i> Live Preview
+                        <span class="text-xs text-gray-400 font-normal">(simplified)</span>
+                    </p>
+                    <div class="rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-white">
+                        <div class="flex" style="height: 460px;">
+                            <!-- Brand panel replica -->
+                            <div id="pv_brand" class="bg-preview w-[62%] flex flex-col justify-between p-4 text-white">
+                                <p id="pv_brand_line" class="text-[8px] font-semibold text-white/90 leading-snug"></p>
+                                <div class="text-center px-2">
+                                    <div class="w-10 h-10 mx-auto rounded-full bg-white/95 flex items-center justify-center ring-2 ring-white/20">
+                                        <img id="pv_logo" src="<?php echo $s('login_logo'); ?>" alt="" class="w-7 h-7 object-contain">
+                                    </div>
+                                    <p id="pv_brand_eyebrow" class="mt-2 text-[7px] font-semibold uppercase tracking-[0.2em] text-[#9fd4a8]"></p>
+                                    <p class="mt-1 text-sm font-bold leading-snug"><span id="pv_brand_title"></span><br><span id="pv_brand_title_accent"></span></p>
+                                    <p id="pv_brand_description" class="mt-1.5 text-[7px] text-white/75 leading-relaxed"></p>
+                                    <div class="mt-2 flex flex-wrap justify-center gap-1">
+                                        <?php for ($i = 1; $i <= 3; $i++): ?>
+                                            <span id="pv_pill_<?php echo $i; ?>" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-white/25 bg-white/10 text-[7px]">
+                                                <i id="pv_pill_<?php echo $i; ?>_icon" class="fas"></i><span id="pv_pill_<?php echo $i; ?>_text"></span>
+                                            </span>
+                                        <?php endfor; ?>
+                                    </div>
+                                </div>
+                                <div class="text-center">
+                                    <p id="pv_brand_quote" class="text-[7px] italic text-white/60 leading-snug"></p>
+                                    <p id="pv_brand_footer" class="mt-1 text-[7px] text-white/50"></p>
+                                </div>
+                            </div>
+                            <!-- Form panel replica -->
+                            <div id="pv_form" class="w-[38%] flex flex-col items-center justify-center p-4 text-center">
+                                <div class="w-9 h-9 rounded-full bg-white shadow ring-2 ring-[#e2eae4] flex items-center justify-center">
+                                    <img id="pv_logo2" src="<?php echo $s('login_logo'); ?>" alt="" class="w-6 h-6 object-contain">
+                                </div>
+                                <p id="pv_form_eyebrow" class="mt-2 text-[7px] font-semibold uppercase tracking-[0.2em] text-[#3d7a66]"></p>
+                                <p id="pv_form_heading" class="text-sm font-bold text-[#23332c] leading-tight"></p>
+                                <p id="pv_form_subtext" class="text-[8px] text-[#7d8b84]"></p>
+                                <div class="mt-3 w-full space-y-1.5">
+                                    <div class="h-6 rounded-md bg-white border border-[#e2eae4]"></div>
+                                    <div class="h-6 rounded-md bg-white border border-[#e2eae4]"></div>
+                                    <div id="pv_button" class="h-7 rounded-md flex items-center justify-center text-[8px] font-semibold text-white"><span id="pv_button_text"></span></div>
+                                </div>
+                                <p class="mt-2 text-[7px] text-[#8a978f]"><span id="pv_help_text"></span> <span id="pv_help_link" class="font-medium"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-2">Approximate replica — open the <a href="<?php echo $view_url; ?>" target="_blank" class="underline">login page</a> for the real thing.</p>
                 </div>
             </div>
-        </div>
+        </form>
     </div>
 
     <script>
     // ---------- Live preview ----------
+    function val(id) {
+        var el = document.getElementById(id);
+        return el ? el.value.trim() : '';
+    }
+    function setText(id, txt) {
+        var el = document.getElementById(id);
+        if (el) { el.textContent = txt; }
+    }
+
     function updatePreview() {
         var enabled = document.getElementById('login_bg_enabled').checked;
-        var imgUrl = document.getElementById('image-url-input').value;
-        var opacity = document.getElementById('overlay_opacity').value;
-        var alpha = (parseInt(opacity, 10) / 100).toFixed(2);
-        var preview = document.getElementById('login_preview');
-        var bgColor = document.getElementById('login_bg_color').value;
+        var imgUrl = val('image-url-input');
+        var alpha = (parseInt(val('overlay_opacity') || '80', 10) / 100).toFixed(2);
+        var brand = document.getElementById('pv_brand');
+        var accent = val('login_accent_color') || '#8bc34a';
 
-        preview.style.backgroundColor = bgColor;
-        preview.style.backgroundImage = (enabled && imgUrl.trim())
-            ? "linear-gradient(rgba(35, 51, 44, " + alpha + "), rgba(35, 51, 44, " + alpha + ")), url('" + imgUrl + "')"
-            : "none";
+        brand.style.backgroundColor = val('login_bg_color');
+        brand.style.backgroundImage = (enabled && imgUrl)
+            ? "linear-gradient(rgba(21, 46, 30, " + alpha + "), rgba(21, 46, 30, " + alpha + ")), url('" + imgUrl + "')"
+            : "linear-gradient(155deg, " + (val('login_bg_gradient_from') || '#2c5530') + " 0%, " + (val('login_bg_gradient_to') || '#152e1e') + " 100%)";
+
+        var separateLogos = document.getElementById('login_logo_mode').value === 'separate';
+        var logo = val('login_logo');
+        var logoAlt = separateLogos ? (val('login_logo_alt') || logo) : logo;
+        var pvLogo = document.getElementById('pv_logo');
+        if (logo) { pvLogo.src = logo; pvLogo.style.display = ''; }
+        else { pvLogo.style.display = 'none'; }
+        var pvLogo2 = document.getElementById('pv_logo2');
+        if (logoAlt) { pvLogo2.src = logoAlt; pvLogo2.style.display = ''; }
+        else { pvLogo2.style.display = 'none'; }
+
+        setText('pv_brand_line', val('login_brand_line'));
+        setText('pv_brand_eyebrow', val('login_brand_eyebrow'));
+        setText('pv_brand_title', val('login_brand_title'));
+        var accentEl = document.getElementById('pv_brand_title_accent');
+        accentEl.textContent = val('login_brand_title_accent');
+        accentEl.style.color = accent;
+        setText('pv_brand_description', val('login_brand_description'));
+
+        for (var i = 1; i <= 3; i++) {
+            var pill = document.getElementById('pv_pill_' + i);
+            var text = val('login_pill_' + i + '_text');
+            if (text === '') {
+                pill.style.display = 'none';
+            } else {
+                pill.style.display = '';
+                setText('pv_pill_' + i + '_text', text);
+                var icon = document.getElementById('pv_pill_' + i + '_icon');
+                icon.className = 'fas ' + (val('login_pill_' + i + '_icon') || 'fa-circle');
+                icon.style.color = accent;
+            }
+        }
+
+        var quote = val('login_brand_quote');
+        setText('pv_brand_quote', quote ? '\u201C' + quote + '\u201D' : '');
+        setText('pv_brand_footer', val('login_brand_footer'));
+
+        document.getElementById('pv_form').style.backgroundColor = val('login_form_bg_color');
+        setText('pv_form_eyebrow', val('login_form_eyebrow'));
+        setText('pv_form_heading', val('login_form_heading'));
+        setText('pv_form_subtext', val('login_form_subtext'));
+        document.getElementById('pv_button').style.backgroundColor = val('login_button_color');
+        setText('pv_button_text', val('login_button_text'));
+        setText('pv_help_text', val('login_help_text'));
+        var helpLink = document.getElementById('pv_help_link');
+        helpLink.textContent = val('login_help_link_text');
+        helpLink.style.color = val('login_button_color');
     }
 
     // Slider readout + live preview refresh
@@ -325,7 +620,7 @@ $view_url = 'login.php';
         updatePreview();
     }
 
-    // ---------- Image upload logic (same as carousel) ----------
+    // ---------- Background image picker ----------
     let selectedFile = null;
     let uploadState = 'idle';
     let imageMode = 'upload';
@@ -450,6 +745,50 @@ $view_url = 'login.php';
         updatePreview();
     }
 
+    // ---------- Logo pickers ----------
+    // Toggle between one shared logo and per-panel logos
+    function updateLogoMode() {
+        var separate = document.getElementById('login_logo_mode').value === 'separate';
+        document.getElementById('logo-alt-block').classList.toggle('hidden', !separate);
+        document.getElementById('login_logo_label').textContent = separate ? 'Brand panel logo' : 'Logo';
+        updatePreview();
+    }
+
+    function wireLogoUpload(fileInputId, targetInputId, previewId, statusId) {
+        document.getElementById(fileInputId).addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const status = document.getElementById(statusId);
+            const formData = new FormData();
+            formData.append('image', file);
+            status.textContent = 'Uploading...';
+            status.className = 'text-xs mt-2 text-gray-500';
+            const xhr = new XMLHttpRequest();
+            xhr.addEventListener('load', function() {
+                let response = { success: false, error: 'Server error' };
+                try { response = JSON.parse(xhr.responseText); } catch (_) {}
+                if (xhr.status === 200 && response.success) {
+                    document.getElementById(targetInputId).value = response.url;
+                    document.getElementById(previewId).src = response.url;
+                    status.textContent = 'Upload successful!';
+                    status.className = 'text-xs mt-2 text-green-600';
+                    updatePreview();
+                } else {
+                    status.textContent = 'Upload failed: ' + (response.error || 'error');
+                    status.className = 'text-xs mt-2 text-red-600';
+                }
+            });
+            xhr.addEventListener('error', function() {
+                status.textContent = 'Upload failed: Network error';
+                status.className = 'text-xs mt-2 text-red-600';
+            });
+            xhr.open('POST', 'api/upload_image.php');
+            xhr.send(formData);
+        });
+    }
+    wireLogoUpload('logo-file-input', 'login_logo', 'logo-preview', 'logo-upload-status');
+    wireLogoUpload('logo-alt-file-input', 'login_logo_alt', 'logo-alt-preview', 'logo-alt-upload-status');
+
     function validateImageUpload() {
         const urlInput = document.getElementById('image-url-input');
         const enabled = document.getElementById('login_bg_enabled').checked;
@@ -464,6 +803,9 @@ $view_url = 'login.php';
         if (!urlInput.value.trim()) { alert('Please choose and upload an image file first, or turn off "Use background image".'); return false; }
         return true;
     }
+
+    // Initial paint
+    updateLogoMode();
     </script>
 </body>
 </html>

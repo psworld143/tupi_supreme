@@ -64,10 +64,10 @@ $nav_groups = [
     ],
     'System' => [
         ['site-settings.php',    'fa-sliders-h',      'Site Settings'],
-        ['login-background.php', 'fa-image',          'Login Background'],
+        ['login-background.php', 'fa-sign-in-alt',    'Login Page'],
         ['settings.php',         'fa-cog',            'Settings'],
     ],
-];
+];  
 
 // Friendly page title for the top header bar
 $header_title = 'Admin';

@@ -69,7 +69,9 @@ if (session_status() === PHP_SESSION_NONE) {
     if (is_dir($sessionPath) && is_writable($sessionPath)) {
         session_save_path($sessionPath);
     }
-    ini_set('session.gc_maxlifetime', (string) SESSION_LIFETIME);
+    // Keep session files for 30 days so "Remember me" logins survive GC;
+    // normal sessions still end when their 8-hour cookie expires.
+    ini_set('session.gc_maxlifetime', (string) (3600 * 24 * 30));
     session_set_cookie_params([
         'lifetime' => SESSION_LIFETIME,
         'path'     => '/',
