@@ -48,6 +48,11 @@ $section_anchors = [
     'map'             => 'map',
     'office_hours'    => 'office-hours',
     'contact_info'    => 'contact-section',
+    'iso'             => 'iso-certifications',
+    'product_certs'   => 'product-certifications',
+    'quality'         => 'quality-management',
+    'compliance'      => 'industry-compliance',
+    'testing'         => 'testing-validation',
 ];
 
 // Derive the on-page anchor for a given section_name (longest-prefix match).
@@ -229,12 +234,23 @@ $known_section_names = [
         'cta_button_3_text', 'cta_button_3_link',
     ],
     // 'about' reads from the about_content table (managed in about.php), not page_content.
-    // 'certifications' renders its content from the certifications table.
+    'certifications' => [
+        'page_header_title', 'page_header_subtitle',
+        'iso_title', 'iso_subtitle',
+        'product_certs_title', 'product_certs_subtitle',
+        'quality_title', 'quality_subtitle',
+        'compliance_title', 'compliance_subtitle',
+        'testing_title', 'testing_subtitle', 'testing_note',
+        'cta_title', 'cta_description', 'cta_button_1_text', 'cta_button_1_link',
+        'cta_button_2_text', 'cta_button_2_link', 'meta_description',
+    ],
     'products' => [
         'page_header_title', 'page_header_subtitle', 'section_title', 'section_subtitle',
         'tab_granulated_label', 'tab_husk_label', 'tab_custom_label',
         'specifications_title', 'specifications_subtitle', 'applications_title', 'applications_subtitle',
         'all_products_title', 'all_products_subtitle',
+        'husk_banner_title', 'husk_banner_subtitle', 'husk_note_title', 'husk_note_text',
+        'custom_banner_title', 'custom_banner_subtitle',
         'cta_title', 'cta_description', 'cta_button_1_text', 'cta_button_1_link',
         'cta_button_2_text', 'cta_button_2_link',
     ],
@@ -311,6 +327,12 @@ $section_descriptions = [
     'applications_subtitle' => 'Subtitle for the applications section.',
     'all_products_title'   => 'Heading for the all-products section.',
     'all_products_subtitle' => 'Subtitle for the all-products section.',
+    'husk_banner_title'    => 'Banner heading inside the Coconut Husk Products tab.',
+    'husk_banner_subtitle' => 'Banner subtitle inside the Coconut Husk Products tab.',
+    'husk_note_title'      => 'Heading for the zero-waste note at the bottom of the husk tab.',
+    'husk_note_text'       => 'Body text for the zero-waste note at the bottom of the husk tab.',
+    'custom_banner_title'  => 'Banner heading inside the Custom Formulations tab.',
+    'custom_banner_subtitle' => 'Banner subtitle inside the Custom Formulations tab.',
     // Services
     'process_title'       => 'Heading for the process steps section.',
     'process_subtitle'    => 'Subtitle for the process steps section.',
@@ -329,6 +351,18 @@ $section_descriptions = [
     'faqs_subtitle'        => 'Subtitle for the FAQs section.',
     'download_button_text' => 'Text on the download buttons (e.g., "Download").',
     'download_guide_text'  => 'Text on the guide download buttons.',
+    // Certifications
+    'iso_title'            => 'Heading for the ISO Certifications section.',
+    'iso_subtitle'         => 'Subtitle for the ISO Certifications section.',
+    'product_certs_title'    => 'Heading for the Product Certifications section.',
+    'product_certs_subtitle' => 'Subtitle for the Product Certifications section.',
+    'quality_title'        => 'Heading for the Quality Management Systems section.',
+    'quality_subtitle'     => 'Subtitle for the Quality Management Systems section.',
+    'compliance_title'     => 'Heading for the Industry Compliance section.',
+    'compliance_subtitle'  => 'Subtitle for the Industry Compliance section.',
+    'testing_title'        => 'Heading for the Testing & Validation section.',
+    'testing_subtitle'     => 'Subtitle for the Testing & Validation section.',
+    'testing_note'         => 'Footnote text below the testing specifications table.',
     // Contact
     'contact_section_title'    => 'Heading for the contact section.',
     'contact_section_subtitle' => 'Subtitle for the contact section.',

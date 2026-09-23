@@ -1,13 +1,39 @@
 <?php
 require_once 'includes/config.php';
 $current_page = 'certifications';
+
+// Editable copy (managed via Admin -> Pages -> Certifications)
+$page_header_title = getPageContent('certifications', 'page_header_title', 'Certifications & Quality Standards');
+$page_header_subtitle = getPageContent('certifications', 'page_header_subtitle', 'Committed to quality, compliance, and industry standards');
+$iso_title = getPageContent('certifications', 'iso_title', 'ISO Certifications');
+$iso_subtitle = getPageContent('certifications', 'iso_subtitle', 'International quality management standards');
+$product_certs_title = getPageContent('certifications', 'product_certs_title', 'Product Certifications');
+$product_certs_subtitle = getPageContent('certifications', 'product_certs_subtitle', 'Industry standards and regulatory compliance for municipal water treatment');
+$quality_title = getPageContent('certifications', 'quality_title', 'Quality Management Systems');
+$quality_subtitle = getPageContent('certifications', 'quality_subtitle', 'Comprehensive quality assurance for municipal water treatment clients');
+$compliance_title = getPageContent('certifications', 'compliance_title', 'Industry Compliance');
+$compliance_subtitle = getPageContent('certifications', 'compliance_subtitle', 'Meeting and exceeding industry standards for activated carbon');
+$testing_title = getPageContent('certifications', 'testing_title', 'Testing & Validation');
+$testing_subtitle = getPageContent('certifications', 'testing_subtitle', 'Rigorous testing ensures consistent quality for municipal water treatment');
+$testing_note = getPageContent('certifications', 'testing_note', 'All testing is performed in our certified laboratory with full documentation available upon request for municipal water treatment facilities.');
+$cta_title = getPageContent('certifications', 'cta_title', 'Request Certification Documentation');
+$cta_description = getPageContent('certifications', 'cta_description', 'Contact us to receive detailed certification documents, test reports, and compliance information for your municipal water treatment facility');
+$cta_button_1_text = getPageContent('certifications', 'cta_button_1_text', 'Request Certifications');
+$cta_button_1_link = getPageContent('certifications', 'cta_button_1_link', 'contact.php');
+$cta_button_2_text = getPageContent('certifications', 'cta_button_2_text', 'Download Test Reports');
+$cta_button_2_link = getPageContent('certifications', 'cta_button_2_link', 'resources.php');
+$meta_description = getPageContent('certifications', 'meta_description', 'TSACI certifications and quality standards. ISO certifications, quality management systems, and industry compliance for activated carbon products.');
+
+// Certification cards (managed via Admin -> Certifications)
+$iso_certs = getCertifications('iso');
+$product_certs = getCertifications('product');
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="TSACI certifications and quality standards. ISO certifications, quality management systems, and industry compliance for activated carbon products.">
+    <meta name="description" content="<?php echo htmlspecialchars_safe($meta_description); ?>">
     <title>Certifications & Quality Standards | <?php echo htmlspecialchars_safe(getSiteSetting('company_short_name', 'TSACI')); ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -195,13 +221,14 @@ $current_page = 'certifications';
                 <span class="eyebrow bg-white/15 text-white/90 mb-5 fade-in fade-in-delay-1">
                     <i class="fas fa-certificate text-xs"></i> Quality & Compliance
                 </span>
-                <h1 class="text-4xl lg:text-6xl font-bold mb-5 leading-tight mt-4 fade-in fade-in-delay-2">Certifications & Quality Standards</h1>
-                <p class="text-lg lg:text-xl text-white/85 max-w-2xl mx-auto fade-in fade-in-delay-3">Committed to quality, compliance, and industry standards</p>
+                <h1 class="text-4xl lg:text-6xl font-bold mb-5 leading-tight mt-4 fade-in fade-in-delay-2"><?php echo htmlspecialchars_safe($page_header_title); ?></h1>
+                <p class="text-lg lg:text-xl text-white/85 max-w-2xl mx-auto fade-in fade-in-delay-3"><?php echo htmlspecialchars_safe($page_header_subtitle); ?></p>
             </div>
         </div>
     </section>
 
     <!-- ISO Certifications -->
+    <?php if (!empty($iso_certs)): ?>
     <section id="iso-certifications" class="py-20 lg:py-24 relative overflow-hidden">
         <!-- Subtle dot grid backdrop -->
         <div class="absolute inset-0 dot-grid opacity-40"></div>
@@ -210,91 +237,72 @@ $current_page = 'certifications';
                 <span class="eyebrow mb-4">
                     <i class="fas fa-globe text-xs"></i> International Standards
                 </span>
-                <h2 class="text-3xl lg:text-4xl font-bold text-[#23332c] mb-4 mt-4">ISO Certifications</h2>
-                <p class="text-lg text-[#7d8b84] max-w-2xl mx-auto">International quality management standards</p>
+                <h2 class="text-3xl lg:text-4xl font-bold text-[#23332c] mb-4 mt-4"><?php echo htmlspecialchars_safe($iso_title); ?></h2>
+                <p class="text-lg text-[#7d8b84] max-w-2xl mx-auto"><?php echo nl2br_safe($iso_subtitle); ?></p>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="cert-card bg-white border border-[#e6ece8] rounded-2xl p-8 reveal reveal-delay-1">
+                <?php foreach ($iso_certs as $index => $cert):
+                    $cert_features = !empty($cert['features']) ? array_filter(array_map('trim', explode('•', $cert['features']))) : [];
+                ?>
+                <div class="cert-card bg-white border border-[#e6ece8] rounded-2xl p-8 reveal reveal-delay-<?php echo ($index % 4) + 1; ?>">
                     <div class="flex items-start">
                         <div class="cert-badge w-16 h-16 rounded-2xl flex items-center justify-center mr-5 flex-shrink-0">
-                            <i class="fas fa-certificate text-2xl text-white"></i>
+                            <i class="<?php echo htmlspecialchars_safe($cert['icon'] ?: 'fas fa-certificate'); ?> text-2xl text-white"></i>
                         </div>
                         <div class="flex-1">
-                            <h3 class="text-xl font-semibold text-[#23332c] mb-1">ISO 9001:2015</h3>
-                            <p class="text-[#3d7a66] text-sm font-medium mb-3">Quality Management Systems</p>
-                            <p class="text-[#5a6b62] mb-4 leading-relaxed text-sm">Certified since 2010, demonstrating our commitment to consistent quality management and continuous improvement in all our operations.</p>
-                            <ul class="text-sm text-[#7d8b84] space-y-1.5">
-                                <li class="flex items-center"><i class="fas fa-check text-[#3d7a66] mr-2 text-xs"></i>Quality management system certification</li>
-                                <li class="flex items-center"><i class="fas fa-check text-[#3d7a66] mr-2 text-xs"></i>Process standardization</li>
-                                <li class="flex items-center"><i class="fas fa-check text-[#3d7a66] mr-2 text-xs"></i>Continuous improvement framework</li>
-                                <li class="flex items-center"><i class="fas fa-check text-[#3d7a66] mr-2 text-xs"></i>Customer satisfaction focus</li>
-                            </ul>
+                            <h3 class="text-xl font-semibold text-[#23332c] mb-1"><?php echo htmlspecialchars_safe($cert['title']); ?></h3>
+                            <?php if (!empty($cert['subtitle'])): ?>
+                                <p class="text-[#3d7a66] text-sm font-medium mb-3"><?php echo htmlspecialchars_safe($cert['subtitle']); ?></p>
+                            <?php endif; ?>
+                            <?php if (!empty($cert['description'])): ?>
+                                <p class="text-[#5a6b62] mb-4 leading-relaxed text-sm"><?php echo nl2br_safe($cert['description']); ?></p>
+                            <?php endif; ?>
+                            <?php if (!empty($cert_features)): ?>
+                                <ul class="text-sm text-[#7d8b84] space-y-1.5">
+                                    <?php foreach ($cert_features as $feature): ?>
+                                        <li class="flex items-center"><i class="fas fa-check text-[#3d7a66] mr-2 text-xs"></i><?php echo htmlspecialchars_safe($feature); ?></li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
-                
-                <div class="cert-card bg-white border border-[#e6ece8] rounded-2xl p-8 reveal reveal-delay-2">
-                    <div class="flex items-start">
-                        <div class="cert-badge w-16 h-16 rounded-2xl flex items-center justify-center mr-5 flex-shrink-0">
-                            <i class="fas fa-shield-alt text-2xl text-white"></i>
-                        </div>
-                        <div class="flex-1">
-                            <h3 class="text-xl font-semibold text-[#23332c] mb-1">ISO 14001:2015</h3>
-                            <p class="text-[#3d7a66] text-sm font-medium mb-3">Environmental Management Systems</p>
-                            <p class="text-[#5a6b62] mb-4 leading-relaxed text-sm">Certification demonstrating our commitment to environmental responsibility and sustainable operations in activated carbon production.</p>
-                            <ul class="text-sm text-[#7d8b84] space-y-1.5">
-                                <li class="flex items-center"><i class="fas fa-check text-[#3d7a66] mr-2 text-xs"></i>Environmental management system</li>
-                                <li class="flex items-center"><i class="fas fa-check text-[#3d7a66] mr-2 text-xs"></i>Zero-waste operations</li>
-                                <li class="flex items-center"><i class="fas fa-check text-[#3d7a66] mr-2 text-xs"></i>Sustainable resource utilization</li>
-                                <li class="flex items-center"><i class="fas fa-check text-[#3d7a66] mr-2 text-xs"></i>Environmental compliance</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+                <?php endforeach; ?>
             </div>
         </div>
     </section>
+    <?php endif; ?>
 
     <!-- Product Certifications -->
+    <?php if (!empty($product_certs)): ?>
     <section id="product-certifications" class="bg-[#f5f7f5] py-20 lg:py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16 reveal">
                 <span class="eyebrow mb-4">
                     <i class="fas fa-award text-xs"></i> Product Compliance
                 </span>
-                <h2 class="text-3xl lg:text-4xl font-bold text-[#23332c] mb-4 mt-4">Product Certifications</h2>
-                <p class="text-lg text-[#7d8b84] max-w-2xl mx-auto">Industry standards and regulatory compliance for municipal water treatment</p>
+                <h2 class="text-3xl lg:text-4xl font-bold text-[#23332c] mb-4 mt-4"><?php echo htmlspecialchars_safe($product_certs_title); ?></h2>
+                <p class="text-lg text-[#7d8b84] max-w-2xl mx-auto"><?php echo nl2br_safe($product_certs_subtitle); ?></p>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="cert-card bg-white border border-[#e6ece8] rounded-2xl p-8 text-center reveal reveal-delay-1">
+                <?php foreach ($product_certs as $index => $cert): ?>
+                <div class="cert-card bg-white border border-[#e6ece8] rounded-2xl p-8 text-center reveal reveal-delay-<?php echo ($index % 4) + 1; ?>">
                     <div class="cert-badge w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                        <i class="fas fa-check-circle text-3xl text-white"></i>
+                        <i class="<?php echo htmlspecialchars_safe($cert['icon'] ?: 'fas fa-certificate'); ?> text-3xl text-white"></i>
                     </div>
-                    <h3 class="text-lg font-semibold text-[#23332c] mb-3">NSF/ANSI Standards</h3>
-                    <p class="text-[#7d8b84] mb-4 leading-relaxed text-sm">Certified for drinking water treatment applications. Our activated carbon products meet NSF/ANSI Standard 61 for drinking water system components.</p>
-                    <span class="eyebrow">Compliant</span>
+                    <h3 class="text-lg font-semibold text-[#23332c] mb-3"><?php echo htmlspecialchars_safe($cert['title']); ?></h3>
+                    <?php if (!empty($cert['description'])): ?>
+                        <p class="text-[#7d8b84] mb-4 leading-relaxed text-sm"><?php echo nl2br_safe($cert['description']); ?></p>
+                    <?php endif; ?>
+                    <?php if (!empty($cert['badge_label'])): ?>
+                        <span class="eyebrow"><?php echo htmlspecialchars_safe($cert['badge_label']); ?></span>
+                    <?php endif; ?>
                 </div>
-                
-                <div class="cert-card bg-white border border-[#e6ece8] rounded-2xl p-8 text-center reveal reveal-delay-2">
-                    <div class="cert-badge w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                        <i class="fas fa-award text-3xl text-white"></i>
-                    </div>
-                    <h3 class="text-lg font-semibold text-[#23332c] mb-3">Water Quality Standards</h3>
-                    <p class="text-[#7d8b84] mb-4 leading-relaxed text-sm">Compliance with EPA and WHO drinking water quality standards. Our 2mm granulated activated carbon meets all regulatory requirements for municipal applications.</p>
-                    <span class="eyebrow">Regulatory Compliant</span>
-                </div>
-                
-                <div class="cert-card bg-white border border-[#e6ece8] rounded-2xl p-8 text-center reveal reveal-delay-3">
-                    <div class="cert-badge w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                        <i class="fas fa-flask text-3xl text-white"></i>
-                    </div>
-                    <h3 class="text-lg font-semibold text-[#23332c] mb-3">Quality Control Testing</h3>
-                    <p class="text-[#7d8b84] mb-4 leading-relaxed text-sm">Rigorous batch testing and quality control processes ensure consistent product specifications, including our strict 2mm granulated particle size standard.</p>
-                    <span class="eyebrow">Batch Consistency</span>
-                </div>
+                <?php endforeach; ?>
             </div>
         </div>
     </section>
+    <?php endif; ?>
 
     <!-- Quality Management -->
     <section id="quality-management" class="py-20 lg:py-24 relative overflow-hidden">
@@ -304,8 +312,8 @@ $current_page = 'certifications';
                 <span class="eyebrow mb-4">
                     <i class="fas fa-clipboard-check text-xs"></i> QA Systems
                 </span>
-                <h2 class="text-3xl lg:text-4xl font-bold text-[#23332c] mb-4 mt-4">Quality Management Systems</h2>
-                <p class="text-lg text-[#7d8b84] max-w-2xl mx-auto">Comprehensive quality assurance for municipal water treatment clients</p>
+                <h2 class="text-3xl lg:text-4xl font-bold text-[#23332c] mb-4 mt-4"><?php echo htmlspecialchars_safe($quality_title); ?></h2>
+                <p class="text-lg text-[#7d8b84] max-w-2xl mx-auto"><?php echo nl2br_safe($quality_subtitle); ?></p>
             </div>
             <div class="max-w-4xl mx-auto reveal">
                 <div class="bg-white border border-[#e6ece8] rounded-2xl overflow-hidden divide-y divide-[#e6ece8]">
@@ -357,8 +365,8 @@ $current_page = 'certifications';
                 <span class="eyebrow bg-white/15 text-white/90 mb-4">
                     <i class="fas fa-balance-scale text-xs"></i> Compliance
                 </span>
-                <h2 class="text-3xl lg:text-4xl font-bold mb-4 mt-4">Industry Compliance</h2>
-                <p class="text-lg text-white/70 max-w-2xl mx-auto">Meeting and exceeding industry standards for activated carbon</p>
+                <h2 class="text-3xl lg:text-4xl font-bold mb-4 mt-4"><?php echo htmlspecialchars_safe($compliance_title); ?></h2>
+                <p class="text-lg text-white/70 max-w-2xl mx-auto"><?php echo nl2br_safe($compliance_subtitle); ?></p>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
                 <div class="compliance-card bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 text-center reveal reveal-delay-1">
@@ -400,8 +408,8 @@ $current_page = 'certifications';
                 <span class="eyebrow mb-4">
                     <i class="fas fa-vial text-xs"></i> Lab Results
                 </span>
-                <h2 class="text-3xl lg:text-4xl font-bold text-[#23332c] mb-4 mt-4">Testing & Validation</h2>
-                <p class="text-lg text-[#7d8b84] max-w-2xl mx-auto">Rigorous testing ensures consistent quality for municipal water treatment</p>
+                <h2 class="text-3xl lg:text-4xl font-bold text-[#23332c] mb-4 mt-4"><?php echo htmlspecialchars_safe($testing_title); ?></h2>
+                <p class="text-lg text-[#7d8b84] max-w-2xl mx-auto"><?php echo nl2br_safe($testing_subtitle); ?></p>
             </div>
             <div class="max-w-6xl mx-auto reveal">
                 <div class="bg-white border border-[#e6ece8] rounded-2xl overflow-hidden">
@@ -456,7 +464,7 @@ $current_page = 'certifications';
                     </table>
                     </div>
                 </div>
-                <p class="text-center text-[#7d8b84] mt-6 text-sm">All testing is performed in our certified laboratory with full documentation available upon request for municipal water treatment facilities.</p>
+                <p class="text-center text-[#7d8b84] mt-6 text-sm"><?php echo nl2br_safe($testing_note); ?></p>
             </div>
         </div>
     </section>
@@ -469,16 +477,16 @@ $current_page = 'certifications';
             <span class="eyebrow bg-white/15 text-white/90 mb-5">
                 <i class="fas fa-file-alt text-xs"></i> Documentation
             </span>
-            <h2 class="text-3xl lg:text-4xl font-bold mb-4 mt-4">Request Certification Documentation</h2>
-            <p class="text-lg mb-8 text-white/85 max-w-2xl mx-auto">Contact us to receive detailed certification documents, test reports, and compliance information for your municipal water treatment facility</p>
+            <h2 class="text-3xl lg:text-4xl font-bold mb-4 mt-4"><?php echo htmlspecialchars_safe($cta_title); ?></h2>
+            <p class="text-lg mb-8 text-white/85 max-w-2xl mx-auto"><?php echo nl2br_safe($cta_description); ?></p>
             <div class="flex flex-col sm:flex-row justify-center gap-3">
-                <a href="contact.php" class="bg-white text-[#23332c] hover:bg-[#eff4f1] font-medium py-3 px-8 rounded-full transition-colors inline-flex items-center justify-center gap-2">
-                    Request Certifications
+                <a href="<?php echo htmlspecialchars_safe($cta_button_1_link); ?>" class="bg-white text-[#23332c] hover:bg-[#eff4f1] font-medium py-3 px-8 rounded-full transition-colors inline-flex items-center justify-center gap-2">
+                    <?php echo htmlspecialchars_safe($cta_button_1_text); ?>
                     <i class="fas fa-arrow-right text-xs"></i>
                 </a>
-                <a href="resources.php" class="border-2 border-white/80 text-white hover:bg-white hover:text-[#23332c] font-medium py-3 px-8 rounded-full transition-colors inline-flex items-center justify-center gap-2">
+                <a href="<?php echo htmlspecialchars_safe($cta_button_2_link); ?>" class="border-2 border-white/80 text-white hover:bg-white hover:text-[#23332c] font-medium py-3 px-8 rounded-full transition-colors inline-flex items-center justify-center gap-2">
                     <i class="fas fa-download text-xs"></i>
-                    Download Test Reports
+                    <?php echo htmlspecialchars_safe($cta_button_2_text); ?>
                 </a>
             </div>
         </div>

@@ -16,11 +16,16 @@ if ($status_param === 'deleted') $success = 'Certification deleted successfully!
 // Handle form submissions (POST)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['delete_id'] ?? '') === '') {
     $title = sanitizeInput($_POST['title'] ?? '');
+    $category = in_array($_POST['category'] ?? '', ['iso', 'product']) ? $_POST['category'] : 'iso';
+    $subtitle = sanitizeInput($_POST['subtitle'] ?? '');
+    $icon = sanitizeInput($_POST['icon'] ?? '');
     $issuing_organization = sanitizeInput($_POST['issuing_organization'] ?? '');
     $certificate_number = sanitizeInput($_POST['certificate_number'] ?? '');
     $issue_date = sanitizeInput($_POST['issue_date'] ?? null);
     $expiry_date = sanitizeInput($_POST['expiry_date'] ?? null);
     $description = $_POST['description'] ?? '';
+    $features = sanitizeInput($_POST['features'] ?? '');
+    $badge_label = sanitizeInput($_POST['badge_label'] ?? '');
     $image_url = sanitizeInput($_POST['image_url'] ?? '');
     $document_url = sanitizeInput($_POST['document_url'] ?? '');
     $display_order = intval($_POST['display_order'] ?? 0);
@@ -30,8 +35,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['delete_id'] ?? '') === '')
         $error = 'Title is required.';
     } else {
         if ($action === 'add') {
-            $stmt = $db->prepare("INSERT INTO certifications (title, issuing_organization, certificate_number, issue_date, expiry_date, description, image_url, document_url, display_order, is_active, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("sssssssssiii", $title, $issuing_organization, $certificate_number, $issue_date, $expiry_date, $description, $image_url, $document_url, $display_order, $is_active, $_SESSION['admin_id']);
+            $stmt = $db->prepare("INSERT INTO certifications (title, category, subtitle, icon, issuing_organization, certificate_number, issue_date, expiry_date, description, features, badge_label, image_url, document_url, display_order, is_active, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("sssssssssssssiii", $title, $category, $subtitle, $icon, $issuing_organization, $certificate_number, $issue_date, $expiry_date, $description, $features, $badge_label, $image_url, $document_url, $display_order, $is_active, $_SESSION['admin_id']);
             if ($stmt->execute()) {
                 logActivity('create', 'certifications', $db->insert_id, "Added certification: {$title}");
                 redirect('certifications.php?status=saved');
@@ -39,8 +44,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['delete_id'] ?? '') === '')
                 $error = 'Error: ' . $stmt->error;
             }
         } elseif ($action === 'edit' && $id) {
-            $stmt = $db->prepare("UPDATE certifications SET title = ?, issuing_organization = ?, certificate_number = ?, issue_date = ?, expiry_date = ?, description = ?, image_url = ?, document_url = ?, display_order = ?, is_active = ?, updated_by = ? WHERE id = ?");
-            $stmt->bind_param("sssssssssiiii", $title, $issuing_organization, $certificate_number, $issue_date, $expiry_date, $description, $image_url, $document_url, $display_order, $is_active, $_SESSION['admin_id'], $id);
+            $stmt = $db->prepare("UPDATE certifications SET title = ?, category = ?, subtitle = ?, icon = ?, issuing_organization = ?, certificate_number = ?, issue_date = ?, expiry_date = ?, description = ?, features = ?, badge_label = ?, image_url = ?, document_url = ?, display_order = ?, is_active = ?, updated_by = ? WHERE id = ?");
+            $stmt->bind_param("sssssssssssssiiii", $title, $category, $subtitle, $icon, $issuing_organization, $certificate_number, $issue_date, $expiry_date, $description, $features, $badge_label, $image_url, $document_url, $display_order, $is_active, $_SESSION['admin_id'], $id);
             if ($stmt->execute()) {
                 logActivity('update', 'certifications', $id, "Updated certification: {$title}");
                 redirect('certifications.php?status=saved');
@@ -90,12 +95,18 @@ if ($action === 'list') {
     $current_page_num = max(1, intval($_GET['page'] ?? 1));
     $filter_status = $_GET['filter_status'] ?? '';
     $filter_expiry = $_GET['filter_expiry'] ?? '';
+    $filter_category = $_GET['filter_category'] ?? '';
     $search_q = trim($_GET['q'] ?? '');
 
     // Build dynamic WHERE
     $where = [];
     $params = [];
     $types = '';
+    if ($filter_category === 'iso' || $filter_category === 'product') {
+        $where[] = 'category = ?';
+        $params[] = $filter_category;
+        $types .= 's';
+    }
     if ($filter_status === 'active') {
         $where[] = 'is_active = 1';
     } elseif ($filter_status === 'inactive') {
@@ -133,7 +144,7 @@ if ($action === 'list') {
     $offset = ($current_page_num - 1) * $per_page;
 
     // List query
-    $list_sql = "SELECT * FROM certifications $where_sql ORDER BY display_order, title LIMIT ? OFFSET ?";
+    $list_sql = "SELECT * FROM certifications $where_sql ORDER BY category, display_order, title LIMIT ? OFFSET ?";
     $list_stmt = $db->prepare($list_sql);
     $list_params = $params;
     $list_types = $types . 'ii';
@@ -160,7 +171,7 @@ if ($st) {
     $stats['expired'] = (int)$row['expired'];
 }
 
-// All certifications render in the ISO Certifications section on the public page
+// Certifications render in the ISO / Product Certifications sections on the public page
 $view_url = '../certifications.php#iso-certifications';
 ?>
 <!DOCTYPE html>
@@ -267,6 +278,73 @@ $view_url = '../certifications.php#iso-certifications';
                                            placeholder="e.g., ISO 9001:2015 Quality Management"
                                            oninput="updatePreview()">
                                     <p class="text-xs text-gray-400 mt-1">The certification name shown on the card.</p>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Card Section <span class="text-red-500">*</span></label>
+                                        <select name="category" id="category_input" required
+                                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                                onchange="updatePreview()">
+                                            <option value="iso" <?php echo ($edit_cert['category'] ?? 'iso') === 'iso' ? 'selected' : ''; ?>>ISO Certifications (left-icon card + checklist)</option>
+                                            <option value="product" <?php echo ($edit_cert['category'] ?? '') === 'product' ? 'selected' : ''; ?>>Product Certifications (centered card + badge)</option>
+                                        </select>
+                                        <p class="text-xs text-gray-400 mt-1">Which section of the Certifications page this card appears in.</p>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Icon <span class="text-gray-400 font-normal">(optional)</span></label>
+                                        <div class="flex items-center gap-3">
+                                            <input type="text" name="icon" id="icon_input"
+                                                   value="<?php echo htmlspecialchars($edit_cert['icon'] ?? ''); ?>"
+                                                   class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary font-mono"
+                                                   placeholder="fas fa-certificate"
+                                                   oninput="updatePreview()">
+                                            <div id="icon_preview" class="flex items-center justify-center w-10 h-10 border border-gray-300 rounded-lg bg-gray-50 text-lg text-primary">
+                                                <i class="<?php echo htmlspecialchars($edit_cert['icon'] ?? '') ?: 'fas fa-certificate'; ?>"></i>
+                                            </div>
+                                        </div>
+                                        <p class="text-xs text-gray-400 mt-1">Font Awesome class for the card badge. <a href="https://fontawesome.com/v6/search?o=r&m=free" target="_blank" class="text-primary hover:underline">Browse icons</a>.</p>
+                                        <div class="mt-2 flex flex-wrap gap-1">
+                                            <button type="button" class="quick-pick" onclick="setIcon('fas fa-certificate')">certificate</button>
+                                            <button type="button" class="quick-pick" onclick="setIcon('fas fa-shield-alt')">shield-alt</button>
+                                            <button type="button" class="quick-pick" onclick="setIcon('fas fa-check-circle')">check-circle</button>
+                                            <button type="button" class="quick-pick" onclick="setIcon('fas fa-award')">award</button>
+                                            <button type="button" class="quick-pick" onclick="setIcon('fas fa-flask')">flask</button>
+                                            <button type="button" class="quick-pick" onclick="setIcon('fas fa-leaf')">leaf</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Subtitle <span class="text-gray-400 font-normal">(ISO cards)</span></label>
+                                        <input type="text" name="subtitle" id="subtitle_input"
+                                               value="<?php echo htmlspecialchars($edit_cert['subtitle'] ?? ''); ?>"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                               placeholder="e.g., Quality Management Systems"
+                                               oninput="updatePreview()">
+                                        <p class="text-xs text-gray-400 mt-1">Green line under the title on ISO-style cards.</p>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Badge Label <span class="text-gray-400 font-normal">(product cards)</span></label>
+                                        <input type="text" name="badge_label" id="badge_label_input"
+                                               value="<?php echo htmlspecialchars($edit_cert['badge_label'] ?? ''); ?>"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                               placeholder="e.g., Compliant"
+                                               oninput="updatePreview()">
+                                        <p class="text-xs text-gray-400 mt-1">Small pill shown at the bottom of product-certification cards.</p>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Checklist Items <span class="text-gray-400 font-normal">(ISO cards, optional)</span></label>
+                                    <textarea name="features" id="features_input" rows="3"
+                                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                              placeholder="Item one • Item two • Item three"
+                                              oninput="updatePreview()"><?php echo htmlspecialchars($edit_cert['features'] ?? ''); ?></textarea>
+                                    <p class="text-xs text-gray-400 mt-1">Bullet list shown under the description on ISO-style cards. Separate items with <code class="bg-gray-100 px-1 rounded">•</code>.</p>
                                 </div>
 
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -445,16 +523,20 @@ $view_url = '../certifications.php#iso-certifications';
                             <i class="fas fa-eye text-gray-400"></i> Live Preview
                             <span class="text-xs text-gray-400 font-normal">(certification card)</span>
                         </p>
-                        <div class="cert-card bg-white border border-[#e6ece8] rounded-2xl p-8">
-                            <div class="flex items-start">
-                                <div class="cert-badge w-16 h-16 rounded-2xl flex items-center justify-center mr-5 flex-shrink-0 overflow-hidden" style="background: #3d7a66;">
+                        <div class="cert-card bg-white border border-[#e6ece8] rounded-2xl p-8" id="preview_card">
+                            <div class="flex items-start" id="preview_layout">
+                                <div class="cert-badge w-16 h-16 rounded-2xl flex items-center justify-center mr-5 flex-shrink-0 overflow-hidden" style="background: #3d7a66;" id="preview_badge_wrap">
                                     <img id="preview_badge_img" src="<?php echo htmlspecialchars($edit_cert['image_url'] ?? ''); ?>" alt="" class="w-full h-full object-cover <?php echo empty($edit_cert['image_url'] ?? '') ? 'hidden' : ''; ?>">
-                                    <i id="preview_badge_icon" class="fas fa-certificate text-2xl text-white <?php echo empty($edit_cert['image_url'] ?? '') ? '' : 'hidden'; ?>"></i>
+                                    <i id="preview_badge_icon" class="<?php echo htmlspecialchars($edit_cert['icon'] ?? '') ?: 'fas fa-certificate'; ?> text-2xl text-white <?php echo empty($edit_cert['image_url'] ?? '') ? '' : 'hidden'; ?>"></i>
                                 </div>
-                                <div class="flex-1">
+                                <div class="flex-1" id="preview_body">
                                     <h3 id="preview_title" class="text-xl font-semibold text-[#23332c] mb-1"><?php echo htmlspecialchars($edit_cert['title'] ?? 'Certification title'); ?></h3>
-                                    <p id="preview_org" class="text-[#3d7a66] text-sm font-medium mb-3 <?php echo empty($edit_cert['issuing_organization'] ?? '') ? 'hidden' : ''; ?>"><?php echo htmlspecialchars($edit_cert['issuing_organization'] ?? ''); ?></p>
+                                    <p id="preview_subtitle" class="text-[#3d7a66] text-sm font-medium mb-3 <?php echo empty($edit_cert['subtitle'] ?? '') ? 'hidden' : ''; ?>"><?php echo htmlspecialchars($edit_cert['subtitle'] ?? ''); ?></p>
                                     <p id="preview_desc" class="text-[#5a6b62] mb-4 leading-relaxed text-sm <?php echo empty($edit_cert['description'] ?? '') ? 'hidden' : ''; ?>"><?php echo htmlspecialchars($edit_cert['description'] ?? ''); ?></p>
+                                    <ul id="preview_features" class="text-sm text-[#7d8b84] space-y-1.5 <?php echo empty($edit_cert['features'] ?? '') ? 'hidden' : ''; ?>"></ul>
+                                    <div id="preview_badge_label_wrap" class="<?php echo empty($edit_cert['badge_label'] ?? '') ? 'hidden' : ''; ?>">
+                                        <span id="preview_badge_label" class="inline-block text-xs font-semibold bg-[#eef3f0] text-[#3d7a66] px-2.5 py-1 rounded-full"><?php echo htmlspecialchars($edit_cert['badge_label'] ?? ''); ?></span>
+                                    </div>
                                     <div id="preview_dates" class="text-sm text-[#7d8b84] space-y-1 <?php echo empty($edit_cert['issue_date'] ?? '') && empty($edit_cert['expiry_date'] ?? '') ? 'hidden' : ''; ?>">
                                         <p id="preview_issue" class="flex items-center <?php echo empty($edit_cert['issue_date'] ?? '') ? 'hidden' : ''; ?>"><i class="fas fa-calendar-check text-[#3d7a66] mr-2 text-xs"></i>Issued: <span class="ml-1" id="preview_issue_text"></span></p>
                                         <p id="preview_expiry" class="flex items-center <?php echo empty($edit_cert['expiry_date'] ?? '') ? 'hidden' : ''; ?>"><i class="fas fa-calendar-times text-[#3d7a66] mr-2 text-xs"></i>Valid until: <span class="ml-1" id="preview_expiry_text"></span></p>
@@ -463,7 +545,7 @@ $view_url = '../certifications.php#iso-certifications';
                                 </div>
                             </div>
                         </div>
-                        <p class="text-xs text-gray-400 mt-2">The card style mirrors the certification cards on the public Certifications page. If a badge image is uploaded, it replaces the default icon.</p>
+                        <p class="text-xs text-gray-400 mt-2">Preview mirrors the card on the public Certifications page — the layout follows the selected <strong>Card Section</strong>. If a badge image is uploaded, it replaces the icon.</p>
                     </div>
                 </div>
             </div>
@@ -474,11 +556,19 @@ $view_url = '../certifications.php#iso-certifications';
                 document.getElementById('org_input').value = name;
                 updatePreview();
             }
+            function setIcon(cls) {
+                document.getElementById('icon_input').value = cls;
+                updatePreview();
+            }
 
             // Live preview
             function updatePreview() {
                 var title = document.getElementById('title_input').value || 'Certification title';
-                var org = document.getElementById('org_input').value || '';
+                var category = document.getElementById('category_input').value || 'iso';
+                var subtitle = document.getElementById('subtitle_input').value || '';
+                var iconCls = document.getElementById('icon_input').value.trim() || 'fas fa-certificate';
+                var badgeLabel = document.getElementById('badge_label_input').value || '';
+                var features = document.getElementById('features_input').value || '';
                 var desc = document.getElementById('description_input').value || '';
                 var certNum = document.getElementById('cert_num_input').value || '';
                 var issueDate = document.getElementById('issue_date_input').value || '';
@@ -486,14 +576,48 @@ $view_url = '../certifications.php#iso-certifications';
                 var imgUrl = document.getElementById('image-url-input').value;
 
                 document.getElementById('preview_title').textContent = title;
+                document.getElementById('icon_preview').innerHTML = '<i class="' + iconCls + '"></i>';
 
-                var orgEl = document.getElementById('preview_org');
-                if (org.trim()) { orgEl.textContent = org; orgEl.classList.remove('hidden'); }
-                else { orgEl.classList.add('hidden'); }
+                // Card layout follows the category: iso = left icon row, product = centered
+                var isProduct = (category === 'product');
+                document.getElementById('preview_card').className = 'cert-card bg-white border border-[#e6ece8] rounded-2xl p-8' + (isProduct ? ' text-center' : '');
+                document.getElementById('preview_layout').className = isProduct ? '' : 'flex items-start';
+                document.getElementById('preview_badge_wrap').className = 'cert-badge rounded-2xl flex items-center justify-center flex-shrink-0 overflow-hidden ' + (isProduct ? 'w-20 h-20 mx-auto mb-6' : 'w-16 h-16 mr-5');
+
+                var subtitleEl = document.getElementById('preview_subtitle');
+                if (subtitle.trim()) { subtitleEl.textContent = subtitle; subtitleEl.classList.remove('hidden'); }
+                else { subtitleEl.classList.add('hidden'); }
 
                 var descEl = document.getElementById('preview_desc');
                 if (desc.trim()) { descEl.textContent = desc; descEl.classList.remove('hidden'); }
                 else { descEl.classList.add('hidden'); }
+
+                // Checklist items (•-separated, ISO cards)
+                var featEl = document.getElementById('preview_features');
+                var items = features.split('•').map(function(s){ return s.trim(); }).filter(Boolean);
+                if (items.length) {
+                    featEl.innerHTML = items.map(function(s){
+                        var li = document.createElement('li');
+                        li.className = 'flex items-center' + (isProduct ? ' justify-center' : '');
+                        var i = document.createElement('i');
+                        i.className = 'fas fa-check text-[#3d7a66] mr-2 text-xs';
+                        li.appendChild(i);
+                        li.appendChild(document.createTextNode(s));
+                        return li.outerHTML;
+                    }).join('');
+                    featEl.classList.remove('hidden');
+                } else {
+                    featEl.classList.add('hidden');
+                }
+
+                // Badge pill (product cards)
+                var blWrap = document.getElementById('preview_badge_label_wrap');
+                if (badgeLabel.trim()) {
+                    document.getElementById('preview_badge_label').textContent = badgeLabel;
+                    blWrap.classList.remove('hidden');
+                } else {
+                    blWrap.classList.add('hidden');
+                }
 
                 // Dates
                 var datesEl = document.getElementById('preview_dates');
@@ -519,6 +643,7 @@ $view_url = '../certifications.php#iso-certifications';
                 // Badge image vs icon
                 var badgeImg = document.getElementById('preview_badge_img');
                 var badgeIcon = document.getElementById('preview_badge_icon');
+                badgeIcon.className = iconCls + ' ' + (isProduct ? 'text-3xl' : 'text-2xl') + ' text-white' + (imgUrl.trim() ? ' hidden' : '');
                 if (imgUrl.trim()) {
                     badgeImg.src = imgUrl;
                     badgeImg.classList.remove('hidden');
@@ -751,6 +876,11 @@ $view_url = '../certifications.php#iso-certifications';
                                 <option value="active" <?php echo (($_GET['filter_status'] ?? '') === 'active') ? 'selected' : ''; ?>>Active only</option>
                                 <option value="inactive" <?php echo (($_GET['filter_status'] ?? '') === 'inactive') ? 'selected' : ''; ?>>Inactive only</option>
                             </select>
+                            <select name="filter_category" class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary">
+                                <option value="">All sections</option>
+                                <option value="iso" <?php echo (($_GET['filter_category'] ?? '') === 'iso') ? 'selected' : ''; ?>>ISO Certifications</option>
+                                <option value="product" <?php echo (($_GET['filter_category'] ?? '') === 'product') ? 'selected' : ''; ?>>Product Certifications</option>
+                            </select>
                             <select name="filter_expiry" class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-primary focus:border-primary">
                                 <option value="">All dates</option>
                                 <option value="valid" <?php echo (($_GET['filter_expiry'] ?? '') === 'valid') ? 'selected' : ''; ?>>Valid only</option>
@@ -766,7 +896,7 @@ $view_url = '../certifications.php#iso-certifications';
                         <button type="submit" class="bg-primary text-white px-4 py-2 rounded-md hover:bg-secondary transition-colors text-sm inline-flex items-center justify-center">
                             <i class="fas fa-filter mr-1"></i>Filter
                         </button>
-                        <?php if (!empty($_GET['filter_status']) || !empty($_GET['filter_expiry']) || !empty($_GET['q'])): ?>
+                        <?php if (!empty($_GET['filter_status']) || !empty($_GET['filter_expiry']) || !empty($_GET['filter_category']) || !empty($_GET['q'])): ?>
                         <a href="certifications.php" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200 transition-colors text-sm inline-flex items-center justify-center">
                             <i class="fas fa-times mr-1"></i>Clear
                         </a>
@@ -779,6 +909,7 @@ $view_url = '../certifications.php#iso-certifications';
                     <thead class="bg-gray-50 sticky top-0">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Section</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Organization</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Issue Date</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expiry Date</th>
@@ -790,7 +921,7 @@ $view_url = '../certifications.php#iso-certifications';
                     <tbody class="bg-white divide-y divide-gray-200">
                         <?php if (empty($all_certs)): ?>
                             <tr>
-                                <td colspan="7" class="px-6 py-12 text-center">
+                                <td colspan="8" class="px-6 py-12 text-center">
                                     <i class="fas fa-certificate text-4xl text-gray-300 mb-3"></i>
                                     <p class="text-gray-500 mb-2">No certifications found.</p>
                                     <a href="?action=add" class="text-primary hover:underline text-sm"><i class="fas fa-plus mr-1"></i>Add new certification</a>
@@ -802,6 +933,13 @@ $view_url = '../certifications.php#iso-certifications';
                             ?>
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-6 py-4 text-sm font-medium text-gray-900"><?php echo htmlspecialchars($cert['title']); ?></td>
+                                    <td class="px-6 py-4 text-sm">
+                                        <?php if (($cert['category'] ?? 'iso') === 'product'): ?>
+                                            <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">Product</span>
+                                        <?php else: ?>
+                                            <span class="px-2 py-1 text-xs rounded-full bg-gray-200 text-gray-700">ISO</span>
+                                        <?php endif; ?>
+                                    </td>
                                     <td class="px-6 py-4 text-sm text-gray-500"><?php echo htmlspecialchars($cert['issuing_organization'] ?: '—'); ?></td>
                                     <td class="px-6 py-4 text-sm text-gray-500"><?php echo $cert['issue_date'] ? formatDate($cert['issue_date'], 'M d, Y') : '—'; ?></td>
                                     <td class="px-6 py-4 text-sm">

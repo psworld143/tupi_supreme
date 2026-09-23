@@ -304,16 +304,21 @@ function getCaseStudies($limit = null, $featured_only = false) {
     return $cases;
 }
 
-function getCertifications($limit = null) {
+function getCertifications($category = null, $limit = null) {
     $db = getDB();
     if (!$db) return [];
     
-    $sql = "SELECT * FROM certifications WHERE is_active = 1 ORDER BY display_order, title";
+    $sql = "SELECT * FROM certifications WHERE is_active = 1";
+    if ($category) {
+        $sql .= " AND category = '" . $db->real_escape_string($category) . "'";
+    }
+    $sql .= " ORDER BY display_order, title";
     if ($limit) {
         $sql .= " LIMIT " . intval($limit);
     }
     
     $result = $db->query($sql);
+    if (!$result) return [];
     $certs = [];
     while ($row = $result->fetch_assoc()) {
         $certs[] = $row;

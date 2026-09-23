@@ -82,12 +82,46 @@ INSERT INTO timeline_events (year, title, description, display_order, is_active)
 ON DUPLICATE KEY UPDATE title=VALUES(title), description=VALUES(description);
 
 -- Products (from existing products page content)
-INSERT INTO products (name, slug, description, specifications, features, applications, image_url, display_order, is_featured, is_active) VALUES
-('Granulated Activated Carbon (GAC)', 'granulated-activated-carbon', 'Premium 2mm granulated activated carbon optimized for municipal water treatment facilities. Strict quality specifications ensure consistent performance.', '2mm below (granulated) • High surface area • Low ash content • Consistent particle size distribution', 'Premium quality • Strict specifications • Consistent performance • GAC certified', 'Municipal water treatment • Industrial water purification • Wastewater treatment • Air purification', NULL, 1, 1, 1),
-('Municipal Water Treatment Solutions', 'municipal-water-treatment', 'Specialized activated carbon solutions designed specifically for municipal water treatment facilities. Proven track record with 200+ municipal clients.', 'Custom formulations • System integration • Technical support • Compliance guaranteed', 'Municipal expertise • Proven results • Technical consultation • 24/7 support', 'Municipal water treatment • Public water systems • Water quality compliance', NULL, 2, 1, 1),
-('Coconut Husk Chips', 'coconut-husk-chips', 'Sustainable growing medium made from coconut husks. Ideal for horticultural and agricultural applications.', 'Natural organic material • Excellent drainage • High water retention • pH balanced', 'Sustainable • Organic • Renewable resource • Eco-friendly', 'Horticulture • Agriculture • Landscaping • Hydroponics', NULL, 3, 0, 1),
-('Coconut Pit', 'coconut-pit', 'Premium horticultural growing medium. Finely processed coconut coir for optimal plant growth.', 'Fine texture • High water retention • Excellent aeration • Nutrient rich', 'Premium quality • Sustainable • Organic • Versatile', 'Horticulture • Greenhouse production • Container gardening • Seed starting', NULL, 4, 0, 1)
+-- icon/tagline require the products columns added by database_schema_update.sql.
+INSERT INTO products (name, slug, description, specifications, features, applications, image_url, icon, tagline, display_order, is_featured, is_active) VALUES
+('Granulated Activated Carbon (GAC)', 'granulated-activated-carbon', 'Premium 2mm granulated activated carbon optimized for municipal water treatment facilities. Strict quality specifications ensure consistent performance.', '2mm below (granulated) • High surface area • Low ash content • Consistent particle size distribution', 'Premium quality • Strict specifications • Consistent performance • GAC certified', 'Municipal water treatment • Industrial water purification • Wastewater treatment • Air purification', NULL, 'fas fa-cubes', NULL, 1, 1, 1),
+('Municipal Water Treatment Solutions', 'municipal-water-treatment', 'Specialized activated carbon solutions designed specifically for municipal water treatment facilities. Proven track record with 200+ municipal clients.', 'Custom formulations • System integration • Technical support • Compliance guaranteed', 'Municipal expertise • Proven results • Technical consultation • 24/7 support', 'Municipal water treatment • Public water systems • Water quality compliance', NULL, 'fas fa-water', NULL, 2, 1, 1),
+('Coconut Husk Chips', 'coconut-husk-chips', 'High-quality coconut husk chips processed from our zero-waste operations. An excellent sustainable alternative to traditional growing mediums, providing superior water retention and aeration for horticultural applications.', 'Natural organic material • Excellent drainage • High water retention • pH balanced', 'Excellent water retention capacity • Superior aeration properties • Sustainable and eco-friendly • Natural fiber composition • pH balanced and disease-free • Consistent particle size', 'Horticulture and greenhouse operations • Commercial agriculture • Professional gardening • Container growing', NULL, 'fas fa-seedling', 'Premium Growing Medium', 3, 0, 1),
+('Coconut Pit', 'coconut-pit', 'Premium-grade coconut pit processed specifically for horticultural applications. This specialized growing medium offers exceptional performance for professional growers, greenhouse operations, and commercial agriculture.', 'Fine texture • High water retention • Excellent aeration • Nutrient rich', 'Premium quality for professional use • Optimized particle size distribution • Superior root development support • Enhanced nutrient retention • Long-lasting performance • Zero-waste sustainable source', 'Professional horticulture • Greenhouse cultivation • Commercial growing operations • Specialized crop production', NULL, 'fas fa-leaf', 'Premium Horticultural Medium', 4, 0, 1)
 ON DUPLICATE KEY UPDATE name=VALUES(name), description=VALUES(description);
+
+-- Product tabs (system tabs for the public products page)
+INSERT INTO product_tabs (tab_key, label, icon, keywords, display_order, is_active, is_system) VALUES
+('granulated', 'Granulated Activated Carbon', 'fa-cubes', 'granulated', 1, 1, 1),
+('husk', 'Coconut Husk Products', 'fa-seedling', 'husk,coconut', 2, 1, 1),
+('custom', 'Custom Formulations', 'fa-cogs', 'custom', 3, 1, 1)
+ON DUPLICATE KEY UPDATE label=VALUES(label);
+
+-- Assign the husk products to the "Coconut Husk Products" tab
+UPDATE products p JOIN product_tabs t ON t.tab_key = 'husk'
+SET p.category_id = t.id
+WHERE p.slug IN ('coconut-husk-chips', 'coconut-pit');
+
+-- Custom Formulations cards as products on the custom tab
+INSERT INTO products (name, slug, description, features, icon, category_id, display_order, is_active)
+SELECT v.name, v.slug, v.description, v.features, v.icon, t.id, v.display_order, 1 FROM product_tabs t
+JOIN (
+    SELECT 'Custom Particle Sizes' AS name, 'custom-particle-sizes' AS slug,
+        'Tailored activated carbon formulations with custom particle sizes designed for your specific application requirements beyond standard 2mm granulated specification.' AS description,
+        'Custom particle size distributions • Specialized surface chemistry • Application-specific testing • Performance optimization' AS features,
+        'fas fa-cogs' AS icon, 1 AS display_order
+    UNION ALL
+    SELECT 'System Integration', 'system-integration',
+        'Complete activated carbon system design and integration for complex applications.',
+        'System design • Installation support • Performance monitoring',
+        'fas fa-tools', 2
+    UNION ALL
+    SELECT 'R&D Support', 'rd-support',
+        'Research and development support for new activated carbon applications and technologies.',
+        'Laboratory testing • Performance analysis • Technical consultation',
+        'fas fa-microscope', 3
+) v ON t.tab_key = 'custom'
+WHERE NOT EXISTS (SELECT 1 FROM products p WHERE p.slug = v.slug);
 
 -- Services (from services page)
 INSERT INTO services (title, slug, description, features, benefits, icon, image_url, display_order, is_active) VALUES
@@ -163,3 +197,27 @@ INSERT INTO applications (title, description, icon, is_primary, display_order, i
 ('Aquaculture', 'Fish farming and aquarium systems', 'fas fa-fish', 0, 70, 1),
 ('Environmental', 'Pollution control and remediation', 'fas fa-leaf', 0, 80, 1)
 ON DUPLICATE KEY UPDATE description=VALUES(description), icon=VALUES(icon), is_primary=VALUES(is_primary);
+
+-- Certifications — ISO cards + product certification cards (certifications.php)
+-- Requires the category/subtitle/icon/features/badge_label columns from database_schema_update.sql.
+UPDATE certifications SET
+    category = 'iso',
+    subtitle = 'Quality Management Systems',
+    icon = 'fas fa-certificate',
+    description = 'Certified since 2010, demonstrating our commitment to consistent quality management and continuous improvement in all our operations.',
+    features = 'Quality management system certification • Process standardization • Continuous improvement framework • Customer satisfaction focus'
+WHERE title = 'ISO 9001:2015';
+
+UPDATE certifications SET
+    category = 'iso',
+    subtitle = 'Environmental Management Systems',
+    icon = 'fas fa-shield-alt',
+    description = 'Certification demonstrating our commitment to environmental responsibility and sustainable operations in activated carbon production.',
+    features = 'Environmental management system • Zero-waste operations • Sustainable resource utilization • Environmental compliance'
+WHERE title = 'ISO 14001:2015';
+
+INSERT INTO certifications (title, category, icon, description, badge_label, display_order, is_active) VALUES
+('NSF/ANSI Standards', 'product', 'fas fa-check-circle', 'Certified for drinking water treatment applications. Our activated carbon products meet NSF/ANSI Standard 61 for drinking water system components.', 'Compliant', 10, 1),
+('Water Quality Standards', 'product', 'fas fa-award', 'Compliance with EPA and WHO drinking water quality standards. Our 2mm granulated activated carbon meets all regulatory requirements for municipal applications.', 'Regulatory Compliant', 20, 1),
+('Quality Control Testing', 'product', 'fas fa-flask', 'Rigorous batch testing and quality control processes ensure consistent product specifications, including our strict 2mm granulated particle size standard.', 'Batch Consistency', 30, 1)
+ON DUPLICATE KEY UPDATE category=VALUES(category), icon=VALUES(icon), description=VALUES(description), badge_label=VALUES(badge_label);

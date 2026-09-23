@@ -27,6 +27,14 @@ $tab_granulated_label = getPageContent('products', 'tab_granulated_label', 'Gran
 $tab_husk_label = getPageContent('products', 'tab_husk_label', 'Coconut Husk Products');
 $tab_custom_label = getPageContent('products', 'tab_custom_label', 'Custom Formulations');
 
+// Tab pane banner/callout copy (editable via page_content)
+$husk_banner_title = getPageContent('products', 'husk_banner_title', 'Coconut Husk Products');
+$husk_banner_subtitle = getPageContent('products', 'husk_banner_subtitle', 'Sustainable Growing Mediums from Our Zero-Waste Operations');
+$husk_note_title = getPageContent('products', 'husk_note_title', 'Sustainable Zero-Waste Operations');
+$husk_note_text = getPageContent('products', 'husk_note_text', 'Our Coconut Husk Products are part of our integrated zero-waste operations. By utilizing all parts of the coconut, we maximize resource efficiency while providing high-quality growing mediums for the horticultural industry. These products represent our commitment to sustainability and environmental responsibility.');
+$custom_banner_title = getPageContent('products', 'custom_banner_title', 'Custom Formulations');
+$custom_banner_subtitle = getPageContent('products', 'custom_banner_subtitle', 'Tailored activated carbon solutions for specialized applications');
+
 // Applications card grid (managed via Admin → Applications)
 $application_cards = getApplications();
 
@@ -492,39 +500,49 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
                             <span class="eyebrow bg-white/15 text-white/90 mb-4">
                                 <i class="fas fa-seedling text-xs"></i> Sustainable
                             </span>
-                            <h3 class="text-3xl lg:text-4xl font-bold mb-4 mt-3">Coconut Husk Products</h3>
-                            <p class="text-lg text-white/85">Sustainable Growing Mediums from Our Zero-Waste Operations</p>
+                            <h3 class="text-3xl lg:text-4xl font-bold mb-4 mt-3"><?php echo htmlspecialchars_safe($husk_banner_title); ?></h3>
+                            <p class="text-lg text-white/85"><?php echo nl2br_safe($husk_banner_subtitle); ?></p>
                         </div>
                     </div>
 
+                    <?php if (!empty($husk_products)): ?>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-                        <!-- Coconut Husk Chips -->
-                        <div class="product-card bg-white border border-[#e6ece8] rounded-2xl p-8 h-full reveal reveal-delay-1">
+                        <?php foreach ($husk_products as $pi => $product):
+                            $p_features = !empty($product['features']) ? array_filter(array_map('trim', explode('•', $product['features']))) : [];
+                            $p_apps = !empty($product['applications']) ? array_filter(array_map('trim', explode('•', $product['applications']))) : [];
+                        ?>
+                        <div class="product-card bg-white border border-[#e6ece8] rounded-2xl p-8 h-full reveal reveal-delay-<?php echo ($pi % 4) + 1; ?>">
                             <div class="text-center">
-                                <div class="product-icon w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                                    <i class="fas fa-seedling text-3xl text-white"></i>
-                                </div>
-                                <h4 class="text-2xl font-semibold text-[#23332c] mb-2">Coconut Husk Chips</h4>
-                                <span class="eyebrow mb-4">Premium Growing Medium</span>
-                                <p class="text-[#7d8b84] mb-6 leading-relaxed text-sm">High-quality coconut husk chips processed from our zero-waste operations. An excellent sustainable alternative to traditional growing mediums, providing superior water retention and aeration for horticultural applications.</p>
-                                
-                                <h5 class="text-lg font-semibold text-[#23332c] mb-3 text-left">Key Features:</h5>
-                                <ul class="text-left space-y-2 mb-6">
-                                    <li class="flex items-center text-[#5a6b62] text-sm"><i class="fas fa-check text-[#3d7a66] mr-3"></i>Excellent water retention capacity</li>
-                                    <li class="flex items-center text-[#5a6b62] text-sm"><i class="fas fa-check text-[#3d7a66] mr-3"></i>Superior aeration properties</li>
-                                    <li class="flex items-center text-[#5a6b62] text-sm"><i class="fas fa-check text-[#3d7a66] mr-3"></i>Sustainable and eco-friendly</li>
-                                    <li class="flex items-center text-[#5a6b62] text-sm"><i class="fas fa-check text-[#3d7a66] mr-3"></i>Natural fiber composition</li>
-                                    <li class="flex items-center text-[#5a6b62] text-sm"><i class="fas fa-check text-[#3d7a66] mr-3"></i>pH balanced and disease-free</li>
-                                    <li class="flex items-center text-[#5a6b62] text-sm"><i class="fas fa-check text-[#3d7a66] mr-3"></i>Consistent particle size</li>
-                                </ul>
+                                <?php if (!empty($product['image_url'])): ?>
+                                    <img src="<?php echo htmlspecialchars_safe($product['image_url']); ?>" alt="<?php echo htmlspecialchars_safe($product['name']); ?>" class="w-20 h-20 rounded-2xl object-cover mx-auto mb-6">
+                                <?php else: ?>
+                                    <div class="product-icon w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                                        <i class="<?php echo htmlspecialchars_safe($product['icon'] ?: 'fas fa-box'); ?> text-3xl text-white"></i>
+                                    </div>
+                                <?php endif; ?>
+                                <h4 class="text-2xl font-semibold text-[#23332c] mb-2"><?php echo htmlspecialchars_safe($product['name']); ?></h4>
+                                <?php if (!empty($product['tagline'])): ?>
+                                    <span class="eyebrow mb-4"><?php echo htmlspecialchars_safe($product['tagline']); ?></span>
+                                <?php endif; ?>
+                                <div class="text-[#7d8b84] mb-6 leading-relaxed text-sm"><?php echo htmlspecialchars_decode($product['description'], ENT_QUOTES); ?></div>
 
-                                <h5 class="text-lg font-semibold text-[#23332c] mb-3 text-left">Applications:</h5>
-                                <ul class="text-left space-y-2 mb-6">
-                                    <li class="flex items-center text-[#5a6b62] text-sm"><i class="fas fa-seedling text-[#3d7a66] mr-3"></i>Horticulture and greenhouse operations</li>
-                                    <li class="flex items-center text-[#5a6b62] text-sm"><i class="fas fa-seedling text-[#3d7a66] mr-3"></i>Commercial agriculture</li>
-                                    <li class="flex items-center text-[#5a6b62] text-sm"><i class="fas fa-seedling text-[#3d7a66] mr-3"></i>Professional gardening</li>
-                                    <li class="flex items-center text-[#5a6b62] text-sm"><i class="fas fa-seedling text-[#3d7a66] mr-3"></i>Container growing</li>
-                                </ul>
+                                <?php if (!empty($p_features)): ?>
+                                    <h5 class="text-lg font-semibold text-[#23332c] mb-3 text-left">Key Features:</h5>
+                                    <ul class="text-left space-y-2 mb-6">
+                                        <?php foreach ($p_features as $feat): ?>
+                                            <li class="flex items-center text-[#5a6b62] text-sm"><i class="fas fa-check text-[#3d7a66] mr-3"></i><?php echo htmlspecialchars_safe($feat); ?></li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                <?php endif; ?>
+
+                                <?php if (!empty($p_apps)): ?>
+                                    <h5 class="text-lg font-semibold text-[#23332c] mb-3 text-left">Applications:</h5>
+                                    <ul class="text-left space-y-2 mb-6">
+                                        <?php foreach ($p_apps as $app): ?>
+                                            <li class="flex items-center text-[#5a6b62] text-sm"><i class="fas fa-seedling text-[#3d7a66] mr-3"></i><?php echo htmlspecialchars_safe($app); ?></li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                <?php endif; ?>
 
                                 <div class="flex flex-col gap-3 mt-6">
                                     <a href="contact.php" class="bg-[#23332c] hover:bg-[#3a4a41] text-white font-medium py-3 px-7 rounded-full transition-colors text-center inline-flex items-center justify-center gap-2">
@@ -536,46 +554,16 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Coconut Pit -->
-                        <div class="product-card bg-white border border-[#e6ece8] rounded-2xl p-8 h-full reveal reveal-delay-2">
-                            <div class="text-center">
-                                <div class="product-icon w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                                    <i class="fas fa-leaf text-3xl text-white"></i>
-                                </div>
-                                <h4 class="text-2xl font-semibold text-[#23332c] mb-2">Coconut Pit</h4>
-                                <span class="eyebrow mb-4">Premium Horticultural Medium</span>
-                                <p class="text-[#7d8b84] mb-6 leading-relaxed text-sm">Premium-grade coconut pit processed specifically for horticultural applications. This specialized growing medium offers exceptional performance for professional growers, greenhouse operations, and commercial agriculture.</p>
-                                
-                                <h5 class="text-lg font-semibold text-[#23332c] mb-3 text-left">Key Features:</h5>
-                                <ul class="text-left space-y-2 mb-6">
-                                    <li class="flex items-center text-[#5a6b62] text-sm"><i class="fas fa-check text-[#3d7a66] mr-3"></i>Premium quality for professional use</li>
-                                    <li class="flex items-center text-[#5a6b62] text-sm"><i class="fas fa-check text-[#3d7a66] mr-3"></i>Optimized particle size distribution</li>
-                                    <li class="flex items-center text-[#5a6b62] text-sm"><i class="fas fa-check text-[#3d7a66] mr-3"></i>Superior root development support</li>
-                                    <li class="flex items-center text-[#5a6b62] text-sm"><i class="fas fa-check text-[#3d7a66] mr-3"></i>Enhanced nutrient retention</li>
-                                    <li class="flex items-center text-[#5a6b62] text-sm"><i class="fas fa-check text-[#3d7a66] mr-3"></i>Long-lasting performance</li>
-                                    <li class="flex items-center text-[#5a6b62] text-sm"><i class="fas fa-check text-[#3d7a66] mr-3"></i>Zero-waste sustainable source</li>
-                                </ul>
-
-                                <h5 class="text-lg font-semibold text-[#23332c] mb-3 text-left">Applications:</h5>
-                                <ul class="text-left space-y-2 mb-6">
-                                    <li class="flex items-center text-[#5a6b62] text-sm"><i class="fas fa-seedling text-[#3d7a66] mr-3"></i>Professional horticulture</li>
-                                    <li class="flex items-center text-[#5a6b62] text-sm"><i class="fas fa-seedling text-[#3d7a66] mr-3"></i>Greenhouse cultivation</li>
-                                    <li class="flex items-center text-[#5a6b62] text-sm"><i class="fas fa-seedling text-[#3d7a66] mr-3"></i>Commercial growing operations</li>
-                                    <li class="flex items-center text-[#5a6b62] text-sm"><i class="fas fa-seedling text-[#3d7a66] mr-3"></i>Specialized crop production</li>
-                                </ul>
-
-                                <div class="flex flex-col gap-3 mt-6">
-                                    <a href="contact.php" class="bg-[#23332c] hover:bg-[#3a4a41] text-white font-medium py-3 px-7 rounded-full transition-colors text-center inline-flex items-center justify-center gap-2">
-                                        <i class="fas fa-quote-left text-xs"></i>Request Quote
-                                    </a>
-                                    <a href="resources.php" class="border border-[#d6ded9] text-[#23332c] hover:bg-[#eff4f1] font-medium py-2.5 px-6 rounded-full transition-colors text-center inline-flex items-center justify-center gap-2 text-sm">
-                                        <i class="fas fa-download text-xs"></i>Download Specifications
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
+                        <?php endforeach; ?>
                     </div>
+                    <?php else: ?>
+                        <div class="text-center py-12 reveal">
+                            <div class="w-16 h-16 rounded-full bg-[#eef3f0] flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-box text-2xl text-[#60796e]"></i>
+                            </div>
+                            <p class="text-[#7d8b84]">No products match this category yet.</p>
+                        </div>
+                    <?php endif; ?>
 
                     <!-- Zero-Waste Message -->
                     <div class="bg-[#eef3f0] border border-[#e6ece8] border-l-4 border-l-[#3d7a66] rounded-2xl p-6 reveal">
@@ -584,8 +572,8 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
                                 <i class="fas fa-recycle text-xl text-white"></i>
                             </div>
                             <div>
-                                <h4 class="text-lg font-semibold text-[#23332c] mb-2">Sustainable Zero-Waste Operations</h4>
-                                <p class="text-[#5a6b62] leading-relaxed text-sm">Our Coconut Husk Products are part of our integrated zero-waste operations. By utilizing all parts of the coconut, we maximize resource efficiency while providing high-quality growing mediums for the horticultural industry. These products represent our commitment to sustainability and environmental responsibility.</p>
+                                <h4 class="text-lg font-semibold text-[#23332c] mb-2"><?php echo htmlspecialchars_safe($husk_note_title); ?></h4>
+                                <p class="text-[#5a6b62] leading-relaxed text-sm"><?php echo nl2br_safe($husk_note_text); ?></p>
                             </div>
                         </div>
                     </div>
@@ -598,59 +586,47 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
                             <span class="eyebrow bg-white/15 text-white/90 mb-4">
                                 <i class="fas fa-cogs text-xs"></i> Tailored Solutions
                             </span>
-                            <h3 class="text-3xl lg:text-4xl font-bold mb-4 mt-3">Custom Formulations</h3>
-                            <p class="text-lg text-white/85">Tailored activated carbon solutions for specialized applications</p>
+                            <h3 class="text-3xl lg:text-4xl font-bold mb-4 mt-3"><?php echo htmlspecialchars_safe($custom_banner_title); ?></h3>
+                            <p class="text-lg text-white/85"><?php echo nl2br_safe($custom_banner_subtitle); ?></p>
                         </div>
                     </div>
 
+                    <?php if (!empty($custom_products)): ?>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="product-card bg-white border border-[#e6ece8] rounded-2xl p-8 h-full reveal reveal-delay-1">
+                        <?php foreach ($custom_products as $pi => $product):
+                            $p_features = !empty($product['features']) ? array_filter(array_map('trim', explode('•', $product['features']))) : [];
+                        ?>
+                        <div class="product-card bg-white border border-[#e6ece8] rounded-2xl p-8 h-full reveal reveal-delay-<?php echo ($pi % 4) + 1; ?>">
                             <div class="text-center">
-                                <div class="product-icon w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                                    <i class="fas fa-cogs text-3xl text-white"></i>
-                                </div>
-                                <h4 class="text-xl font-semibold text-[#23332c] mb-3">Custom Particle Sizes</h4>
-                                <p class="text-[#7d8b84] mb-6 leading-relaxed text-sm">Tailored activated carbon formulations with custom particle sizes designed for your specific application requirements beyond standard 2mm granulated specification.</p>
-                                <ul class="text-left space-y-2 mb-6">
-                                    <li class="flex items-center text-[#5a6b62] text-sm"><i class="fas fa-check text-[#3d7a66] mr-3"></i>Custom particle size distributions</li>
-                                    <li class="flex items-center text-[#5a6b62] text-sm"><i class="fas fa-check text-[#3d7a66] mr-3"></i>Specialized surface chemistry</li>
-                                    <li class="flex items-center text-[#5a6b62] text-sm"><i class="fas fa-check text-[#3d7a66] mr-3"></i>Application-specific testing</li>
-                                    <li class="flex items-center text-[#5a6b62] text-sm"><i class="fas fa-check text-[#3d7a66] mr-3"></i>Performance optimization</li>
-                                </ul>
+                                <?php if (!empty($product['image_url'])): ?>
+                                    <img src="<?php echo htmlspecialchars_safe($product['image_url']); ?>" alt="<?php echo htmlspecialchars_safe($product['name']); ?>" class="w-20 h-20 rounded-2xl object-cover mx-auto mb-6">
+                                <?php else: ?>
+                                    <div class="product-icon w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                                        <i class="<?php echo htmlspecialchars_safe($product['icon'] ?: 'fas fa-cogs'); ?> text-3xl text-white"></i>
+                                    </div>
+                                <?php endif; ?>
+                                <h4 class="text-xl font-semibold text-[#23332c] mb-3"><?php echo htmlspecialchars_safe($product['name']); ?></h4>
+                                <div class="text-[#7d8b84] mb-6 leading-relaxed text-sm"><?php echo htmlspecialchars_decode($product['description'], ENT_QUOTES); ?></div>
+                                <?php if (!empty($p_features)): ?>
+                                    <ul class="text-left space-y-2 mb-6">
+                                        <?php foreach ($p_features as $feat): ?>
+                                            <li class="flex items-center text-[#5a6b62] text-sm"><i class="fas fa-check text-[#3d7a66] mr-3"></i><?php echo htmlspecialchars_safe($feat); ?></li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                <?php endif; ?>
                                 <a href="contact.php" class="inline-flex items-center gap-2 border border-[#d6ded9] text-[#23332c] hover:bg-[#23332c] hover:text-white hover:border-[#23332c] font-medium py-2.5 px-5 rounded-full transition-colors text-sm">Request Consultation <i class="fas fa-arrow-right text-xs"></i></a>
                             </div>
                         </div>
-                        <div class="product-card bg-white border border-[#e6ece8] rounded-2xl p-8 h-full reveal reveal-delay-2">
-                            <div class="text-center">
-                                <div class="product-icon w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                                    <i class="fas fa-tools text-3xl text-white"></i>
-                                </div>
-                                <h4 class="text-xl font-semibold text-[#23332c] mb-3">System Integration</h4>
-                                <p class="text-[#7d8b84] mb-6 leading-relaxed text-sm">Complete activated carbon system design and integration for complex applications.</p>
-                                <ul class="text-left space-y-2 mb-6">
-                                    <li class="flex items-center text-[#5a6b62] text-sm"><i class="fas fa-check text-[#3d7a66] mr-3"></i>System design</li>
-                                    <li class="flex items-center text-[#5a6b62] text-sm"><i class="fas fa-check text-[#3d7a66] mr-3"></i>Installation support</li>
-                                    <li class="flex items-center text-[#5a6b62] text-sm"><i class="fas fa-check text-[#3d7a66] mr-3"></i>Performance monitoring</li>
-                                </ul>
-                                <a href="contact.php" class="inline-flex items-center gap-2 border border-[#d6ded9] text-[#23332c] hover:bg-[#23332c] hover:text-white hover:border-[#23332c] font-medium py-2.5 px-5 rounded-full transition-colors text-sm">Request Consultation <i class="fas fa-arrow-right text-xs"></i></a>
-                            </div>
-                        </div>
-                        <div class="product-card bg-white border border-[#e6ece8] rounded-2xl p-8 h-full reveal reveal-delay-3">
-                            <div class="text-center">
-                                <div class="product-icon w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                                    <i class="fas fa-microscope text-3xl text-white"></i>
-                                </div>
-                                <h4 class="text-xl font-semibold text-[#23332c] mb-3">R&D Support</h4>
-                                <p class="text-[#7d8b84] mb-6 leading-relaxed text-sm">Research and development support for new activated carbon applications and technologies.</p>
-                                <ul class="text-left space-y-2 mb-6">
-                                    <li class="flex items-center text-[#5a6b62] text-sm"><i class="fas fa-check text-[#3d7a66] mr-3"></i>Laboratory testing</li>
-                                    <li class="flex items-center text-[#5a6b62] text-sm"><i class="fas fa-check text-[#3d7a66] mr-3"></i>Performance analysis</li>
-                                    <li class="flex items-center text-[#5a6b62] text-sm"><i class="fas fa-check text-[#3d7a66] mr-3"></i>Technical consultation</li>
-                                </ul>
-                                <a href="contact.php" class="inline-flex items-center gap-2 border border-[#d6ded9] text-[#23332c] hover:bg-[#23332c] hover:text-white hover:border-[#23332c] font-medium py-2.5 px-5 rounded-full transition-colors text-sm">Request Consultation <i class="fas fa-arrow-right text-xs"></i></a>
-                            </div>
-                        </div>
+                        <?php endforeach; ?>
                     </div>
+                    <?php else: ?>
+                        <div class="text-center py-12 reveal">
+                            <div class="w-16 h-16 rounded-full bg-[#eef3f0] flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-box text-2xl text-[#60796e]"></i>
+                            </div>
+                            <p class="text-[#7d8b84]">No products match this category yet.</p>
+                        </div>
+                    <?php endif; ?>
                 </div>
 
                 <?php
@@ -681,7 +657,7 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
                                         </div>
                                     <?php else: ?>
                                         <div class="aspect-video bg-[#3d7a66] flex items-center justify-center">
-                                            <i class="fas fa-box text-5xl text-white/80"></i>
+                                            <i class="<?php echo htmlspecialchars_safe($product['icon'] ?? '') ?: 'fas fa-box'; ?> text-5xl text-white/80"></i>
                                         </div>
                                     <?php endif; ?>
                                     <div class="p-6 flex flex-col flex-1">
@@ -743,7 +719,7 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
                                 </div>
                             <?php else: ?>
                                 <div class="aspect-video bg-[#3d7a66] flex items-center justify-center">
-                                    <i class="fas fa-box text-5xl text-white/80"></i>
+                                    <i class="<?php echo htmlspecialchars_safe($product['icon'] ?? '') ?: 'fas fa-box'; ?> text-5xl text-white/80"></i>
                                 </div>
                             <?php endif; ?>
                             <div class="p-6 flex flex-col flex-1">

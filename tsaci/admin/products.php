@@ -30,6 +30,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['delete_id'] ?? '') === '')
     $features = $_POST['features'] ?? '';
     $applications = $_POST['applications'] ?? '';
     $image_url = sanitizeInput($_POST['image_url'] ?? '');
+    $icon = sanitizeInput($_POST['icon'] ?? '');
+    $tagline = sanitizeInput($_POST['tagline'] ?? ''); 
     $category_id = intval($_POST['category_id'] ?? 0);
     $category_id = $category_id > 0 ? $category_id : null;
     $display_order = intval($_POST['display_order'] ?? 0);
@@ -40,8 +42,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['delete_id'] ?? '') === '')
         $error = 'Product name is required.';
     } else {
         if ($action === 'add') {
-            $stmt = $db->prepare("INSERT INTO products (name, slug, description, specifications, features, applications, image_url, category_id, display_order, is_featured, is_active, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("sssssssiiiii", $name, $slug, $description, $specifications, $features, $applications, $image_url, $category_id, $display_order, $is_featured, $is_active, $_SESSION['admin_id']);
+            $stmt = $db->prepare("INSERT INTO products (name, slug, description, specifications, features, applications, image_url, icon, tagline, category_id, display_order, is_featured, is_active, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("sssssssssiiiii", $name, $slug, $description, $specifications, $features, $applications, $image_url, $icon, $tagline, $category_id, $display_order, $is_featured, $is_active, $_SESSION['admin_id']);
 
             if ($stmt->execute()) {
                 logActivity('create', 'products', $db->insert_id, "Created product: {$name}");
@@ -50,8 +52,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['delete_id'] ?? '') === '')
                 $error = 'Error adding product: ' . $stmt->error;
             }
         } elseif ($action === 'edit' && $id) {
-            $stmt = $db->prepare("UPDATE products SET name = ?, slug = ?, description = ?, specifications = ?, features = ?, applications = ?, image_url = ?, category_id = ?, display_order = ?, is_featured = ?, is_active = ?, updated_by = ? WHERE id = ?");
-            $stmt->bind_param("sssssssiiiiii", $name, $slug, $description, $specifications, $features, $applications, $image_url, $category_id, $display_order, $is_featured, $is_active, $_SESSION['admin_id'], $id);
+            $stmt = $db->prepare("UPDATE products SET name = ?, slug = ?, description = ?, specifications = ?, features = ?, applications = ?, image_url = ?, icon = ?, tagline = ?, category_id = ?, display_order = ?, is_featured = ?, is_active = ?, updated_by = ? WHERE id = ?");
+            $stmt->bind_param("sssssssssiiiiii", $name, $slug, $description, $specifications, $features, $applications, $image_url, $icon, $tagline, $category_id, $display_order, $is_featured, $is_active, $_SESSION['admin_id'], $id);
 
             if ($stmt->execute()) {
                 logActivity('update', 'products', $id, "Updated product: {$name}");
@@ -323,11 +325,44 @@ $view_url = '../products.php#main';
                                     </div>
 
                                     <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Tagline <span class="text-gray-400 font-normal">(optional)</span></label>
+                                        <input type="text" name="tagline" id="tagline_input"
+                                               value="<?php echo htmlspecialchars($edit_product['tagline'] ?? ''); ?>"
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                                               placeholder="e.g., Premium Growing Medium"
+                                               oninput="updatePreview()">
+                                        <p class="text-xs text-gray-400 mt-1">Small pill shown under the product name on tab-pane cards.</p>
+                                    </div>
+
+                                    <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Display Order</label>
                                         <input type="number" name="display_order" min="0"
                                                value="<?php echo htmlspecialchars($edit_product['display_order'] ?? 0); ?>"
                                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary">
                                         <p class="text-xs text-gray-400 mt-1">Lower numbers appear first in the catalog. Use 10, 20, 30…</p>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Icon <span class="text-gray-400 font-normal">(optional)</span></label>
+                                        <div class="flex items-center gap-3">
+                                            <input type="text" name="icon" id="icon_input"
+                                                   value="<?php echo htmlspecialchars($edit_product['icon'] ?? ''); ?>"
+                                                   class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary font-mono"
+                                                   placeholder="fas fa-box"
+                                                   oninput="updateIconPreview(this.value)">
+                                            <div id="icon_preview" class="flex items-center justify-center w-10 h-10 border border-gray-300 rounded-lg bg-gray-50 text-lg text-primary">
+                                                <i class="<?php echo htmlspecialchars($edit_product['icon'] ?? '') ?: 'fas fa-box'; ?>"></i>
+                                            </div>
+                                        </div>
+                                        <p class="text-xs text-gray-400 mt-1">Font Awesome class shown on cards when no image is set. <a href="https://fontawesome.com/v6/search?o=r&m=free" target="_blank" class="text-primary hover:underline">Browse icons</a>.</p>
+                                        <div class="mt-2 flex flex-wrap gap-1">
+                                            <button type="button" class="quick-pick" onclick="setIcon('fas fa-cubes')">cubes</button>
+                                            <button type="button" class="quick-pick" onclick="setIcon('fas fa-seedling')">seedling</button>
+                                            <button type="button" class="quick-pick" onclick="setIcon('fas fa-leaf')">leaf</button>
+                                            <button type="button" class="quick-pick" onclick="setIcon('fas fa-cogs')">cogs</button>
+                                            <button type="button" class="quick-pick" onclick="setIcon('fas fa-tools')">tools</button>
+                                            <button type="button" class="quick-pick" onclick="setIcon('fas fa-microscope')">microscope</button>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -462,11 +497,12 @@ $view_url = '../products.php#main';
                             <div class="aspect-video bg-[#f7faf8] flex items-center justify-center overflow-hidden" id="preview_img_wrap">
                                 <img id="preview_img" src="<?php echo htmlspecialchars($edit_product['image_url'] ?? ''); ?>" alt="" class="w-full h-full object-cover <?php echo empty($edit_product['image_url'] ?? '') ? 'hidden' : ''; ?>">
                                 <div id="preview_img_placeholder" class="aspect-video bg-[#3d7a66] flex items-center justify-center w-full h-full <?php echo empty($edit_product['image_url'] ?? '') ? '' : 'hidden'; ?>">
-                                    <i class="fas fa-box text-5xl text-white/80"></i>
+                                    <i id="preview_img_icon" class="<?php echo htmlspecialchars($edit_product['icon'] ?? '') ?: 'fas fa-box'; ?> text-5xl text-white/80"></i>
                                 </div>
                             </div>
                             <div class="p-6">
                                 <h4 id="preview_name" class="text-xl font-semibold text-[#23332c] mb-2"><?php echo htmlspecialchars($edit_product['name'] ?? 'Product name'); ?></h4>
+                                <span id="preview_tagline" class="inline-block bg-[#eef3f0] text-[#3d7a66] text-xs font-medium px-3 py-1 rounded-full mb-3 <?php echo empty($edit_product['tagline'] ?? '') ? 'hidden' : ''; ?>"><?php echo htmlspecialchars($edit_product['tagline'] ?? ''); ?></span>
                                 <div id="preview_desc" class="text-[#7d8b84] text-sm leading-relaxed mb-4 prose prose-sm max-w-none"><?php echo $edit_product['description'] ?? '<span class="text-gray-400">Product description appears here…</span>'; ?></div>
                                 <ul id="preview_features" class="text-sm text-[#5a6b62] space-y-1 mb-4">
                                     <li class="text-gray-400">Features appear here when added (split on • )…</li>
@@ -522,15 +558,36 @@ $view_url = '../products.php#main';
                 }
             })();
 
+            function updateIconPreview(cls) {
+                var ic = document.getElementById('icon_preview').querySelector('i');
+                ic.className = (cls.trim() || 'fas fa-box');
+            }
+
+            function setIcon(cls) {
+                document.getElementById('icon_input').value = cls;
+                updateIconPreview(cls);
+                updatePreview();
+            }
+
             // Live preview
             function updatePreview() {
                 var name = document.getElementById('name_input').value || 'Product name';
+                var tagline = (document.getElementById('tagline_input') || {}).value || '';
+                var iconCls = (document.getElementById('icon_input') || {}).value || 'fas fa-box';
                 var descHtml = document.getElementById('description_html').innerHTML || '<span class="text-gray-400">Product description appears here…</span>';
                 var featuresHtml = document.getElementById('features_html').innerHTML || '';
                 var imgUrl = document.getElementById('image-url-input').value;
 
                 document.getElementById('preview_name').textContent = name;
                 document.getElementById('preview_desc').innerHTML = descHtml;
+
+                var tg = document.getElementById('preview_tagline');
+                if (tg) {
+                    tg.textContent = tagline;
+                    tg.classList.toggle('hidden', !tagline.trim());
+                }
+                var imgIcon = document.getElementById('preview_img_icon');
+                if (imgIcon) imgIcon.className = iconCls.trim() + ' text-5xl text-white/80';
 
                 // Parse features: split on • character
                 var feats = featuresHtml.split('•').map(function(s){ return s.trim(); }).filter(function(s){ return s.length > 0 && s.replace(/<[^>]*>/g,'').trim().length > 0; });
