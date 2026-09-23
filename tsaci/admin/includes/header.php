@@ -10,11 +10,6 @@ if (!defined('ADMIN_ACCESS')) {
 <header id="admin-topbar" class="fixed top-0 left-0 right-0 lg:left-64 z-20 h-14 bg-white/95 backdrop-blur border-b border-[#e6ece8] flex items-center gap-3 pl-16 pr-4 lg:pl-6 lg:pr-8">
     <p class="min-w-0 flex-1 truncate text-sm font-semibold text-[#23332c]"><?php echo htmlspecialchars($header_title); ?></p>
 
-    <a href="../index.php" target="_blank" class="hidden sm:inline-flex items-center gap-1.5 text-xs font-medium text-[#66746c] hover:text-[#23332c] transition-colors">
-        <i class="fas fa-external-link-alt"></i> View Website
-    </a>
-    <span class="hidden sm:block w-px h-5 bg-[#e6ece8]"></span>
-
     <!-- Notifications -->
     <div class="relative flex-shrink-0">
         <button id="notif-toggle" type="button" title="Notifications" class="relative w-8 h-8 rounded-full flex items-center justify-center text-[#66746c] hover:bg-[#eff4f1] hover:text-[#23332c] transition-colors">
@@ -50,14 +45,6 @@ if (!defined('ADMIN_ACCESS')) {
                 <?php endif; ?>
             </div>
             <a href="messages.php" class="block px-4 py-2.5 text-center text-xs font-medium text-[#3d7a66] hover:bg-[#f7faf8] border-t border-[#e6ece8] transition-colors">View all messages</a>
-        </div>
-    </div>
-
-    <div class="flex items-center gap-2.5">
-        <div class="w-8 h-8 rounded-full bg-[#23332c] text-white flex items-center justify-center text-xs font-semibold flex-shrink-0"><?php echo htmlspecialchars($avatar_initial); ?></div>
-        <div class="hidden sm:block leading-tight min-w-0">
-            <p class="text-xs font-semibold text-[#23332c] truncate max-w-[10rem]"><?php echo htmlspecialchars($display_name); ?></p>
-            <p class="text-[10px] text-[#8a978f] truncate"><?php echo htmlspecialchars($role_label); ?></p>
         </div>
     </div>
 

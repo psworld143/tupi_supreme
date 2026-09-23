@@ -21,47 +21,62 @@ if ($recent_res) {
 $display_name = $current_user['full_name'] ?: $current_user['username'];
 $avatar_initial = strtoupper(substr($display_name, 0, 1));
 $role_label = ucwords(str_replace('_', ' ', $current_user['role'] ?? 'Admin'));
+$site_short_name = 'Tupi Supreme';
 
-$nav_items = [
-    ['index.php',          'fa-home',           'Dashboard'],
-    ['pages.php',          'fa-file-alt',       'Pages'],
-    ['about.php',          'fa-info-circle',    'About Page'],
-    ['team-members.php',   'fa-users',          'Team Members'],
-    ['company-values.php', 'fa-gem',            'Company Values'],
-    ['timeline.php',       'fa-history',        'Our Journey'],
-    ['statistics.php',     'fa-chart-bar',      'Statistics'],
-    ['homepage-features.php','fa-star',         'Homepage Features'],
-    ['carousel.php',       'fa-images',         'Carousel'],
-    ['products.php',       'fa-cube',           'Products'],
-    ['product-tabs.php',   'fa-folder',         'Product Tabs'],
-    ['applications.php',   'fa-th-large',       'Applications'],
-    ['services.php',       'fa-concierge-bell', 'Services'],
-    ['service-items.php',  'fa-stream',         'Service Items'],
-    ['testimonials.php',   'fa-quote-left',     'Testimonials'],
-    ['case-studies.php',   'fa-book',           'Case Studies'],
-    ['gallery.php',        'fa-photo-video',    'Gallery'],
-    ['resources.php',      'fa-file-download',  'Resources'],
-    ['faqs.php',           'fa-question-circle','FAQs'],
-    ['office-hours.php',   'fa-clock',          'Office Hours'],
-    ['subject-options.php','fa-list-ul',        'Subject Options'],
-    ['contact-info.php',   'fa-address-book',   'Contact Info'],
-    ['social-media.php',   'fa-share-alt',      'Social Media'],
-    ['footer-links.php',   'fa-link',           'Footer Links'],
-    ['certifications.php', 'fa-certificate',    'Certifications'],
-];
-
-$account_items = [
-    ['site-settings.php',    'fa-sliders-h',   'Site Settings'],
-    ['login-background.php', 'fa-image',       'Login Background'],
-    ['settings.php',         'fa-cog',         'Settings'],
+$nav_groups = [
+    'Overview' => [
+        ['index.php',            'fa-home',           'Dashboard'],
+        ['messages.php',         'fa-envelope',       'Messages'],
+    ],
+    'Homepage' => [
+        ['carousel.php',         'fa-images',         'Carousel'],
+        ['homepage-features.php','fa-star',           'Homepage Features'],
+        ['statistics.php',       'fa-chart-bar',      'Statistics'],
+    ],
+    'About Page' => [
+        ['about.php',            'fa-info-circle',    'About Page'],
+        ['team-members.php',     'fa-users',          'Team Members'],
+        ['company-values.php',   'fa-gem',            'Company Values'],
+        ['timeline.php',         'fa-history',        'Our Journey'],
+        ['testimonials.php',     'fa-quote-left',     'Testimonials'],
+        ['certifications.php',   'fa-certificate',    'Certifications'],
+    ],
+    'Products & Services' => [
+        ['products.php',         'fa-cube',           'Products'],
+        ['product-tabs.php',     'fa-folder',         'Product Tabs'],
+        ['applications.php',     'fa-th-large',       'Applications'],
+        ['services.php',         'fa-concierge-bell', 'Services'],
+        ['service-items.php',    'fa-stream',         'Service Items'],
+        ['case-studies.php',     'fa-book',           'Case Studies'],
+    ],
+    'Media & Content' => [
+        ['pages.php',            'fa-file-alt',       'Pages'],
+        ['gallery.php',          'fa-photo-video',    'Gallery'],
+        ['resources.php',        'fa-file-download',  'Resources'],
+        ['faqs.php',             'fa-question-circle','FAQs'],
+    ],
+    'Contact & Footer' => [
+        ['contact-info.php',     'fa-address-book',   'Contact Info'],
+        ['office-hours.php',     'fa-clock',          'Office Hours'],
+        ['subject-options.php',  'fa-list-ul',        'Subject Options'],
+        ['social-media.php',     'fa-share-alt',      'Social Media'],
+        ['footer-links.php',     'fa-link',           'Footer Links'],
+    ],
+    'System' => [
+        ['site-settings.php',    'fa-sliders-h',      'Site Settings'],
+        ['login-background.php', 'fa-image',          'Login Background'],
+        ['settings.php',         'fa-cog',            'Settings'],
+    ],
 ];
 
 // Friendly page title for the top header bar
 $header_title = 'Admin';
-foreach (array_merge($nav_items, [['messages.php', '', 'Messages']], $account_items) as $item) {
-    if ($current_page === $item[0]) {
-        $header_title = $item[2];
-        break;
+foreach ($nav_groups as $items) {
+    foreach ($items as $item) {
+        if ($current_page === $item[0]) {
+            $header_title = $item[2];
+            break 2;
+        }
     }
 }
 ?>
@@ -72,15 +87,13 @@ foreach (array_merge($nav_items, [['messages.php', '', 'Messages']], $account_it
 
 <!-- Sidebar -->
 <aside id="sidebar" class="fixed top-0 bottom-0 left-0 z-40 w-64 transition-all duration-300 -translate-x-full lg:translate-x-0 bg-[#f5f7f5] text-[#45524b] lg:border-r lg:border-black/5 flex flex-col">
-    <!-- Profile header (pinned — stays put while the nav scrolls) -->
+    <!-- Sidebar header (pinned — stays put while the nav scrolls) -->
     <div class="sidebar-header flex items-center gap-3 px-5 pt-5 pb-4 flex-shrink-0">
-        <div class="w-11 h-11 rounded-full bg-[#23332c] text-white flex items-center justify-center font-semibold text-lg flex-shrink-0">
-            <?php echo htmlspecialchars($avatar_initial); ?>
-        </div>
-        <div class="sidebar-label min-w-0 flex-1">
-            <p class="font-semibold text-[15px] text-[#23332c] leading-tight truncate"><?php echo htmlspecialchars($display_name); ?></p>
-            <p class="text-xs text-[#8a978f] truncate"><?php echo htmlspecialchars($role_label); ?></p>
-        </div>
+        <p class="sidebar-label min-w-0 flex-1 font-semibold text-[15px] text-[#23332c] truncate"><?php echo htmlspecialchars($site_short_name); ?></p>
+        <!-- Desktop collapse button -->
+        <button id="sidebar-collapse" type="button" title="Collapse sidebar" class="hidden lg:flex w-8 h-8 rounded-full text-[#66746c] hover:bg-[#eaf0ec] hover:text-[#23332c] items-center justify-center transition-colors flex-shrink-0">
+            <i class="fas fa-bars text-sm"></i>
+        </button>
         <!-- Mobile close button -->
         <button id="sidebar-close" class="lg:hidden text-[#66746c] hover:text-[#23332c]">
             <i class="fas fa-times text-xl"></i>
@@ -88,46 +101,44 @@ foreach (array_merge($nav_items, [['messages.php', '', 'Messages']], $account_it
     </div>
 
     <div class="sidebar-scroll flex-1 overflow-y-auto px-3 pb-5">
-        <!-- Navigation Menu -->
-        <nav class="space-y-1">
-            <?php foreach ($nav_items as $item):
-                $is_active = $current_page === $item[0];
-            ?>
-                <a href="<?php echo $item[0]; ?>" title="<?php echo $item[2]; ?>" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm transition-colors <?php echo $is_active ? 'bg-[#e2eae4] text-[#23332c] font-medium' : 'text-[#66746c] hover:bg-[#eaf0ec] hover:text-[#23332c]'; ?>">
-                    <i class="fas <?php echo $item[1]; ?> w-5 text-center"></i>
-                    <span class="sidebar-label"><?php echo $item[2]; ?></span>
-                </a>
-            <?php endforeach; ?>
-
-            <a href="messages.php" title="Messages" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm transition-colors <?php echo $current_page == 'messages.php' ? 'bg-[#e2eae4] text-[#23332c] font-medium' : 'text-[#66746c] hover:bg-[#eaf0ec] hover:text-[#23332c]'; ?>">
-                <i class="fas fa-envelope w-5 text-center"></i>
-                <span class="sidebar-label">Messages</span>
-                <?php if ($unread_messages > 0): ?>
-                    <span class="sidebar-badge ml-auto bg-[#23332c] text-white text-[10px] font-semibold rounded-full px-2 py-0.5"><?php echo $unread_messages; ?></span>
-                <?php endif; ?>
-            </a>
-        </nav>
-
-        <!-- Account section -->
-        <p class="section-label px-3.5 pt-6 pb-2 text-[11px] font-semibold uppercase tracking-wider text-[#96a39b]">Account</p>
-        <nav class="space-y-1">
-            <?php foreach ($account_items as $item):
-                $is_active = $current_page === $item[0];
-                $is_logout = $item[0] === 'logout.php';
-            ?>
-                <a href="<?php echo $item[0]; ?>" title="<?php echo $item[2]; ?>" class="user-link flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm transition-colors <?php echo $is_logout ? 'text-red-500 hover:bg-red-50' : ($is_active ? 'bg-[#e2eae4] text-[#23332c] font-medium' : 'text-[#66746c] hover:bg-[#eaf0ec] hover:text-[#23332c]'); ?>">
-                    <i class="fas <?php echo $item[1]; ?> w-5 text-center"></i>
-                    <span class="sidebar-label"><?php echo $item[2]; ?></span>
-                </a>
-            <?php endforeach; ?>
-        </nav>
+        <?php foreach ($nav_groups as $group_label => $items):
+            $group_key = strtolower(preg_replace('/[^a-z0-9]+/i', '-', $group_label));
+            $group_has_active = false;
+            foreach ($items as $it) {
+                if ($it[0] === $current_page) { $group_has_active = true; break; }
+            }
+        ?>
+            <div class="nav-group<?php echo $group_has_active ? ' has-active' : ''; ?>" data-group="<?php echo $group_key; ?>">
+                <button type="button" class="nav-group-toggle section-label flex w-full items-center justify-between px-3.5 pt-4 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#96a39b] hover:text-[#66746c] transition-colors" aria-expanded="true">
+                    <span><?php echo $group_label; ?></span>
+                    <i class="fas fa-chevron-down text-[9px] transition-transform duration-200"></i>
+                </button>
+                <nav class="nav-group-items space-y-1">
+                    <?php foreach ($items as $item):
+                        $is_active = $current_page === $item[0];
+                    ?>
+                        <a href="<?php echo $item[0]; ?>" title="<?php echo $item[2]; ?>" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm transition-colors <?php echo $is_active ? 'bg-[#e2eae4] text-[#23332c] font-medium' : 'text-[#66746c] hover:bg-[#eaf0ec] hover:text-[#23332c]'; ?>">
+                            <i class="fas <?php echo $item[1]; ?> w-5 text-center"></i>
+                            <span class="sidebar-label"><?php echo $item[2]; ?></span>
+                            <?php if ($item[0] === 'messages.php' && $unread_messages > 0): ?>
+                                <span class="sidebar-badge ml-auto bg-[#23332c] text-white text-[10px] font-semibold rounded-full px-2 py-0.5"><?php echo $unread_messages; ?></span>
+                            <?php endif; ?>
+                        </a>
+                    <?php endforeach; ?>
+                </nav>
+            </div>
+        <?php endforeach; ?>
     </div>
 
-    <!-- Bottom toggle (matches the dark round button in the reference) -->
-    <div class="sidebar-footer p-4">
-        <button id="sidebar-collapse" type="button" title="Collapse sidebar" class="hidden lg:flex w-10 h-10 rounded-full bg-[#23332c] text-white items-center justify-center hover:bg-[#3a4a41] transition-colors">
-            <i class="fas fa-bars"></i>
-        </button>
+    <!-- Bottom profile block -->
+    <div class="sidebar-footer flex items-center gap-3 px-5 py-4 border-t border-black/5 flex-shrink-0">
+        <div class="w-9 h-9 rounded-full bg-[#23332c] text-white flex items-center justify-center text-xs font-semibold flex-shrink-0">
+            <?php echo htmlspecialchars($avatar_initial); ?>
+        </div>
+        <div class="sidebar-label min-w-0 leading-tight">
+            <p class="text-xs font-semibold text-[#23332c] truncate"><?php echo htmlspecialchars($display_name); ?></p>
+            <p class="text-[10px] text-[#8a978f] truncate"><?php echo htmlspecialchars($role_label); ?></p>
+        </div>
     </div>
 </aside>
 
@@ -200,6 +211,14 @@ foreach (array_merge($nav_items, [['messages.php', '', 'Messages']], $account_it
         background-color: #c0ccc5;
     }
 
+    /* Collapsible nav groups — closed state hides items and rotates the chevron */
+    .nav-group.closed .nav-group-items {
+        display: none;
+    }
+    .nav-group.closed .nav-group-toggle .fa-chevron-down {
+        transform: rotate(-90deg);
+    }
+
     @media (min-width: 1024px) {
         /* Clear the full-height sidebar (16rem panel, flush edges) */
         .lg\:ml-64 {
@@ -227,10 +246,16 @@ foreach (array_merge($nav_items, [['messages.php', '', 'Messages']], $account_it
             padding-right: 0;
         }
         body.sidebar-collapsed #sidebar .sidebar-footer {
-            display: flex;
             justify-content: center;
             padding-left: 0;
             padding-right: 0;
+        }
+        /* Icon rail ignores group open/closed state — all icons stay reachable */
+        body.sidebar-collapsed .nav-group.closed .nav-group-items {
+            display: block;
+        }
+        body.sidebar-collapsed .nav-group + .nav-group {
+            margin-top: 0.5rem;
         }
         body.sidebar-collapsed .lg\:ml-64 {
             margin-left: 4rem !important;
@@ -359,4 +384,33 @@ foreach (array_merge($nav_items, [['messages.php', '', 'Messages']], $account_it
         if (e.target.closest('a')) saveSidebarScroll();
     });
     window.addEventListener('pagehide', saveSidebarScroll);
+
+    // Collapsible nav groups — open by default; manually closed groups are
+    // remembered in localStorage, except the group holding the current page
+    // which always opens so the active link stays visible.
+    const NAV_GROUPS_KEY = 'tsaci_sidebar_nav_groups';
+    let navGroupState = {};
+    try {
+        navGroupState = JSON.parse(localStorage.getItem(NAV_GROUPS_KEY) || '{}') || {};
+    } catch (e) {
+        navGroupState = {};
+    }
+
+    document.querySelectorAll('#sidebar .nav-group').forEach(function(group) {
+        const toggle = group.querySelector('.nav-group-toggle');
+        if (!toggle) return;
+
+        const open = group.classList.contains('has-active') || navGroupState[group.dataset.group] !== false;
+        group.classList.toggle('closed', !open);
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+
+        toggle.addEventListener('click', function() {
+            const closed = group.classList.toggle('closed');
+            navGroupState[group.dataset.group] = !closed;
+            toggle.setAttribute('aria-expanded', closed ? 'false' : 'true');
+            try {
+                localStorage.setItem(NAV_GROUPS_KEY, JSON.stringify(navGroupState));
+            } catch (e) {}
+        });
+    });
 </script>
