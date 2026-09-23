@@ -123,6 +123,21 @@ JOIN (
 ) v ON t.tab_key = 'custom'
 WHERE NOT EXISTS (SELECT 1 FROM products p WHERE p.slug = v.slug);
 
+-- Service Items — "Our Service Process" steps + "Why Choose Our Services" rows
+-- (requires the service_items table from database_schema_update.sql)
+INSERT INTO service_items (section, title, description, icon, display_order, is_active) VALUES
+('process', 'Assessment', 'We begin by thoroughly assessing your specific needs, requirements, and application challenges.', 'fas fa-search', 1, 1),
+('process', 'Solution Design', 'Our experts design customized solutions tailored to your specific application and requirements.', 'fas fa-lightbulb', 2, 1),
+('process', 'Implementation', 'We implement the solution with precision, ensuring optimal performance and reliability.', 'fas fa-cogs', 3, 1),
+('process', 'Monitoring', 'Continuous monitoring and support to ensure long-term success and optimal performance.', 'fas fa-chart-line', 4, 1),
+('features', 'Expert Team', 'Our team consists of certified professionals with decades of experience in activated carbon applications.', 'fas fa-award', 1, 1),
+('features', '24/7 Support', 'Round-the-clock technical support and emergency services to ensure your operations never stop.', 'fas fa-clock', 2, 1),
+('features', 'Quality Assurance', 'Rigorous quality control processes ensure consistent, reliable service delivery every time.', 'fas fa-shield-alt', 3, 1),
+('features', 'Sustainable Solutions', 'Environmentally responsible service practices that align with your sustainability goals.', 'fas fa-leaf', 4, 1),
+('features', 'Long-term Partnership', 'We build lasting relationships with our clients, providing ongoing support and value.', 'fas fa-handshake', 5, 1),
+('features', 'Performance Optimization', 'Continuous improvement services to maximize efficiency and reduce operational costs.', 'fas fa-chart-bar', 6, 1)
+ON DUPLICATE KEY UPDATE description=VALUES(description), icon=VALUES(icon), display_order=VALUES(display_order);
+
 -- Services (from services page)
 INSERT INTO services (title, slug, description, features, benefits, icon, image_url, display_order, is_active) VALUES
 ('Technical Consultation', 'technical-consultation', 'Expert technical support and consultation for all activated carbon applications and system design.', 'Application analysis\nSystem design\nProduct selection\nPerformance optimization', 'Expert guidance\nCustomized solutions\nCost optimization\nImproved efficiency', 'fas fa-headset', NULL, 1, 1),

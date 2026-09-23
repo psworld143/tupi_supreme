@@ -334,3 +334,37 @@ INSERT INTO page_content (page_name, section_name, content_type, content, displa
 ('products', 'custom_banner_title', 'text', 'Custom Formulations', 34, 1),
 ('products', 'custom_banner_subtitle', 'text', 'Tailored activated carbon solutions for specialized applications', 35, 1)
 ON DUPLICATE KEY UPDATE content=VALUES(content);
+
+-- ============================================================
+-- Phase 3: service_items — "Our Service Process" steps and
+-- "Why Choose Our Services" feature rows were hardcoded PHP arrays
+-- in services.php. One table covers both sections (section column).
+-- ============================================================
+CREATE TABLE IF NOT EXISTS service_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    section VARCHAR(20) NOT NULL DEFAULT 'features',
+    title VARCHAR(200) NOT NULL,
+    description TEXT,
+    icon VARCHAR(100) DEFAULT 'fas fa-star',
+    display_order INT DEFAULT 0,
+    is_active TINYINT(1) DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_by INT,
+    UNIQUE KEY uq_section_title (section, title),
+    KEY idx_section (section),
+    KEY idx_is_active (is_active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO service_items (section, title, description, icon, display_order, is_active) VALUES
+('process', 'Assessment', 'We begin by thoroughly assessing your specific needs, requirements, and application challenges.', 'fas fa-search', 1, 1),
+('process', 'Solution Design', 'Our experts design customized solutions tailored to your specific application and requirements.', 'fas fa-lightbulb', 2, 1),
+('process', 'Implementation', 'We implement the solution with precision, ensuring optimal performance and reliability.', 'fas fa-cogs', 3, 1),
+('process', 'Monitoring', 'Continuous monitoring and support to ensure long-term success and optimal performance.', 'fas fa-chart-line', 4, 1),
+('features', 'Expert Team', 'Our team consists of certified professionals with decades of experience in activated carbon applications.', 'fas fa-award', 1, 1),
+('features', '24/7 Support', 'Round-the-clock technical support and emergency services to ensure your operations never stop.', 'fas fa-clock', 2, 1),
+('features', 'Quality Assurance', 'Rigorous quality control processes ensure consistent, reliable service delivery every time.', 'fas fa-shield-alt', 3, 1),
+('features', 'Sustainable Solutions', 'Environmentally responsible service practices that align with your sustainability goals.', 'fas fa-leaf', 4, 1),
+('features', 'Long-term Partnership', 'We build lasting relationships with our clients, providing ongoing support and value.', 'fas fa-handshake', 5, 1),
+('features', 'Performance Optimization', 'Continuous improvement services to maximize efficiency and reduce operational costs.', 'fas fa-chart-bar', 6, 1)
+ON DUPLICATE KEY UPDATE description=VALUES(description), icon=VALUES(icon), display_order=VALUES(display_order);

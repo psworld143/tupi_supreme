@@ -39,22 +39,9 @@ if ($db) {
     }
 }
 
-// Static process steps (kept inline in the original)
-$process_steps = [
-    ['fa-search',      'Assessment',       'We begin by thoroughly assessing your specific needs, requirements, and application challenges.'],
-    ['fa-lightbulb',   'Solution Design',  'Our experts design customized solutions tailored to your specific application and requirements.'],
-    ['fa-cogs',        'Implementation',   'We implement the solution with precision, ensuring optimal performance and reliability.'],
-    ['fa-chart-line',  'Monitoring',       'Continuous monitoring and support to ensure long-term success and optimal performance.'],
-];
-
-$service_features = [
-    ['fa-award',       'Expert Team',              'Our team consists of certified professionals with decades of experience in activated carbon applications.'],
-    ['fa-clock',       '24/7 Support',             'Round-the-clock technical support and emergency services to ensure your operations never stop.'],
-    ['fa-shield-alt',  'Quality Assurance',         'Rigorous quality control processes ensure consistent, reliable service delivery every time.'],
-    ['fa-leaf',        'Sustainable Solutions',     'Environmentally responsible service practices that align with your sustainability goals.'],
-    ['fa-handshake',   'Long-term Partnership',     'We build lasting relationships with our clients, providing ongoing support and value.'],
-    ['fa-chart-bar',   'Performance Optimization',  'Continuous improvement services to maximize efficiency and reduce operational costs.'],
-];
+// Service process steps + feature rows (managed via Admin → Service Items)
+$process_steps = getServiceItems('process');
+$service_features = getServiceItems('features');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -347,11 +334,11 @@ $service_features = [
                 <?php foreach ($process_steps as $i => $step): ?>
                     <div class="process-step text-center p-6 reveal <?php echo 'reveal-delay-' . (($i + 1)); ?>">
                         <div class="process-icon w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-5 relative z-20">
-                            <i class="<?php echo $step[0]; ?> text-2xl text-white"></i>
+                            <i class="<?php echo htmlspecialchars_safe($step['icon'] ?? '') ?: 'fas fa-star'; ?> text-2xl text-white"></i>
                             <span class="process-number"><?php echo $i + 1; ?></span>
                         </div>
-                        <h5 class="text-lg font-semibold mb-2 relative z-10"><?php echo htmlspecialchars_safe($step[1]); ?></h5>
-                        <p class="text-white/70 text-sm leading-relaxed relative z-10"><?php echo htmlspecialchars_safe($step[2]); ?></p>
+                        <h5 class="text-lg font-semibold mb-2 relative z-10"><?php echo htmlspecialchars_safe($step['title']); ?></h5>
+                        <p class="text-white/70 text-sm leading-relaxed relative z-10"><?php echo htmlspecialchars_safe($step['description']); ?></p>
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -371,13 +358,13 @@ $service_features = [
             <div class="max-w-4xl mx-auto reveal">
                 <div class="bg-white border border-[#e6ece8] rounded-2xl overflow-hidden divide-y divide-[#e6ece8]">
                     <?php foreach ($service_features as $i => $feat): ?>
-                        <div class="feature-row flex items-center p-6 <?php echo $i < count($service_features) - 1 ? '' : ''; ?>">
+                        <div class="feature-row flex items-center p-6">
                             <div class="feature-icon w-12 h-12 rounded-2xl flex items-center justify-center mr-5 flex-shrink-0">
-                                <i class="<?php echo $feat[0]; ?> text-lg text-white"></i>
+                                <i class="<?php echo htmlspecialchars_safe($feat['icon'] ?? '') ?: 'fas fa-star'; ?> text-lg text-white"></i>
                             </div>
                             <div>
-                                <h5 class="text-lg font-semibold text-[#23332c] mb-1"><?php echo htmlspecialchars_safe($feat[1]); ?></h5>
-                                <p class="text-[#7d8b84] text-sm leading-relaxed"><?php echo htmlspecialchars_safe($feat[2]); ?></p>
+                                <h5 class="text-lg font-semibold text-[#23332c] mb-1"><?php echo htmlspecialchars_safe($feat['title']); ?></h5>
+                                <p class="text-[#7d8b84] text-sm leading-relaxed"><?php echo htmlspecialchars_safe($feat['description']); ?></p>
                             </div>
                         </div>
                     <?php endforeach; ?>

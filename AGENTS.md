@@ -74,6 +74,7 @@ Standalone CMS back-office. Separate `config.php` (defines `ADMIN_ACCESS`, start
 | `pages.php` | CRUD for `page_content` sections |
 | `products.php` | CRUD for `products` |
 | `services.php` | CRUD for `services` |
+| `service-items.php` | CRUD for `service_items` (services-page process steps + feature rows; `section` = `process`/`features`) |
 | `case-studies.php` | CRUD for `case_studies` |
 | `gallery.php` | CRUD for `gallery_images` (upload/URL) |
 | `resources.php` | CRUD for `resources` |

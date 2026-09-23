@@ -143,6 +143,27 @@ function getApplications() {
     return $applications;
 }
 
+// Service items: 'process' steps or 'features' rows on the services page.
+// Fail-soft — returns [] if the table doesn't exist yet.
+function getServiceItems($section = null) {
+    $db = getDB();
+    if (!$db) return [];
+
+    $sql = "SELECT * FROM service_items WHERE is_active = 1";
+    if ($section !== null) {
+        $sql .= " AND section = '" . $db->real_escape_string($section) . "'";
+    }
+    $sql .= " ORDER BY display_order, title";
+
+    $result = $db->query($sql);
+    if (!$result) return [];
+    $items = [];
+    while ($row = $result->fetch_assoc()) {
+        $items[] = $row;
+    }
+    return $items;
+}
+
 function getProducts($limit = null, $featured_only = false) {
     $db = getDB();
     if (!$db) return [];
