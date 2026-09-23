@@ -151,3 +151,15 @@ INSERT INTO footer_links (category, label, url, display_order, is_active) VALUES
 ('legal', 'Terms of Service', '#', 2, 1)
 ON DUPLICATE KEY UPDATE label=VALUES(label), url=VALUES(url);
 
+
+-- Applications (products.php "Applications" grid)
+INSERT INTO applications (title, description, icon, is_primary, display_order, is_active) VALUES
+('Municipal Water Treatment', 'Drinking water treatment for cities and towns - 200+ facilities served', 'fas fa-building', 1, 10, 1),
+('Industrial Wastewater', 'Treatment of industrial process water', 'fas fa-industry', 0, 20, 1),
+('Healthcare', 'Medical air filtration and sterilization', 'fas fa-hospital', 0, 30, 1),
+('Pharmaceutical', 'Drug purification and manufacturing', 'fas fa-flask', 0, 40, 1),
+('Oil & Gas', 'Fuel purification and gas treatment', 'fas fa-gas-pump', 0, 50, 1),
+('Residential', 'Home water and air filtration', 'fas fa-home', 0, 60, 1),
+('Aquaculture', 'Fish farming and aquarium systems', 'fas fa-fish', 0, 70, 1),
+('Environmental', 'Pollution control and remediation', 'fas fa-leaf', 0, 80, 1)
+ON DUPLICATE KEY UPDATE description=VALUES(description), icon=VALUES(icon), is_primary=VALUES(is_primary);

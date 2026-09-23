@@ -11,8 +11,18 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 if (!isset($_FILES['document']) || $_FILES['document']['error'] !== UPLOAD_ERR_OK) {
+    $code = $_FILES['document']['error'] ?? UPLOAD_ERR_NO_FILE;
+    $messages = [
+        UPLOAD_ERR_INI_SIZE   => 'File exceeds the server upload limit (' . ini_get('upload_max_filesize') . '). Raise upload_max_filesize in php.ini or pick a smaller file.',
+        UPLOAD_ERR_FORM_SIZE  => 'File exceeds the maximum allowed size.',
+        UPLOAD_ERR_PARTIAL    => 'The file was only partially uploaded. Please try again.',
+        UPLOAD_ERR_NO_FILE    => 'No file was uploaded.',
+        UPLOAD_ERR_NO_TMP_DIR => 'Server misconfiguration: missing temporary upload folder.',
+        UPLOAD_ERR_CANT_WRITE => 'Server error: could not write the file to disk.',
+        UPLOAD_ERR_EXTENSION  => 'The upload was blocked by a server extension.',
+    ];
     http_response_code(400);
-    echo json_encode(['success' => false, 'error' => 'No file uploaded or upload error']);
+    echo json_encode(['success' => false, 'error' => ($messages[$code] ?? 'Upload error (code ' . $code . ')')]);
     exit;
 }
 
@@ -54,8 +64,10 @@ if (!file_exists(UPLOAD_DIR . 'documents/')) {
 
 // Move uploaded file
 if (move_uploaded_file($file_tmp, $upload_path)) {
-    // Generate URL relative to site root
-    $file_url = '/tupi_supreme/tsaci/uploads/documents/' . $unique_name;
+    // Generate URL relative to site root — adapts to subfolder installs
+    // (local: /tupi_supreme/tsaci) and domain-root installs (live: /)
+    $site_base = rtrim(dirname(dirname(dirname($_SERVER['SCRIPT_NAME']))), '/');
+    $file_url = $site_base . '/uploads/documents/' . $unique_name;
 
     logActivity('upload', 'documents', null, "Uploaded document: {$file_name}");
 

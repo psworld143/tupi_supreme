@@ -58,18 +58,16 @@ $login_bg = [
     'login_bg_enabled'  => '0',
     'login_bg_image'    => '',
     'login_bg_overlay'  => '80',
-    'login_bg_gradient' => '1',
     'login_bg_color'    => '#f5f7f5',
 ];
 $db = getDB();
-$res = $db->query("SELECT setting_key, setting_value FROM site_settings WHERE setting_key IN ('login_bg_enabled','login_bg_image','login_bg_overlay','login_bg_gradient','login_bg_color')");
+$res = $db->query("SELECT setting_key, setting_value FROM site_settings WHERE setting_key IN ('login_bg_enabled','login_bg_image','login_bg_overlay','login_bg_color')");
 if ($res) {
     while ($row = $res->fetch_assoc()) {
         $login_bg[$row['setting_key']] = $row['setting_value'];
     }
 }
 $login_bg_enabled = $login_bg['login_bg_enabled'] === '1' && trim($login_bg['login_bg_image']) !== '';
-$login_bg_gradient = $login_bg['login_bg_gradient'] === '1';
 $login_bg_alpha = number_format(max(0, min(100, (int) $login_bg['login_bg_overlay'])) / 100, 2);
 $login_bg_url = str_replace(["'", "\\", "\n", "\r", "<", ">"], '', $login_bg['login_bg_image']);
 $login_bg_color = preg_match('/^#[0-9a-fA-F]{6}$/', $login_bg['login_bg_color']) ? $login_bg['login_bg_color'] : '#f5f7f5';
@@ -106,54 +104,17 @@ $login_bg_color = preg_match('/^#[0-9a-fA-F]{6}$/', $login_bg['login_bg_color'])
         body {
             font-family: 'Poppins', ui-sans-serif, system-ui, sans-serif;
             <?php if ($login_bg_enabled): ?>
-                <?php if ($login_bg_gradient): ?>
-            background: linear-gradient(135deg, rgba(35, 51, 44, <?php echo $login_bg_alpha; ?>), rgba(61, 122, 102, <?php echo $login_bg_alpha; ?>)), url('<?php echo $login_bg_url; ?>') center/cover no-repeat fixed;
-                <?php else: ?>
-            background: <?php echo $login_bg_color; ?> url('<?php echo $login_bg_url; ?>') center/cover no-repeat fixed;
-                <?php endif; ?>
+            background-image: linear-gradient(rgba(35, 51, 44, <?php echo $login_bg_alpha; ?>), rgba(35, 51, 44, <?php echo $login_bg_alpha; ?>)), url('<?php echo $login_bg_url; ?>');
+            background-color: <?php echo $login_bg_color; ?>;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
             <?php else: ?>
-                <?php if ($login_bg_gradient): ?>
-            background: linear-gradient(135deg, #23332c, #3d7a66);
-                <?php else: ?>
             background: <?php echo $login_bg_color; ?>;
-                <?php endif; ?>
             <?php endif; ?>
             color: #23332c;
             min-height: 100vh;
-        }
-
-        /* Page grain pattern overlay */
-        .page-pattern {
-            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-        }
-
-        /* Floating gradient orbs for depth */
-        .orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(60px);
-            opacity: 0.35;
-            pointer-events: none;
-        }
-        .orb-1 {
-            width: 400px;
-            height: 400px;
-            background: #8bc34a;
-            top: -120px;
-            right: -100px;
-            animation: float 8s ease-in-out infinite;
-        }
-        .orb-2 {
-            width: 320px;
-            height: 320px;
-            background: #3d7a66;
-            bottom: -100px;
-            left: -80px;
-            animation: float 10s ease-in-out infinite reverse;
-        }
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(20px, -30px); }
         }
 
         /* Eyebrow label */
@@ -162,8 +123,8 @@ $login_bg_color = preg_match('/^#[0-9a-fA-F]{6}$/', $login_bg['login_bg_color'])
             align-items: center;
             gap: 0.5rem;
             padding: 0.375rem 1rem;
-            background-color: rgba(255, 255, 255, 0.15);
-            color: rgba(255, 255, 255, 0.9);
+            background-color: rgba(61, 122, 102, 0.12);
+            color: #3d7a66;
             font-size: 0.75rem;
             font-weight: 600;
             letter-spacing: 0.08em;
@@ -193,17 +154,8 @@ $login_bg_color = preg_match('/^#[0-9a-fA-F]{6}$/', $login_bg['login_bg_color'])
 
         /* Icon container */
         .icon-container {
-            background: linear-gradient(135deg, #3d7a66, #60796e);
-            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* Plain (no-gradient) mode — flattens every gradient/white-on-dark element */
-        .plain-bg .icon-container {
             background: #3d7a66;
-        }
-        .plain-bg .eyebrow {
-            background-color: rgba(61, 122, 102, 0.12);
-            color: #3d7a66;
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .login-card:hover .icon-container {
             transform: scale(1.06) rotate(-3deg);
@@ -236,22 +188,13 @@ $login_bg_color = preg_match('/^#[0-9a-fA-F]{6}$/', $login_bg['login_bg_color'])
                 animation: none;
                 transform: none;
             }
-            .orb {
-                animation: none;
-            }
             html {
                 scroll-behavior: auto;
             }
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden<?php echo $login_bg_gradient ? '' : ' plain-bg'; ?>">
-    <?php if ($login_bg_gradient): ?>
-    <!-- Floating gradient orbs for depth -->
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-    <div class="page-pattern absolute inset-0 opacity-30"></div>
-    <?php endif; ?>
+<body class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
 
     <div class="max-w-md w-full login-card p-10 rounded-3xl shadow-2xl relative z-10 fade-in fade-in-delay-1">
         <div>

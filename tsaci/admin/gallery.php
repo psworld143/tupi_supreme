@@ -389,7 +389,7 @@ $view_url = '../gallery.php#gallery-grid';
                         <div class="gallery-item bg-white border border-[#e6ece8] rounded-2xl overflow-hidden">
                             <div class="aspect-video bg-[#f7faf8] flex items-center justify-center overflow-hidden" id="preview_img_wrap">
                                 <img id="preview_img" src="<?php echo htmlspecialchars($edit_image['image_url'] ?? ''); ?>" alt="" class="w-full h-full object-cover <?php echo empty($edit_image['image_url'] ?? '') ? 'hidden' : ''; ?>">
-                                <div id="preview_img_placeholder" class="aspect-video bg-gradient-to-br from-[#3d7a66] to-[#60796e] flex items-center justify-center w-full h-full <?php echo empty($edit_image['image_url'] ?? '') ? '' : 'hidden'; ?>">
+                                <div id="preview_img_placeholder" class="aspect-video bg-[#3d7a66] flex items-center justify-center w-full h-full <?php echo empty($edit_image['image_url'] ?? '') ? '' : 'hidden'; ?>">
                                     <i class="fas fa-image text-5xl text-white/80"></i>
                                 </div>
                             </div>

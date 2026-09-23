@@ -34,6 +34,7 @@ $nav_items = [
     ['carousel.php',       'fa-images',         'Carousel'],
     ['products.php',       'fa-cube',           'Products'],
     ['product-tabs.php',   'fa-folder',         'Product Tabs'],
+    ['applications.php',   'fa-th-large',       'Applications'],
     ['services.php',       'fa-concierge-bell', 'Services'],
     ['testimonials.php',   'fa-quote-left',     'Testimonials'],
     ['case-studies.php',   'fa-book',           'Case Studies'],

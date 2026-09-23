@@ -27,6 +27,9 @@ $tab_granulated_label = getPageContent('products', 'tab_granulated_label', 'Gran
 $tab_husk_label = getPageContent('products', 'tab_husk_label', 'Coconut Husk Products');
 $tab_custom_label = getPageContent('products', 'tab_custom_label', 'Custom Formulations');
 
+// Applications card grid (managed via Admin → Applications)
+$application_cards = getApplications();
+
 // Product tab definitions (from product_tabs table; fail-soft defaults)
 $product_tabs = getProductTabs();
 // System tab keys (rendered with their own rich hard-coded panes)
@@ -90,41 +93,17 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
         }
 
         .page-header-gradient {
-            background: linear-gradient(135deg, #23332c, #3d7a66);
+            background: #23332c;
         }
 
         .page-header-pattern {
             background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
         }
 
-        /* Floating gradient orbs for depth — a modern hero accent */
-        .orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(60px);
-            opacity: 0.35;
-            pointer-events: none;
-        }
-        .orb-1 {
-            width: 400px;
-            height: 400px;
-            background: #8bc34a;
-            top: -100px;
-            right: -80px;
-            animation: float 8s ease-in-out infinite;
-        }
-        .orb-2 {
-            width: 300px;
-            height: 300px;
-            background: #3d7a66;
-            bottom: -80px;
-            left: 10%;
-            animation: float 10s ease-in-out infinite reverse;
-        }
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(20px, -30px); }
-        }
+
+
+
+
 
         /* Subtle dot grid for section backgrounds */
         .dot-grid {
@@ -161,12 +140,12 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
         }
 
         .product-icon {
-            background: linear-gradient(135deg, #3d7a66, #60796e);
+            background: #3d7a66;
             transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .application-icon {
-            background: linear-gradient(135deg, #3d7a66, #60796e);
+            background: #3d7a66;
             transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .app-card:hover .application-icon {
@@ -256,9 +235,7 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
                 transform: none;
                 transition: none;
             }
-            .orb {
-                animation: none;
-            }
+
             html {
                 scroll-behavior: auto;
             }
@@ -270,9 +247,6 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
 
     <!-- Page Header -->
     <section id="page-header" class="page-header-gradient text-white relative overflow-hidden pt-24 pb-20">
-        <!-- Floating gradient orbs for depth -->
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
         <div class="page-header-pattern absolute inset-0 opacity-30"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="text-center">
@@ -313,7 +287,6 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
                 <div id="granulated" class="tab-pane">
                     <!-- Product Highlight -->
                     <div class="bg-[#23332c] text-white rounded-2xl p-8 lg:p-10 mb-12 text-center relative overflow-hidden reveal">
-                        <div class="orb orb-1" style="background: #3d7a66; opacity: 0.25;"></div>
                         <div class="relative">
                             <span class="eyebrow bg-white/15 text-white/90 mb-4">
                                 <i class="fas fa-award text-xs"></i> Flagship Product
@@ -515,7 +488,6 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
                 <!-- Coconut Husk Products (NEW) -->
                 <div id="husk" class="tab-pane hidden">
                     <div class="bg-[#3d7a66] text-white rounded-2xl p-8 lg:p-10 mb-12 text-center relative overflow-hidden reveal">
-                        <div class="orb orb-1" style="background: #8bc34a; opacity: 0.25;"></div>
                         <div class="relative">
                             <span class="eyebrow bg-white/15 text-white/90 mb-4">
                                 <i class="fas fa-seedling text-xs"></i> Sustainable
@@ -622,7 +594,6 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
                 <!-- Custom Formulations -->
                 <div id="custom" class="tab-pane hidden">
                     <div class="bg-[#60796e] text-white rounded-2xl p-8 lg:p-10 mb-12 text-center relative overflow-hidden reveal">
-                        <div class="orb orb-1" style="background: #8bc34a; opacity: 0.25;"></div>
                         <div class="relative">
                             <span class="eyebrow bg-white/15 text-white/90 mb-4">
                                 <i class="fas fa-cogs text-xs"></i> Tailored Solutions
@@ -693,7 +664,6 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
                 ?>
                 <div id="<?php echo htmlspecialchars_safe($key); ?>" class="tab-pane hidden">
                     <div class="bg-[#60796e] text-white rounded-2xl p-8 lg:p-10 mb-12 text-center relative overflow-hidden reveal">
-                        <div class="orb orb-1" style="background: #8bc34a; opacity: 0.25;"></div>
                         <div class="relative">
                             <span class="eyebrow bg-white/15 text-white/90 mb-4">
                                 <i class="fas <?php echo htmlspecialchars_safe($tab['icon'] ?? 'fa-cube'); ?> text-xs"></i> Products
@@ -710,7 +680,7 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
                                             <img src="<?php echo htmlspecialchars_safe($product['image_url']); ?>" alt="<?php echo htmlspecialchars_safe($product['name']); ?>" class="w-full h-full object-cover">
                                         </div>
                                     <?php else: ?>
-                                        <div class="aspect-video bg-gradient-to-br from-[#3d7a66] to-[#60796e] flex items-center justify-center">
+                                        <div class="aspect-video bg-[#3d7a66] flex items-center justify-center">
                                             <i class="fas fa-box text-5xl text-white/80"></i>
                                         </div>
                                     <?php endif; ?>
@@ -772,7 +742,7 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
                                     <img src="<?php echo htmlspecialchars_safe($product['image_url']); ?>" alt="<?php echo htmlspecialchars_safe($product['name']); ?>" class="w-full h-full object-cover">
                                 </div>
                             <?php else: ?>
-                                <div class="aspect-video bg-gradient-to-br from-[#3d7a66] to-[#60796e] flex items-center justify-center">
+                                <div class="aspect-video bg-[#3d7a66] flex items-center justify-center">
                                     <i class="fas fa-box text-5xl text-white/80"></i>
                                 </div>
                             <?php endif; ?>
@@ -904,6 +874,7 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
     </section>
 
     <!-- Applications -->
+    <?php if (!empty($application_cards)): ?>
     <section id="applications" class="py-20 lg:py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16 reveal">
@@ -914,76 +885,39 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
                 <p class="text-lg text-[#7d8b84] max-w-2xl mx-auto"><?php echo nl2br_safe($applications_subtitle); ?></p>
             </div>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
-                <div class="app-card bg-[#23332c] text-white rounded-2xl p-6 text-center reveal reveal-delay-1 relative overflow-hidden">
-                    <div class="orb orb-1" style="background: #3d7a66; opacity: 0.25;"></div>
-                    <div class="relative">
-                        <div class="application-icon w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-white">
-                            <i class="fas fa-building text-2xl text-[#3d7a66]"></i>
+                <?php foreach ($application_cards as $index => $app):
+                    $delay = ($index % 4) + 1;
+                    $app_icon = htmlspecialchars_safe($app['icon'] ?: 'fas fa-th-large');
+                    if (!empty($app['is_primary'])):
+                ?>
+                    <div class="app-card bg-[#23332c] text-white rounded-2xl p-6 text-center reveal reveal-delay-<?php echo $delay; ?> relative overflow-hidden">
+                        <div class="relative">
+                            <div class="application-icon w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-white">
+                                <i class="<?php echo $app_icon; ?> text-2xl text-[#3d7a66]"></i>
+                            </div>
+                            <h5 class="text-base font-semibold mb-2"><?php echo htmlspecialchars_safe($app['title']); ?></h5>
+                            <span class="inline-block text-xs font-semibold bg-[#8bc34a] text-[#23332c] px-2.5 py-1 rounded-full mb-2">PRIMARY APPLICATION</span>
+                            <p class="text-white/70 text-sm"><?php echo htmlspecialchars_safe($app['description']); ?></p>
                         </div>
-                        <h5 class="text-base font-semibold mb-2">Municipal Water Treatment</h5>
-                        <span class="inline-block text-xs font-semibold bg-[#8bc34a] text-[#23332c] px-2.5 py-1 rounded-full mb-2">PRIMARY APPLICATION</span>
-                        <p class="text-white/70 text-sm">Drinking water treatment for cities and towns - 200+ facilities served</p>
                     </div>
-                </div>
-                <div class="app-card bg-white border border-[#e6ece8] rounded-2xl p-6 text-center reveal reveal-delay-2">
-                    <div class="application-icon w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-industry text-2xl text-white"></i>
+                    <?php else: ?>
+                    <div class="app-card bg-white border border-[#e6ece8] rounded-2xl p-6 text-center reveal reveal-delay-<?php echo $delay; ?>">
+                        <div class="application-icon w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <i class="<?php echo $app_icon; ?> text-2xl text-white"></i>
+                        </div>
+                        <h5 class="text-base font-semibold text-[#23332c] mb-2"><?php echo htmlspecialchars_safe($app['title']); ?></h5>
+                        <p class="text-[#7d8b84] text-sm"><?php echo htmlspecialchars_safe($app['description']); ?></p>
                     </div>
-                    <h5 class="text-base font-semibold text-[#23332c] mb-2">Industrial Wastewater</h5>
-                    <p class="text-[#7d8b84] text-sm">Treatment of industrial process water</p>
-                </div>
-                <div class="app-card bg-white border border-[#e6ece8] rounded-2xl p-6 text-center reveal reveal-delay-3">
-                    <div class="application-icon w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-hospital text-2xl text-white"></i>
-                    </div>
-                    <h5 class="text-base font-semibold text-[#23332c] mb-2">Healthcare</h5>
-                    <p class="text-[#7d8b84] text-sm">Medical air filtration and sterilization</p>
-                </div>
-                <div class="app-card bg-white border border-[#e6ece8] rounded-2xl p-6 text-center reveal reveal-delay-4">
-                    <div class="application-icon w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-flask text-2xl text-white"></i>
-                    </div>
-                    <h5 class="text-base font-semibold text-[#23332c] mb-2">Pharmaceutical</h5>
-                    <p class="text-[#7d8b84] text-sm">Drug purification and manufacturing</p>
-                </div>
-                <div class="app-card bg-white border border-[#e6ece8] rounded-2xl p-6 text-center reveal reveal-delay-1">
-                    <div class="application-icon w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-gas-pump text-2xl text-white"></i>
-                    </div>
-                    <h5 class="text-base font-semibold text-[#23332c] mb-2">Oil & Gas</h5>
-                    <p class="text-[#7d8b84] text-sm">Fuel purification and gas treatment</p>
-                </div>
-                <div class="app-card bg-white border border-[#e6ece8] rounded-2xl p-6 text-center reveal reveal-delay-2">
-                    <div class="application-icon w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-home text-2xl text-white"></i>
-                    </div>
-                    <h5 class="text-base font-semibold text-[#23332c] mb-2">Residential</h5>
-                    <p class="text-[#7d8b84] text-sm">Home water and air filtration</p>
-                </div>
-                <div class="app-card bg-white border border-[#e6ece8] rounded-2xl p-6 text-center reveal reveal-delay-3">
-                    <div class="application-icon w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-fish text-2xl text-white"></i>
-                    </div>
-                    <h5 class="text-base font-semibold text-[#23332c] mb-2">Aquaculture</h5>
-                    <p class="text-[#7d8b84] text-sm">Fish farming and aquarium systems</p>
-                </div>
-                <div class="app-card bg-white border border-[#e6ece8] rounded-2xl p-6 text-center reveal reveal-delay-4">
-                    <div class="application-icon w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-leaf text-2xl text-white"></i>
-                    </div>
-                    <h5 class="text-base font-semibold text-[#23332c] mb-2">Environmental</h5>
-                    <p class="text-[#7d8b84] text-sm">Pollution control and remediation</p>
-                </div>
+                    <?php endif; ?>
+                <?php endforeach; ?>
             </div>
         </div>
     </section>
+    <?php endif; ?>
 
     <!-- CTA Section -->
     <section id="cta" class="relative overflow-hidden py-20 lg:py-24">
-        <!-- Gradient background with orbs -->
         <div class="absolute inset-0 page-header-gradient"></div>
-        <div class="orb orb-1" style="background: #8bc34a; opacity: 0.25;"></div>
-        <div class="orb orb-2" style="background: #3d7a66; opacity: 0.3;"></div>
         <div class="page-header-pattern absolute inset-0 opacity-30"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative text-center text-white reveal">
             <span class="eyebrow bg-white/15 text-white/90 mb-5">

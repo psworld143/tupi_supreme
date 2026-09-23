@@ -73,41 +73,17 @@ $featured_products = getProducts(3, true);
         }
 
         .hero-gradient {
-            background: linear-gradient(135deg, #23332c, #3d7a66);
+            background: #23332c;
         }
 
         .hero-pattern {
             background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
         }
 
-        /* Floating gradient orbs for depth — a modern hero accent */
-        .orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(60px);
-            opacity: 0.35;
-            pointer-events: none;
-        }
-        .orb-1 {
-            width: 400px;
-            height: 400px;
-            background: #8bc34a;
-            top: -100px;
-            right: -80px;
-            animation: float 8s ease-in-out infinite;
-        }
-        .orb-2 {
-            width: 300px;
-            height: 300px;
-            background: #3d7a66;
-            bottom: -80px;
-            left: 10%;
-            animation: float 10s ease-in-out infinite reverse;
-        }
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(20px, -30px); }
-        }
+
+
+
+
 
         /* Subtle dot grid for section backgrounds */
         .dot-grid {
@@ -130,7 +106,7 @@ $featured_products = getProducts(3, true);
         }
 
         .feature-icon {
-            background: linear-gradient(135deg, #3d7a66, #60796e);
+            background: #3d7a66;
             transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -306,7 +282,7 @@ $featured_products = getProducts(3, true);
                 transform: none;
                 transition: none;
             }
-            .orb, .hero-icon-pulse {
+            .hero-icon-pulse {
                 animation: none;
             }
             html {
@@ -321,14 +297,11 @@ $featured_products = getProducts(3, true);
     <!-- Hero Carousel Section -->
     <?php if (!empty($carousel_slides)): ?>
     <section id="hero" class="carousel-container hero-gradient text-white relative overflow-hidden pt-24 pb-20" style="min-height: 600px;">
-        <!-- Floating gradient orbs for depth -->
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
         <?php foreach ($carousel_slides as $index => $slide):
             // Per-slide overlay opacity (0-100 stored; 92 = original fixed value).
             $overlay_alpha = number_format((isset($slide['overlay_opacity']) ? (int)$slide['overlay_opacity'] : 92) / 100, 2);
         ?>
-            <div class="carousel-slide <?php echo $index === 0 ? 'active' : ''; ?>" style="background-image: linear-gradient(135deg, rgba(35, 51, 44, <?php echo $overlay_alpha; ?>), rgba(61, 122, 102, <?php echo $overlay_alpha; ?>)), url('<?php echo htmlspecialchars_safe($slide['image_url']); ?>'); background-size: cover; background-position: center; position: absolute; top: 0; left: 0; right: 0; bottom: 0;">
+            <div class="carousel-slide <?php echo $index === 0 ? 'active' : ''; ?>" style="background-image: linear-gradient(rgba(35, 51, 44, <?php echo $overlay_alpha; ?>), rgba(35, 51, 44, <?php echo $overlay_alpha; ?>)), url('<?php echo htmlspecialchars_safe($slide['image_url']); ?>'); background-size: cover; background-position: center; position: absolute; top: 0; left: 0; right: 0; bottom: 0;">
                 <div class="hero-pattern absolute inset-0 opacity-30"></div>
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 h-full flex items-center">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center w-full">
@@ -377,9 +350,6 @@ $featured_products = getProducts(3, true);
     <?php else: ?>
     <!-- Fallback Hero Section (if no carousel slides) -->
     <section id="hero" class="hero-gradient text-white relative overflow-hidden pt-24 pb-20">
-        <!-- Floating gradient orbs for depth -->
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
         <div class="hero-pattern absolute inset-0 opacity-30"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -442,8 +412,6 @@ $featured_products = getProducts(3, true);
 
     <!-- Stats Section -->
     <section id="stats" class="bg-[#23332c] text-white py-20 lg:py-24 relative overflow-hidden">
-        <!-- Decorative orbs -->
-        <div class="orb orb-1" style="background: #3d7a66; opacity: 0.25;"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
                 <?php foreach ($statistics as $i => $stat): ?>
@@ -506,10 +474,7 @@ $featured_products = getProducts(3, true);
 
     <!-- CTA Section -->
     <section id="cta" class="relative overflow-hidden py-20 lg:py-24">
-        <!-- Gradient background with orbs -->
         <div class="absolute inset-0 hero-gradient"></div>
-        <div class="orb orb-1" style="background: #8bc34a; opacity: 0.25;"></div>
-        <div class="orb orb-2" style="background: #3d7a66; opacity: 0.3;"></div>
         <div class="hero-pattern absolute inset-0 opacity-30"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative text-center text-white reveal-scale">
             <span class="eyebrow bg-white/15 text-white/90 mb-5">

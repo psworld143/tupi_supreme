@@ -420,7 +420,7 @@ function resourceViewUrl($category) {
                         </p>
                         <div class="resource-card bg-white border border-[#e6ece8] rounded-2xl p-8">
                             <div class="text-center mb-6">
-                                <div class="download-icon w-16 h-16 rounded-2xl flex items-center justify-center mx-auto" style="background: linear-gradient(135deg, #3d7a66, #60796e);">
+                                <div class="download-icon w-16 h-16 rounded-2xl flex items-center justify-center mx-auto" style="background: #3d7a66;">
                                     <i id="preview_icon" class="fas fa-file-pdf text-2xl text-white"></i>
                                 </div>
                             </div>

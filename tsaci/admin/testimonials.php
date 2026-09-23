@@ -376,7 +376,7 @@ $view_url = '../services.php#testimonials';
                         <div class="bg-white border border-[#e6ece8] rounded-2xl p-8 max-w-sm">
                             <div class="text-center mb-4">
                                 <img id="preview_photo" src="<?php echo htmlspecialchars($edit_testimonial['photo_url'] ?? ''); ?>" alt="" class="w-16 h-16 rounded-full mx-auto mb-4 object-cover border-4 border-[#eef3f0] <?php echo empty($edit_testimonial['photo_url'] ?? '') ? 'hidden' : ''; ?>">
-                                <div id="preview_photo_fallback" class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-[#eef3f0] <?php echo empty($edit_testimonial['photo_url'] ?? '') ? '' : 'hidden'; ?>" style="background: linear-gradient(135deg, #3d7a66, #60796e);">
+                                <div id="preview_photo_fallback" class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-[#eef3f0] <?php echo empty($edit_testimonial['photo_url'] ?? '') ? '' : 'hidden'; ?>" style="background: #3d7a66;">
                                     <i class="fas fa-user text-xl text-white"></i>
                                 </div>
                                 <h5 id="preview_name" class="text-lg font-semibold text-[#23332c] mb-1"><?php echo htmlspecialchars($edit_testimonial['name'] ?? 'Client name'); ?></h5>
@@ -595,7 +595,7 @@ $view_url = '../services.php#testimonials';
                                             <?php if ($t['photo_url']): ?>
                                                 <img src="<?php echo htmlspecialchars($t['photo_url']); ?>" alt="" class="w-10 h-10 rounded-full object-cover border-2 border-[#eef3f0]">
                                             <?php else: ?>
-                                                <div class="w-10 h-10 rounded-full flex items-center justify-center border-2 border-[#eef3f0]" style="background: linear-gradient(135deg, #3d7a66, #60796e);">
+                                                <div class="w-10 h-10 rounded-full flex items-center justify-center border-2 border-[#eef3f0]" style="background: #3d7a66;">
                                                     <i class="fas fa-user text-white text-sm"></i>
                                                 </div>
                                             <?php endif; ?>

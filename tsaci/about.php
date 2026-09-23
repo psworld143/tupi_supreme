@@ -105,41 +105,17 @@ $company_full_name = getSiteSetting('company_name', 'Tupi Supreme Activated Carb
         }
 
         .page-header-gradient {
-            background: linear-gradient(135deg, #23332c, #3d7a66);
+            background: #23332c;
         }
 
         .page-header-pattern {
             background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
         }
 
-        /* Floating gradient orbs for depth — a modern hero accent */
-        .orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(60px);
-            opacity: 0.35;
-            pointer-events: none;
-        }
-        .orb-1 {
-            width: 400px;
-            height: 400px;
-            background: #8bc34a;
-            top: -100px;
-            right: -80px;
-            animation: float 8s ease-in-out infinite;
-        }
-        .orb-2 {
-            width: 300px;
-            height: 300px;
-            background: #3d7a66;
-            bottom: -80px;
-            left: 10%;
-            animation: float 10s ease-in-out infinite reverse;
-        }
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(20px, -30px); }
-        }
+
+
+
+
 
         /* Subtle dot grid for section backgrounds */
         .dot-grid {
@@ -164,7 +140,7 @@ $company_full_name = getSiteSetting('company_name', 'Tupi Supreme Activated Carb
 
         /* Story / value icon container */
         .story-icon-wrap {
-            background: linear-gradient(135deg, #3d7a66, #60796e);
+            background: #3d7a66;
             transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .story-card:hover .story-icon-wrap {
@@ -181,7 +157,7 @@ $company_full_name = getSiteSetting('company_name', 'Tupi Supreme Activated Carb
             box-shadow: 0 12px 32px -12px rgba(35, 51, 44, 0.15);
         }
         .mv-icon-wrap {
-            background: linear-gradient(135deg, #3d7a66, #60796e);
+            background: #3d7a66;
             transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .mv-card:hover .mv-icon-wrap {
@@ -201,7 +177,7 @@ $company_full_name = getSiteSetting('company_name', 'Tupi Supreme Activated Carb
             transform: scale(1.08) rotate(-3deg);
         }
         .value-icon {
-            background: linear-gradient(135deg, #3d7a66, #60796e);
+            background: #3d7a66;
             transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -215,7 +191,7 @@ $company_full_name = getSiteSetting('company_name', 'Tupi Supreme Activated Carb
             box-shadow: 0 12px 32px -12px rgba(35, 51, 44, 0.15);
         }
         .team-photo {
-            background: linear-gradient(135deg, #3d7a66, #60796e);
+            background: #3d7a66;
         }
 
         /* Timeline — modern vertical rail with alternating cards */
@@ -226,7 +202,7 @@ $company_full_name = getSiteSetting('company_name', 'Tupi Supreme Activated Carb
             top: 0;
             bottom: 0;
             width: 2px;
-            background: linear-gradient(180deg, #3d7a66, #c0ccc5);
+            background: #c0ccc5;
             transform: translateX(-50%);
         }
 
@@ -333,9 +309,7 @@ $company_full_name = getSiteSetting('company_name', 'Tupi Supreme Activated Carb
                 transform: none;
                 transition: none;
             }
-            .orb {
-                animation: none;
-            }
+
             html {
                 scroll-behavior: auto;
             }
@@ -347,9 +321,6 @@ $company_full_name = getSiteSetting('company_name', 'Tupi Supreme Activated Carb
 
     <!-- Page Header -->
     <section id="page-header" class="page-header-gradient text-white relative overflow-hidden pt-24 pb-20">
-        <!-- Floating gradient orbs for depth -->
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
         <div class="page-header-pattern absolute inset-0 opacity-30"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="text-center">
@@ -458,8 +429,6 @@ $company_full_name = getSiteSetting('company_name', 'Tupi Supreme Activated Carb
     <!-- Core Values -->
     <?php if (!empty($company_values)): ?>
     <section id="values" class="bg-[#23332c] text-white py-20 lg:py-24 relative overflow-hidden">
-        <!-- Decorative orbs -->
-        <div class="orb orb-1" style="background: #3d7a66; opacity: 0.25;"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div class="text-center mb-16 reveal">
                 <span class="eyebrow bg-white/15 text-white/90 mb-4">

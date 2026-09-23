@@ -16,10 +16,9 @@ $settings = [
     'login_bg_enabled'  => '0',
     'login_bg_image'    => '',
     'login_bg_overlay'  => '80',
-    'login_bg_gradient' => '1',
     'login_bg_color'    => '#f5f7f5',
 ];
-$res = $db->query("SELECT setting_key, setting_value FROM site_settings WHERE setting_key IN ('login_bg_enabled','login_bg_image','login_bg_overlay','login_bg_gradient','login_bg_color')");
+$res = $db->query("SELECT setting_key, setting_value FROM site_settings WHERE setting_key IN ('login_bg_enabled','login_bg_image','login_bg_overlay','login_bg_color')");
 if ($res) {
     while ($row = $res->fetch_assoc()) {
         $settings[$row['setting_key']] = $row['setting_value'];
@@ -34,7 +33,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $enabled = isset($_POST['login_bg_enabled']) ? '1' : '0';
         $image = sanitizeInput($_POST['login_bg_image'] ?? '');
         $overlay = (string) max(0, min(100, intval($_POST['login_bg_overlay'] ?? 80)));
-        $gradient = isset($_POST['login_bg_gradient']) ? '1' : '0';
         $color = sanitizeInput($_POST['login_bg_color'] ?? '#f5f7f5');
         if (!preg_match('/^#[0-9a-fA-F]{6}$/', $color)) {
             $color = '#f5f7f5';
@@ -44,7 +42,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'login_bg_enabled'  => $enabled,
             'login_bg_image'    => $image,
             'login_bg_overlay'  => $overlay,
-            'login_bg_gradient' => $gradient,
             'login_bg_color'    => $color,
         ];
 
@@ -70,14 +67,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $settings['login_bg_enabled'] = $enabled;
     $settings['login_bg_image'] = $image;
     $settings['login_bg_overlay'] = $overlay;
-    $settings['login_bg_gradient'] = $gradient;
     $settings['login_bg_color'] = $color;
 }
 
 $bg_enabled = $settings['login_bg_enabled'] === '1';
 $bg_image = $settings['login_bg_image'];
 $bg_overlay = (int) $settings['login_bg_overlay'];
-$bg_gradient = $settings['login_bg_gradient'] === '1';
 $bg_color = $settings['login_bg_color'];
 $overlay_alpha = number_format($bg_overlay / 100, 2);
 
@@ -164,7 +159,7 @@ $view_url = 'login.php';
             <div class="mb-6 p-3 rounded-lg bg-blue-50 border border-blue-200 flex items-start gap-2">
                 <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
                 <p class="text-sm text-blue-800">
-                    When enabled, your image replaces the default green gradient as the page background. Turn off <strong>gradient design</strong> to show the image clean (or a flat dark background with no image). The <strong>Image Visibility</strong> slider controls how strongly the green gradient covers the image — the same behavior as the homepage carousel slides.
+                    When enabled, your image replaces the solid background color on the login page. The <strong>Image Visibility</strong> slider controls how strongly a dark overlay covers the image — the same behavior as the homepage carousel slides.
                 </p>
             </div>
 
@@ -187,27 +182,14 @@ $view_url = 'login.php';
                                                  after:transition-transform after:duration-300 after:ease-in-out
                                                  peer-checked:after:translate-x-5
                                                  hover:after:scale-110 active:after:scale-95"></span>
-                                    <span class="ml-3 text-sm font-medium text-gray-700">Use background image <span class="text-gray-400 font-normal">(off = gradient or solid color only)</span></span>
-                                </label>
-                                <label class="flex items-center cursor-pointer select-none">
-                                    <input type="checkbox" name="login_bg_gradient" id="login_bg_gradient" value="1"
-                                           <?php echo $bg_gradient ? 'checked' : ''; ?>
-                                           class="sr-only peer" onchange="updatePreview()">
-                                    <span class="relative w-11 h-6 rounded-full bg-gray-300 transition-colors duration-300 ease-in-out
-                                                 peer-checked:bg-primary peer-focus-visible:ring-2 peer-focus-visible:ring-primary/40 peer-focus-visible:ring-offset-2
-                                                 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:w-5 after:h-5
-                                                 after:bg-white after:rounded-full after:shadow
-                                                 after:transition-transform after:duration-300 after:ease-in-out
-                                                 peer-checked:after:translate-x-5
-                                                 hover:after:scale-110 active:after:scale-95"></span>
-                                    <span class="ml-3 text-sm font-medium text-gray-700">Use gradient design <span class="text-gray-400 font-normal">(off = clean image / solid color)</span></span>
+                                    <span class="ml-3 text-sm font-medium text-gray-700">Use background image <span class="text-gray-400 font-normal">(off = solid color only)</span></span>
                                 </label>
                                 <div class="flex items-center gap-3 pl-14">
                                     <input type="color" name="login_bg_color" id="login_bg_color"
                                            value="<?php echo htmlspecialchars($bg_color); ?>"
                                            class="h-8 w-14 rounded border border-gray-300 cursor-pointer bg-white"
                                            oninput="updatePreview()">
-                                    <span class="text-sm text-gray-600">Background color <span class="text-gray-400">(used when gradient is off)</span></span>
+                                    <span class="text-sm text-gray-600">Background color</span>
                                 </div>
                             </div>
 
@@ -260,9 +242,9 @@ $view_url = 'login.php';
                             </div>
 
                             <!-- Image visibility: overlay opacity (same as carousel) -->
-                            <div id="overlay-block" class="<?php echo $bg_gradient ? '' : 'opacity-40 pointer-events-none'; ?>">
+                            <div id="overlay-block">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
-                                    Image Visibility <span class="text-gray-400 font-normal">(overlay opacity — applies when gradient is on)</span>
+                                    Image Visibility <span class="text-gray-400 font-normal">(overlay opacity)</span>
                                 </label>
                                 <div class="flex items-center gap-3">
                                     <input type="range" name="login_bg_overlay" id="overlay_opacity" min="0" max="100" step="1"
@@ -271,7 +253,7 @@ $view_url = 'login.php';
                                            class="w-full max-w-xs accent-primary">
                                     <span id="overlay_opacity_value" class="text-sm font-medium text-gray-700 w-12 text-right"><?php echo htmlspecialchars($bg_overlay); ?>%</span>
                                 </div>
-                                <p class="text-xs text-gray-400 mt-1">Controls how strongly the dark green gradient covers the image. <strong>0%</strong> = image fully visible, <strong>100%</strong> = image fully hidden behind the green overlay. Default 80%.</p>
+                                <p class="text-xs text-gray-400 mt-1">Controls how strongly the dark overlay covers the image. <strong>0%</strong> = image fully visible, <strong>100%</strong> = image fully hidden behind the overlay. Default 80%.</p>
                             </div>
                         </div>
 
@@ -295,21 +277,17 @@ $view_url = 'login.php';
                     <!-- Approximation of login.php -->
                     <div class="rounded-lg overflow-hidden border border-gray-200">
                         <div id="login_preview" class="bg-preview relative h-96 flex items-center justify-center p-6"
-                             style="background-image: <?php
-                                 if ($bg_enabled && $bg_image) {
-                                     echo $bg_gradient
-                                         ? "linear-gradient(135deg, rgba(35, 51, 44, {$overlay_alpha}), rgba(61, 122, 102, {$overlay_alpha})), url('" . htmlspecialchars($bg_image) . "')"
-                                         : "url('" . htmlspecialchars($bg_image) . "')";
-                                 } else {
-                                     echo $bg_gradient ? "linear-gradient(135deg, #23332c, #3d7a66)" : "none";
-                                 }
-                             ?>;<?php echo (!$bg_enabled || !$bg_image) && !$bg_gradient ? ' background-color: ' . htmlspecialchars($bg_color) . ';' : ''; ?>">
+                             style="background-color: <?php echo htmlspecialchars($bg_color); ?>; background-image: <?php
+                                 echo ($bg_enabled && $bg_image)
+                                     ? "linear-gradient(rgba(35, 51, 44, {$overlay_alpha}), rgba(35, 51, 44, {$overlay_alpha})), url('" . htmlspecialchars($bg_image) . "')"
+                                     : "none";
+                             ?>; background-size: cover; background-position: center;">
                             <!-- Mini login card replica -->
                             <div class="rounded-2xl p-6 w-full max-w-[240px] text-center" style="background-color: rgba(255,255,255,0.95);">
-                                <div id="preview_icon" class="w-12 h-12 rounded-xl mx-auto flex items-center justify-center" style="background: <?php echo $bg_gradient ? 'linear-gradient(135deg, #3d7a66, #60796e)' : '#3d7a66'; ?>;">
+                                <div id="preview_icon" class="w-12 h-12 rounded-xl mx-auto flex items-center justify-center" style="background: #3d7a66;">
                                     <i class="fas fa-shield-alt text-white"></i>
                                 </div>
-                                <span id="preview_eyebrow" class="inline-block mt-3 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-wider rounded-full" style="background-color: <?php echo $bg_gradient ? 'rgba(255,255,255,0.15)' : 'rgba(61,122,102,0.12)'; ?>; color: <?php echo $bg_gradient ? 'rgba(255,255,255,0.9)' : '#3d7a66'; ?>;">Secure Access</span>
+                                <span id="preview_eyebrow" class="inline-block mt-3 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-wider rounded-full" style="background-color: rgba(61,122,102,0.12); color: #3d7a66;">Secure Access</span>
                                 <p class="text-sm font-bold mt-2" style="color: #23332c;">Admin Console Login</p>
                                 <div class="mt-3 space-y-2">
                                     <div class="h-7 rounded-lg" style="background: #f7faf8; border: 1px solid #d6ded9;"></div>
@@ -319,7 +297,7 @@ $view_url = 'login.php';
                             </div>
                         </div>
                     </div>
-                    <p class="text-xs text-gray-400 mt-2">Simplified replica — the real page also shows floating gradient orbs and a grain overlay when the gradient design is on.</p>
+                    <p class="text-xs text-gray-400 mt-2">Simplified replica of the login page.</p>
                 </div>
             </div>
         </div>
@@ -329,40 +307,16 @@ $view_url = 'login.php';
     // ---------- Live preview ----------
     function updatePreview() {
         var enabled = document.getElementById('login_bg_enabled').checked;
-        var gradient = document.getElementById('login_bg_gradient').checked;
         var imgUrl = document.getElementById('image-url-input').value;
         var opacity = document.getElementById('overlay_opacity').value;
         var alpha = (parseInt(opacity, 10) / 100).toFixed(2);
         var preview = document.getElementById('login_preview');
-        var overlayBlock = document.getElementById('overlay-block');
         var bgColor = document.getElementById('login_bg_color').value;
 
-        // Overlay slider only matters while the gradient overlay is on
-        if (gradient) {
-            overlayBlock.classList.remove('opacity-40', 'pointer-events-none');
-        } else {
-            overlayBlock.classList.add('opacity-40', 'pointer-events-none');
-        }
-
-        if (enabled && imgUrl.trim()) {
-            preview.style.backgroundColor = gradient ? '' : bgColor;
-            preview.style.backgroundImage = gradient
-                ? "linear-gradient(135deg, rgba(35, 51, 44, " + alpha + "), rgba(61, 122, 102, " + alpha + ")), url('" + imgUrl + "')"
-                : "url('" + imgUrl + "')";
-        } else if (gradient) {
-            preview.style.backgroundColor = '';
-            preview.style.backgroundImage = "linear-gradient(135deg, #23332c, #3d7a66)";
-        } else {
-            preview.style.backgroundImage = "none";
-            preview.style.backgroundColor = bgColor;
-        }
-
-        // Match the plain-mode element overrides on the real page
-        document.getElementById('preview_icon').style.background = gradient
-            ? 'linear-gradient(135deg, #3d7a66, #60796e)' : '#3d7a66';
-        var eyebrow = document.getElementById('preview_eyebrow');
-        eyebrow.style.backgroundColor = gradient ? 'rgba(255,255,255,0.15)' : 'rgba(61,122,102,0.12)';
-        eyebrow.style.color = gradient ? 'rgba(255,255,255,0.9)' : '#3d7a66';
+        preview.style.backgroundColor = bgColor;
+        preview.style.backgroundImage = (enabled && imgUrl.trim())
+            ? "linear-gradient(rgba(35, 51, 44, " + alpha + "), rgba(35, 51, 44, " + alpha + ")), url('" + imgUrl + "')"
+            : "none";
     }
 
     // Slider readout + live preview refresh

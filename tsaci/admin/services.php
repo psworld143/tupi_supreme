@@ -280,7 +280,7 @@ $view_url = '../services.php#main';
                                                    placeholder="e.g., fas fa-check"
                                                    class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary font-mono"
                                                    oninput="updateIconPreview(this.value); updatePreview()">
-                                            <div id="icon_preview" class="flex items-center justify-center w-12 h-12 rounded-xl text-white" style="background: linear-gradient(135deg, #3d7a66, #60796e);">
+                                            <div id="icon_preview" class="flex items-center justify-center w-12 h-12 rounded-xl text-white" style="background: #3d7a66;">
                                                 <i class="<?php echo htmlspecialchars($edit_service['icon'] ?? 'fas fa-check'); ?> text-2xl"></i>
                                             </div>
                                         </div>
@@ -423,7 +423,7 @@ $view_url = '../services.php#main';
                         </p>
                         <div class="service-card bg-white border border-[#e6ece8] rounded-2xl p-8 h-full">
                             <div class="text-center">
-                                <div id="preview_icon_wrap" class="service-icon w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6" style="background: linear-gradient(135deg, #3d7a66, #60796e);">
+                                <div id="preview_icon_wrap" class="service-icon w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6" style="background: #3d7a66;">
                                     <i id="preview_icon" class="<?php echo htmlspecialchars($edit_service['icon'] ?? 'fas fa-check'); ?> text-3xl text-white"></i>
                                 </div>
                                 <h4 id="preview_title" class="text-xl font-semibold text-[#23332c] mb-3"><?php echo htmlspecialchars($edit_service['title'] ?? 'Service title'); ?></h4>

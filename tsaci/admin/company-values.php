@@ -338,7 +338,7 @@ $view_url = '../about.php#values';
                         </p>
                         <div class="rounded-2xl p-6" style="background: #23332c;">
                             <div class="rounded-2xl p-8 text-center border border-white/10" style="background: rgba(255,255,255,0.05);">
-                                <div id="preview_icon_wrap" class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 <?php echo empty($edit_value['icon'] ?? '') ? 'hidden' : ''; ?>" style="background: linear-gradient(135deg, #3d7a66, #60796e);">
+                                <div id="preview_icon_wrap" class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 <?php echo empty($edit_value['icon'] ?? '') ? 'hidden' : ''; ?>" style="background: #3d7a66;">
                                     <i id="preview_icon" class="<?php echo htmlspecialchars($edit_value['icon'] ?? 'fas fa-check-circle'); ?> text-2xl text-white"></i>
                                 </div>
                                 <h4 id="preview_title" class="text-xl font-semibold mb-3 text-white"><?php echo htmlspecialchars($edit_value['title'] ?? 'Value title'); ?></h4>
@@ -447,7 +447,7 @@ $view_url = '../about.php#values';
                                     <td class="px-6 py-4 text-sm">
                                         <?php if ($value['icon']): ?>
                                             <span class="inline-flex items-center gap-2">
-                                                <span class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: linear-gradient(135deg, #3d7a66, #60796e);">
+                                                <span class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: #3d7a66;">
                                                     <i class="<?php echo htmlspecialchars($value['icon']); ?> text-white text-sm"></i>
                                                 </span>
                                                 <code class="text-xs text-gray-400"><?php echo htmlspecialchars($value['icon']); ?></code>

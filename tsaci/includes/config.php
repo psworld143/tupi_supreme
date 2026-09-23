@@ -130,6 +130,19 @@ function getStatistics() {
     return $stats;
 }
 
+function getApplications() {
+    $db = getDB();
+    if (!$db) return [];
+    
+    $result = $db->query("SELECT * FROM applications WHERE is_active = 1 ORDER BY is_primary DESC, display_order");
+    if (!$result) return [];
+    $applications = [];
+    while ($row = $result->fetch_assoc()) {
+        $applications[] = $row;
+    }
+    return $applications;
+}
+
 function getProducts($limit = null, $featured_only = false) {
     $db = getDB();
     if (!$db) return [];

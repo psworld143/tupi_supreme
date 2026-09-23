@@ -337,7 +337,7 @@ $view_url = '../index.php#features';
                             <span class="text-xs text-gray-400 font-normal">(feature card)</span>
                         </p>
                         <div class="bg-white border border-[#e6ece8] rounded-2xl p-8 max-w-sm text-center">
-                            <div id="preview_icon_wrap" class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 <?php echo empty($edit_feature['icon'] ?? '') ? 'hidden' : ''; ?>" style="background: linear-gradient(135deg, #3d7a66, #60796e);">
+                            <div id="preview_icon_wrap" class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 <?php echo empty($edit_feature['icon'] ?? '') ? 'hidden' : ''; ?>" style="background: #3d7a66;">
                                 <i id="preview_icon" class="<?php echo htmlspecialchars($edit_feature['icon'] ?? 'fas fa-award'); ?> text-2xl text-white"></i>
                             </div>
                             <h3 id="preview_title" class="text-xl font-semibold text-[#23332c] mb-3"><?php echo htmlspecialchars($edit_feature['title'] ?? 'Feature title'); ?></h3>
@@ -445,7 +445,7 @@ $view_url = '../index.php#features';
                                     <td class="px-6 py-4 text-sm">
                                         <?php if ($feature['icon']): ?>
                                             <span class="inline-flex items-center gap-2">
-                                                <span class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: linear-gradient(135deg, #3d7a66, #60796e);">
+                                                <span class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: #3d7a66;">
                                                     <i class="<?php echo htmlspecialchars($feature['icon']); ?> text-white text-sm"></i>
                                                 </span>
                                                 <code class="text-xs text-gray-400"><?php echo htmlspecialchars($feature['icon']); ?></code>

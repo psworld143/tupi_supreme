@@ -517,7 +517,7 @@ $view_url = '../index.php#hero';
                         </p>
                         <!-- Approximation of the hero carousel slide on index.php -->
                         <div class="rounded-lg overflow-hidden border border-gray-200" style="min-height: 300px;">
-                            <div id="hero_preview" class="hero-preview relative h-72 flex items-center" style="background-image: linear-gradient(135deg, rgba(35, 51, 44, <?php echo number_format(($slide['overlay_opacity'] ?? 92) / 100, 2); ?>), rgba(61, 122, 102, <?php echo number_format(($slide['overlay_opacity'] ?? 92) / 100, 2); ?>)), url('<?php echo htmlspecialchars($slide['image_url'] ?? ''); ?>');">
+                            <div id="hero_preview" class="hero-preview relative h-72 flex items-center" style="background-image: linear-gradient(rgba(35, 51, 44, <?php echo number_format(($slide['overlay_opacity'] ?? 92) / 100, 2); ?>), rgba(35, 51, 44, <?php echo number_format(($slide['overlay_opacity'] ?? 92) / 100, 2); ?>)), url('<?php echo htmlspecialchars($slide['image_url'] ?? ''); ?>');">
                                 <div class="absolute inset-0 bg-black/10"></div>
                                 <div class="px-8 relative z-10 w-full">
                                     <span class="eyebrow bg-white/15 text-white/90 mb-3 inline-block px-2 py-0.5 text-xs rounded-full">
@@ -566,7 +566,7 @@ $view_url = '../index.php#hero';
                 // Update background image + overlay opacity if changed
                 if (imgUrl.trim()) {
                     document.getElementById('hero_preview').style.backgroundImage =
-                        "linear-gradient(135deg, rgba(35, 51, 44, " + alpha + "), rgba(61, 122, 102, " + alpha + ")), url('" + imgUrl + "')";
+                        "linear-gradient(rgba(35, 51, 44, " + alpha + "), rgba(35, 51, 44, " + alpha + ")), url('" + imgUrl + "')";
                 }
             }
 
@@ -658,8 +658,9 @@ $view_url = '../index.php#hero';
                 });
                 xhr.addEventListener('load', function() {
                     if (xhr.status === 200) {
-                        const response = JSON.parse(xhr.responseText);
-                        if (response.success) {
+                        let response = null;
+                        try { response = JSON.parse(xhr.responseText); } catch (_) {}
+                        if (response && response.success) {
                             document.getElementById('image-url-input').value = response.url;
                             statusText.textContent = 'Upload successful!';
                             statusText.classList.add('text-green-600');
@@ -668,7 +669,7 @@ $view_url = '../index.php#hero';
                             setTimeout(() => { progressContainer.classList.add('hidden'); }, 2000);
                             updatePreview();
                         } else {
-                            statusText.textContent = 'Upload failed: ' + response.error;
+                            statusText.textContent = 'Upload failed: ' + (response && response.error ? response.error : 'Unexpected server response');
                             statusText.classList.add('text-red-600');
                             uploadState = 'failed';
                         }

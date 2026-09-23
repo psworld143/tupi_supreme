@@ -53,7 +53,7 @@ Pure-PHP pages that pull dynamic content from the `tsaci_cms` database via `incl
 ### 2.2 Shared Includes (`tsaci/includes/`)
 | File | Role |
 |------|------|
-| `config.php` | DB singleton (`Database`), `getDB()`, and ~20 content fetchers (`getProducts`, `getServices`, `getCaseStudies`, `getCertifications`, `getResources`, `getFAQs`, `getGalleryImages`, `getAboutContent`, `getCompanyValues`, `getTimelineEvents`, `getSocialMedia`, `getFooterLinks`, `saveContactMessage`, `getContactInfo`, `getOfficeHours`, `getContactSubjectOptions`, `getCarouselSlides`, `getHomepageFeatures`, `getStatistics`, `getSiteSetting`, `getPageContent`). Also defines escape helpers `htmlspecialchars_safe` / `nl2br_safe`. |
+| `config.php` | DB singleton (`Database`), `getDB()`, and ~20 content fetchers (`getProducts`, `getServices`, `getCaseStudies`, `getCertifications`, `getResources`, `getFAQs`, `getGalleryImages`, `getAboutContent`, `getCompanyValues`, `getTimelineEvents`, `getSocialMedia`, `getFooterLinks`, `saveContactMessage`, `getContactInfo`, `getOfficeHours`, `getContactSubjectOptions`, `getCarouselSlides`, `getHomepageFeatures`, `getStatistics`, `getApplications`, `getSiteSetting`, `getPageContent`). Also defines escape helpers `htmlspecialchars_safe` / `nl2br_safe`. |
 | `navbar.php` | Top nav + mobile menu (active-link highlighting via `$current_page`) |
 | `footer.php` | Footer with dynamic links, social media, contact info |
 
@@ -82,6 +82,7 @@ Standalone CMS back-office. Separate `config.php` (defines `ADMIN_ACCESS`, start
 | `carousel.php` | Manages `carousel_slides` |
 | `timeline.php` | Manages `timeline_events` |
 | `statistics.php` | Manages `statistics` rows |
+| `applications.php` | CRUD for `applications` (products-page Applications grid; `is_primary` = featured dark card) |
 | `messages.php` | Views `contact_messages`; can send email replies via Gmail SMTP |
 | `mail_config.php` | Gmail SMTP credentials & sender identity for admin replies |
 | `setup_admin.php` | Bootstrap/seed admin user |
@@ -117,6 +118,7 @@ Full dump: `tsaci/database/tsaci_cms.sql` (~89 KB). 25 tables:
 | `homepage_features` | Homepage feature cards |
 | `carousel_slides` | Homepage carousel |
 | `statistics` | Homepage stat counters |
+| `applications` | Products-page application cards (title, description, icon, is_primary, ordering) |
 | `products` | Product catalog |
 | `services` | Service offerings |
 | `case_studies` | Success stories |

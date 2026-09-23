@@ -366,7 +366,7 @@ $view_url = '../contact.php#contact-section';
                             <span class="text-xs text-gray-400 font-normal">(contact card)</span>
                         </p>
                         <div class="bg-white border border-[#e6ece8] rounded-2xl p-8 text-center max-w-sm">
-                            <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style="background: linear-gradient(135deg, #3d7a66, #60796e);">
+                            <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style="background: #3d7a66;">
                                 <i id="preview_icon" class="fas fa-map-marker-alt text-2xl text-white"></i>
                             </div>
                             <h4 id="preview_heading" class="text-lg font-semibold text-[#23332c] mb-3">Visit Us</h4>

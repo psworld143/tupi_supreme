@@ -461,7 +461,7 @@ $view_url = '../products.php#main';
                         <div class="border border-gray-200 rounded-2xl overflow-hidden bg-white">
                             <div class="aspect-video bg-[#f7faf8] flex items-center justify-center overflow-hidden" id="preview_img_wrap">
                                 <img id="preview_img" src="<?php echo htmlspecialchars($edit_product['image_url'] ?? ''); ?>" alt="" class="w-full h-full object-cover <?php echo empty($edit_product['image_url'] ?? '') ? 'hidden' : ''; ?>">
-                                <div id="preview_img_placeholder" class="aspect-video bg-gradient-to-br from-[#3d7a66] to-[#60796e] flex items-center justify-center w-full h-full <?php echo empty($edit_product['image_url'] ?? '') ? '' : 'hidden'; ?>">
+                                <div id="preview_img_placeholder" class="aspect-video bg-[#3d7a66] flex items-center justify-center w-full h-full <?php echo empty($edit_product['image_url'] ?? '') ? '' : 'hidden'; ?>">
                                     <i class="fas fa-box text-5xl text-white/80"></i>
                                 </div>
                             </div>

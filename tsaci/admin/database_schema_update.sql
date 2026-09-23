@@ -156,3 +156,36 @@ CREATE TABLE IF NOT EXISTS footer_links (
 ALTER TABLE carousel_slides
     ADD COLUMN overlay_opacity TINYINT UNSIGNED NOT NULL DEFAULT 92 AFTER image_url;
 
+
+-- Applications Table — the "Applications" card grid on products.php.
+-- Replaces the 8 cards that were previously hardcoded in the template.
+-- is_primary marks the featured card (dark background + "PRIMARY APPLICATION" badge);
+-- only one row should have is_primary = 1 at a time (the admin UI enforces this).
+CREATE TABLE IF NOT EXISTS applications (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(100) NOT NULL,
+    description VARCHAR(255),
+    icon VARCHAR(100) DEFAULT 'fas fa-th-large',
+    is_primary TINYINT(1) DEFAULT 0,
+    display_order INT DEFAULT 0,
+    is_active TINYINT(1) DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_by INT,
+    FOREIGN KEY (updated_by) REFERENCES admin_users(id) ON DELETE SET NULL,
+    UNIQUE KEY unique_title (title),
+    INDEX idx_display_order (display_order),
+    INDEX idx_is_active (is_active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Seed the cards that were previously hardcoded in products.php
+INSERT INTO applications (title, description, icon, is_primary, display_order, is_active) VALUES
+('Municipal Water Treatment', 'Drinking water treatment for cities and towns - 200+ facilities served', 'fas fa-building', 1, 10, 1),
+('Industrial Wastewater', 'Treatment of industrial process water', 'fas fa-industry', 0, 20, 1),
+('Healthcare', 'Medical air filtration and sterilization', 'fas fa-hospital', 0, 30, 1),
+('Pharmaceutical', 'Drug purification and manufacturing', 'fas fa-flask', 0, 40, 1),
+('Oil & Gas', 'Fuel purification and gas treatment', 'fas fa-gas-pump', 0, 50, 1),
+('Residential', 'Home water and air filtration', 'fas fa-home', 0, 60, 1),
+('Aquaculture', 'Fish farming and aquarium systems', 'fas fa-fish', 0, 70, 1),
+('Environmental', 'Pollution control and remediation', 'fas fa-leaf', 0, 80, 1)
+ON DUPLICATE KEY UPDATE description=VALUES(description), icon=VALUES(icon), is_primary=VALUES(is_primary);

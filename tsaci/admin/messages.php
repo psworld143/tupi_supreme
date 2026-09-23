@@ -321,7 +321,7 @@ if ($st) {
 
                 <!-- Sender info card -->
                 <div class="flex items-start gap-4 mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+                    <div class="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
                         <?php echo strtoupper(substr($message['name'], 0, 1)); ?>
                     </div>
                     <div class="flex-1 min-w-0">
@@ -550,7 +550,7 @@ if ($st) {
                                 <tr class="hover:bg-gray-50 <?php echo !$msg['is_read'] ? 'bg-blue-50' : ''; ?> cursor-pointer" onclick="window.location='?action=view&id=<?php echo $msg['id']; ?>'">
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-3">
-                                            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                                            <div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                                                 <?php echo strtoupper(substr($msg['name'], 0, 1)); ?>
                                             </div>
                                             <div class="min-w-0">

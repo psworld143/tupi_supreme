@@ -123,41 +123,17 @@ function isValidImageUrl($url) {
         }
 
         .page-header-gradient {
-            background: linear-gradient(135deg, #23332c, #3d7a66);
+            background: #23332c;
         }
 
         .page-header-pattern {
             background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
         }
 
-        /* Floating gradient orbs for depth — a modern hero accent */
-        .orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(60px);
-            opacity: 0.35;
-            pointer-events: none;
-        }
-        .orb-1 {
-            width: 400px;
-            height: 400px;
-            background: #8bc34a;
-            top: -100px;
-            right: -80px;
-            animation: float 8s ease-in-out infinite;
-        }
-        .orb-2 {
-            width: 300px;
-            height: 300px;
-            background: #3d7a66;
-            bottom: -80px;
-            left: 10%;
-            animation: float 10s ease-in-out infinite reverse;
-        }
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(20px, -30px); }
-        }
+
+
+
+
 
         /* Subtle dot grid for section backgrounds */
         .dot-grid {
@@ -333,9 +309,7 @@ function isValidImageUrl($url) {
                 transform: none;
                 transition: none;
             }
-            .orb {
-                animation: none;
-            }
+
             html {
                 scroll-behavior: auto;
             }
@@ -347,9 +321,6 @@ function isValidImageUrl($url) {
 
     <!-- Page Header -->
     <section id="page-header" class="page-header-gradient text-white relative overflow-hidden pt-24 pb-20">
-        <!-- Floating gradient orbs for depth -->
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
         <div class="page-header-pattern absolute inset-0 opacity-30"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="text-center">

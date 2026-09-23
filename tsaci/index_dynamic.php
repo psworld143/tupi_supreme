@@ -51,7 +51,7 @@ $featured_products = getProducts(3, true);
     </script>
     <style>
         .hero-gradient {
-            background: linear-gradient(135deg, #2c5530, #4a7c59);
+            background: #2c5530;
         }
         
         .hero-pattern {
@@ -67,7 +67,7 @@ $featured_products = getProducts(3, true);
         }
         
         .feature-icon {
-            background: linear-gradient(135deg, #8bc34a, #4a7c59);
+            background: #4a7c59;
         }
     </style>
 </head>

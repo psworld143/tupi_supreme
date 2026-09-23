@@ -69,6 +69,13 @@ if (session_status() === PHP_SESSION_NONE) {
     if (is_dir($sessionPath) && is_writable($sessionPath)) {
         session_save_path($sessionPath);
     }
+    ini_set('session.gc_maxlifetime', (string) SESSION_LIFETIME);
+    session_set_cookie_params([
+        'lifetime' => SESSION_LIFETIME,
+        'path'     => '/',
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
     session_name(SESSION_NAME);
     session_start();
 }
@@ -135,7 +142,10 @@ function isLoggedIn() {
 
 function requireLogin() {
     if (!isLoggedIn()) {
-        header('Location: login.php');
+        if (strpos($_SERVER['REQUEST_URI'] ?? '', '/api/') !== false) {
+            jsonResponse(['success' => false, 'error' => 'Your session has expired. Please reload the page and log in again.'], 401);
+        }
+        header('Location: ' . ADMIN_URL . '/login.php');
         exit;
     }
 }

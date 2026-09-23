@@ -447,7 +447,7 @@ $view_url = '../certifications.php#iso-certifications';
                         </p>
                         <div class="cert-card bg-white border border-[#e6ece8] rounded-2xl p-8">
                             <div class="flex items-start">
-                                <div class="cert-badge w-16 h-16 rounded-2xl flex items-center justify-center mr-5 flex-shrink-0 overflow-hidden" style="background: linear-gradient(135deg, #3d7a66, #60796e);">
+                                <div class="cert-badge w-16 h-16 rounded-2xl flex items-center justify-center mr-5 flex-shrink-0 overflow-hidden" style="background: #3d7a66;">
                                     <img id="preview_badge_img" src="<?php echo htmlspecialchars($edit_cert['image_url'] ?? ''); ?>" alt="" class="w-full h-full object-cover <?php echo empty($edit_cert['image_url'] ?? '') ? 'hidden' : ''; ?>">
                                     <i id="preview_badge_icon" class="fas fa-certificate text-2xl text-white <?php echo empty($edit_cert['image_url'] ?? '') ? '' : 'hidden'; ?>"></i>
                                 </div>

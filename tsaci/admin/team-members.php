@@ -390,7 +390,7 @@ $view_url = '../about.php#team';
                         </p>
                         <div class="bg-white border border-[#e6ece8] rounded-2xl p-8 text-center max-w-sm">
                             <img id="preview_photo" src="<?php echo htmlspecialchars($edit_member['photo_url'] ?? ''); ?>" alt="" class="w-28 h-28 rounded-full mx-auto mb-6 object-cover border-4 border-[#eef3f0] <?php echo empty($edit_member['photo_url'] ?? '') ? 'hidden' : ''; ?>">
-                            <div id="preview_photo_fallback" class="w-28 h-28 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-[#eef3f0] <?php echo empty($edit_member['photo_url'] ?? '') ? '' : 'hidden'; ?>" style="background: linear-gradient(135deg, #3d7a66, #60796e);">
+                            <div id="preview_photo_fallback" class="w-28 h-28 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-[#eef3f0] <?php echo empty($edit_member['photo_url'] ?? '') ? '' : 'hidden'; ?>" style="background: #3d7a66;">
                                 <i class="fas fa-user text-4xl text-white"></i>
                             </div>
                             <h5 id="preview_name" class="text-xl font-semibold text-[#23332c] mb-1"><?php echo htmlspecialchars($edit_member['name'] ?? 'Member name'); ?></h5>
@@ -623,7 +623,7 @@ $view_url = '../about.php#team';
                                             <?php if ($member['photo_url']): ?>
                                                 <img src="<?php echo htmlspecialchars($member['photo_url']); ?>" alt="" class="w-10 h-10 rounded-full object-cover border-2 border-[#eef3f0]">
                                             <?php else: ?>
-                                                <div class="w-10 h-10 rounded-full flex items-center justify-center border-2 border-[#eef3f0]" style="background: linear-gradient(135deg, #3d7a66, #60796e);">
+                                                <div class="w-10 h-10 rounded-full flex items-center justify-center border-2 border-[#eef3f0]" style="background: #3d7a66;">
                                                     <i class="fas fa-user text-white text-sm"></i>
                                                 </div>
                                             <?php endif; ?>
