@@ -1,5 +1,6 @@
 <?php
 require_once 'config.php';
+require_once 'includes/session.php';
 
 // Redirect if already logged in
 if (isLoggedIn()) {
@@ -10,11 +11,15 @@ if (isLoggedIn()) {
 $error = '';
 $success = '';
 
+// Progressive login lockout (see includes/session.php)
+$lockout_remaining = loginLockoutRemaining();
+
 // Handle login
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $lockout_remaining <= 0) {
     $username = sanitizeInput($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
-    
+    $failed = false;
+
     if (empty($username) || empty($password)) {
         $error = 'Please enter both username and password.';
     } else {
@@ -23,14 +28,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bind_param("ss", $username, $username);
         $stmt->execute();
         $result = $stmt->get_result();
-        
+
         if ($result->num_rows === 1) {
             $user = $result->fetch_assoc();
-            
+
             if (!$user['is_active']) {
                 $error = 'Your account has been deactivated.';
             } elseif (password_verify($password, $user['password_hash'])) {
-                // Login successful
+                // Login successful — new session ID (fixation defence) + reset lockout state
+                session_regenerate_id(true);
+                resetLoginLockout();
+
                 $_SESSION['admin_id'] = $user['id'];
                 $_SESSION['admin_username'] = $user['username'];
                 $_SESSION['admin_role'] = $user['role'];
@@ -56,12 +64,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 header('Location: index.php');
                 exit;
             } else {
-                $error = 'Invalid username or password.';
+                $failed = true;
             }
         } else {
-            $error = 'Invalid username or password.';
+            $failed = true;
+        }
+
+        if ($failed) {
+            if (registerFailedLogin() > 0) {
+                $lockout_remaining = loginLockoutRemaining();
+            } else {
+                $error = 'Invalid username or password. ' . loginAttemptsRemaining() . ' attempt(s) remaining.';
+            }
         }
     }
+}
+
+if ($lockout_remaining > 0) {
+    $error = 'Too many failed attempts. You can try again in ';
+    $lockout_active = true;
 }
 
 // Login page content & appearance (managed in admin/login-background.php)
@@ -317,7 +338,7 @@ if ($login_help_url === '' || stripos($login_help_url, 'javascript:') === 0 || s
                     <?php if ($error): ?>
                         <div class="mt-8 p-4 rounded-2xl flex items-start gap-3 bg-red-50 border border-red-200 text-red-700 fade-in fade-in-delay-2" role="alert">
                             <i class="fas fa-exclamation-circle text-red-500 text-lg mt-0.5"></i>
-                            <span class="text-sm"><?php echo htmlspecialchars($error); ?></span>
+                            <span class="text-sm"><?php echo htmlspecialchars($error); ?><?php if (!empty($lockout_active)): ?><span id="lockout-countdown" class="font-semibold"></span><?php endif; ?></span>
                         </div>
                     <?php endif; ?>
 
@@ -333,8 +354,8 @@ if ($login_help_url === '' || stripos($login_help_url, 'javascript:') === 0 || s
                             <label for="username" class="block text-xs font-semibold text-[#23332c] mb-1.5">Username or Email</label>
                             <div class="relative">
                                 <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-[#a8b3ac] text-sm"></i>
-                                <input id="username" name="username" type="text" required
-                                       class="form-input w-full pl-11 pr-4 py-3 border border-[#e2eae4] rounded-xl bg-white text-sm text-[#23332c] placeholder-[#a8b3ac]"
+                                <input id="username" name="username" type="text" required <?php echo $lockout_remaining > 0 ? 'disabled' : ''; ?>
+                                       class="form-input w-full pl-11 pr-4 py-3 border border-[#e2eae4] rounded-xl bg-white text-sm text-[#23332c] placeholder-[#a8b3ac] disabled:opacity-60 disabled:cursor-not-allowed"
                                        placeholder="Enter your username or email" value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>">
                             </div>
                         </div>
@@ -342,8 +363,8 @@ if ($login_help_url === '' || stripos($login_help_url, 'javascript:') === 0 || s
                             <label for="password" class="block text-xs font-semibold text-[#23332c] mb-1.5">Password</label>
                             <div class="relative">
                                 <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-[#a8b3ac] text-sm"></i>
-                                <input id="password" name="password" type="password" required
-                                       class="form-input w-full pl-11 pr-11 py-3 border border-[#e2eae4] rounded-xl bg-white text-sm text-[#23332c] placeholder-[#a8b3ac]"
+                                <input id="password" name="password" type="password" required <?php echo $lockout_remaining > 0 ? 'disabled' : ''; ?>
+                                       class="form-input w-full pl-11 pr-11 py-3 border border-[#e2eae4] rounded-xl bg-white text-sm text-[#23332c] placeholder-[#a8b3ac] disabled:opacity-60 disabled:cursor-not-allowed"
                                        placeholder="Enter your password">
                                 <button type="button" id="toggle-password" title="Show password" class="absolute right-4 top-1/2 -translate-y-1/2 text-[#a8b3ac] hover:text-[#66746c] transition-colors">
                                     <i class="fas fa-eye text-sm"></i>
@@ -362,8 +383,8 @@ if ($login_help_url === '' || stripos($login_help_url, 'javascript:') === 0 || s
                         </div>
 
                         <div>
-                            <button type="submit"
-                                    class="login-btn w-full flex justify-center items-center gap-2 py-3.5 px-4 text-sm font-semibold rounded-xl text-white shadow-md">
+                            <button type="submit" <?php echo $lockout_remaining > 0 ? 'disabled' : ''; ?>
+                                    class="login-btn w-full flex justify-center items-center gap-2 py-3.5 px-4 text-sm font-semibold rounded-xl text-white shadow-md disabled:opacity-60 disabled:cursor-not-allowed">
                                 <i class="fas fa-sign-in-alt text-xs"></i>
                                 <?php echo htmlspecialchars($L['login_button_text']); ?>
                             </button>
@@ -386,6 +407,8 @@ if ($login_help_url === '' || stripos($login_help_url, 'javascript:') === 0 || s
             <?php endif; ?>
         </div>
     </div>
+
+    <?php loginLockoutCountdownScript($lockout_remaining); ?>
 
     <script>
         // Password visibility toggle
