@@ -9,11 +9,24 @@ if (!defined('ADMIN_ACCESS')) {
     define('ADMIN_ACCESS', true);
 }
 
-// Database Configuration
-define('DB_HOST', 'localhost');
-define('DB_USER', 'tsaci_app');
-define('DB_PASS', '52f5fc827ea1abd8463510e4');
-define('DB_NAME', 'tsaci_cms');
+// Database credentials live in ../includes/db_credentials.php (gitignored).
+// Copy db_credentials.example.php and fill in values for this environment.
+$db_credentials_file = __DIR__ . '/../includes/db_credentials.php';
+if (file_exists($db_credentials_file)) {
+    require_once $db_credentials_file;
+}
+if (!defined('DB_HOST')) {
+    define('DB_HOST', 'localhost');
+}
+if (!defined('DB_USER')) {
+    define('DB_USER', 'root');
+}
+if (!defined('DB_PASS')) {
+    define('DB_PASS', '');
+}
+if (!defined('DB_NAME')) {
+    define('DB_NAME', 'tsaci_cms');
+}
 
 // Site Configuration
 define('SITE_NAME', 'TSACI Admin Console');

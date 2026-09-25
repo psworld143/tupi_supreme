@@ -4,15 +4,23 @@
  * Database connection and helper functions for public pages
  */
 
-// Database Configuration (only define if not already defined)
+// Database credentials live in db_credentials.php (gitignored).
+// Copy db_credentials.example.php and fill in values for this environment.
+$db_credentials_file = __DIR__ . '/db_credentials.php';
+if (file_exists($db_credentials_file)) {
+    require_once $db_credentials_file;
+}
+
+// Fallback defaults (only define if not already defined) keep the site
+// fail-soft when no credentials file is present.
 if (!defined('DB_HOST')) {
     define('DB_HOST', 'localhost');
 }
 if (!defined('DB_USER')) {
-    define('DB_USER', 'tsaci_app');
+    define('DB_USER', 'root');
 }
 if (!defined('DB_PASS')) {
-    define('DB_PASS', '52f5fc827ea1abd8463510e4');
+    define('DB_PASS', '');
 }
 if (!defined('DB_NAME')) {
     define('DB_NAME', 'tsaci_cms');

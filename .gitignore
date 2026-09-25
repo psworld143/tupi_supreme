@@ -1,0 +1,14 @@
+# Environment-specific configuration & secrets
+tsaci/includes/db_credentials.php
+tsaci/admin/mail.ini
+
+# Runtime session files (keep the protective .htaccess tracked)
+tsaci/sessions/*
+!tsaci/sessions/.htaccess
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+
+# Stray archives
+tsaci/tsaci.zip
