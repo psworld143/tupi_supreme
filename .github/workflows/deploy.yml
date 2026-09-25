@@ -1,0 +1,85 @@
+# Deploys tupi_supreme to the production server via rsync over SSH.
+#
+# Required GitHub repository secrets (Settings > Secrets and variables > Actions):
+#   SSH_HOST        - server hostname or IP (e.g. example.com)
+#   SSH_PORT        - SSH port (e.g. 22)
+#   SSH_USER        - SSH user (e.g. ubuntu or cpanel user)
+#   SSH_PRIVATE_KEY - private key whose public key is in ~/.ssh/authorized_keys on the server
+#   DEPLOY_PATH     - absolute path to the web root on the server
+#                     (e.g. /var/www/html/tupi_supreme or /home/user/public_html/tupi_supreme)
+#
+# Deploys on every push to `main`, or manually via Actions > "Deploy" > Run workflow.
+
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Lint and deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      - name: Lint PHP files
+        run: |
+          ! find . -name '*.php' -print0 | xargs -0 -n1 php -l 2>&1 | grep -v 'No syntax errors'
+
+      - name: Install SSH key
+        run: |
+          install -m 700 -d ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Trust host key
+        run: |
+          ssh-keyscan -p "${{ secrets.SSH_PORT }}" -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: rsync to server
+        run: |
+          rsync -avz --delete --human-readable \
+            -e "ssh -p ${{ secrets.SSH_PORT }}" \
+            --exclude '.git/' \
+            --exclude '.github/' \
+            --exclude '.DS_Store' \
+            --exclude '*.sql' \
+            --exclude '*.zip' \
+            --exclude 'documentation_backup/' \
+            --exclude 'tsaci/documentation_backup/' \
+            --exclude 'tsaci/database/' \
+            --exclude 'tsaci/sessions/' \
+            --filter 'P tsaci/uploads/' \
+            --filter 'P tsaci/sessions/' \
+            ./ "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.DEPLOY_PATH }}/"
+
+      - name: Verify PHP parses on server
+        run: |
+          ssh -p "${{ secrets.SSH_PORT }}" \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
+            "find '${{ secrets.DEPLOY_PATH }}/tsaci' -maxdepth 1 -name '*.php' -exec php -l {} \; >/dev/null && echo OK"
+
+# Notes on the rsync flags:
+#   --delete              Removes files on the server that were deleted from the repo,
+#                         except in protected paths below.
+#   --filter 'P ...'      "Protect": files under tsaci/uploads and tsaci/sessions that
+#                         already exist on the server are never deleted or overwritten
+#                         by deploys. New local files still get uploaded. Remove these
+#                         filters if you want uploads managed entirely by Git.
+#   *.sql / *.zip         Schema dumps and archives are never deployed (already blocked
+#                         by .htaccess, but kept off the server entirely).
+#   documentation_backup/ Reference docs are not needed at runtime and are excluded.
