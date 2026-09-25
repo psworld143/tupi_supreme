@@ -19,9 +19,11 @@ define('SMTP_HOST', 'smtp.gmail.com');
 define('SMTP_PORT', 587);
 define('SMTP_SECURE', 'tls'); // 'tls' (STARTTLS, port 587) or 'ssl' (port 465)
 
-// Credentials
-define('SMTP_USERNAME', 'wh1ssschool@gmail.com');    // e.g. tsaci.sales@gmail.com
-define('SMTP_PASSWORD', 'wbla djfk naes bctg');    // 16-char Gmail app password
+// Credentials — stored in admin/mail.ini (denied web access via .htaccess)
+$mail_ini = __DIR__ . '/mail.ini';
+$mail_creds = (file_exists($mail_ini) ? parse_ini_file($mail_ini) : []) ?: [];
+define('SMTP_USERNAME', $mail_creds['username'] ?? '');
+define('SMTP_PASSWORD', $mail_creds['password'] ?? '');
 
 // Sender identity (what recipients see in From:)
 define('SMTP_FROM_EMAIL', '');  // usually same as SMTP_USERNAME

@@ -1,6 +1,13 @@
 <?php
 require_once 'config.php';
+require_once 'includes/uploads.php';
 requireLogin();
+
+// CSRF guard: all admin POSTs must carry a valid token
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !verifyCsrfToken()) {
+    http_response_code(403);
+    exit('Invalid security token. Reload the page and try again.');
+}
 
 $db = getDB();
 $user_id = $_SESSION['admin_id'];
@@ -67,13 +74,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $profile_picture_value = $user['profile_picture'];
             if ($error === '' && isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] === UPLOAD_ERR_OK) {
                 $file = $_FILES['profile_picture'];
-                if ($file['size'] > MAX_FILE_SIZE) {
-                    $error = 'Profile picture is larger than the 10 MB limit.';
-                } elseif (!in_array($file['type'], ALLOWED_IMAGE_TYPES, true)) {
-                    $error = 'Profile picture must be a JPEG, PNG, GIF, or WebP image.';
+                $safe_ext = validateImageUpload($file, $upload_error);
+                if ($safe_ext === null) {
+                    $error = $upload_error === 'File size exceeds maximum allowed size'
+                        ? 'Profile picture is larger than the 10 MB limit.'
+                        : 'Profile picture must be a JPEG, PNG, GIF, or WebP image.';
                 } else {
-                    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-                    $safe_ext = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'], true) ? $ext : 'png';
                     $unique_name = 'profile_' . $user_id . '_' . uniqid('', true) . '.' . $safe_ext;
                     $upload_path = UPLOAD_DIR . 'images/' . $unique_name;
 
@@ -324,6 +330,7 @@ $last_login_disp = $user['last_login']  ? formatDate($user['last_login'],  'F d,
                 <p class="text-sm text-gray-500 mb-6">Update how your account appears across the admin console.</p>
 
                 <form method="POST" action="settings.php?tab=profile" enctype="multipart/form-data" class="max-w-2xl">
+                    <?php echo csrfTokenField(); ?>
                     <input type="hidden" name="post_action" value="update_profile">
 
                     <!-- Profile picture -->
@@ -390,6 +397,7 @@ $last_login_disp = $user['last_login']  ? formatDate($user['last_login'],  'F d,
                 <p class="text-sm text-gray-500 mb-6">Choose a strong password of at least <?php echo PASSWORD_MIN_LENGTH; ?> characters.</p>
 
                 <form method="POST" action="settings.php?tab=security" class="max-w-2xl">
+                    <?php echo csrfTokenField(); ?>
                     <input type="hidden" name="post_action" value="change_password">
 
                     <!-- Current Password -->

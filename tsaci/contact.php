@@ -3,73 +3,87 @@ require_once 'includes/config.php';
 
 $current_page = 'contact';
 
+// Session needed for CSRF token + submission rate limiting
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 // Contact form processing
 $message = '';
 $messageType = '';
 
+const CONTACT_MAX_PER_HOUR = 5;
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Basic form validation
-    $name = trim($_POST['name'] ?? '');
-    $email = trim($_POST['email'] ?? '');
-    $phone = trim($_POST['phone'] ?? '');
-    $company = trim($_POST['company'] ?? '');
-    $subject = trim($_POST['subject'] ?? '');
-    $message_text = trim($_POST['message'] ?? '');
-    
-    $errors = [];
-    
-    // Validation
-    if (empty($name)) {
-        $errors[] = 'Name is required';
-    }
-    
-    if (empty($email)) {
-        $errors[] = 'Email is required';
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $errors[] = 'Please enter a valid email address';
-    }
-    
-    if (empty($subject)) {
-        $errors[] = 'Subject is required';
-    }
-    
-    if (empty($message_text)) {
-        $errors[] = 'Message is required';
-    }
-    
-    if (empty($errors)) {
-        // Save to database
-        if (saveContactMessage($name, $email, $phone, $company, $subject, $message_text)) {
-            // Also send email notification
-            $to = getSiteSetting('contact_email', 'info@tupisupreme.com');
-            $email_subject = 'Contact Form Submission: ' . $subject;
-            
-            $email_body = "You have received a new contact form submission:\n\n";
-            $email_body .= "Name: " . $name . "\n";
-            $email_body .= "Email: " . $email . "\n";
-            $email_body .= "Phone: " . $phone . "\n";
-            $email_body .= "Company: " . $company . "\n";
-            $email_body .= "Subject: " . $subject . "\n\n";
-            $email_body .= "Message:\n" . $message_text . "\n";
-            
-            $headers = "From: " . $email . "\r\n";
-            $headers .= "Reply-To: " . $email . "\r\n";
-            $headers .= "X-Mailer: PHP/" . phpversion();
-            
-            @mail($to, $email_subject, $email_body, $headers);
-            
-            $message = 'Thank you for your message! We will get back to you soon.';
-            $messageType = 'success';
-            
-            // Clear form data
-            $name = $email = $phone = $company = $subject = $message_text = '';
-        } else {
-            $message = 'Sorry, there was an error sending your message. Please try again.';
-            $messageType = 'danger';
-        }
-    } else {
-        $message = 'Please correct the following errors: ' . implode(', ', $errors);
+    // Honeypot — invisible to humans; bots that fill it get a fake success
+    if (!empty($_POST['website'])) {
+        $message = 'Thank you for your message! We will get back to you soon.';
+        $messageType = 'success';
+    } elseif (!verifyCsrfToken()) {
+        $message = 'Your session expired. Please reload the page and try again.';
         $messageType = 'danger';
+    } else {
+        // Rate limit: max CONTACT_MAX_PER_HOUR submissions per hour per session
+        $_SESSION['contact_submits'] = array_values(array_filter(
+            $_SESSION['contact_submits'] ?? [],
+            fn($t) => $t > time() - 3600
+        ));
+
+        if (count($_SESSION['contact_submits']) >= CONTACT_MAX_PER_HOUR) {
+            $message = 'You have sent too many messages. Please try again later.';
+            $messageType = 'danger';
+        } else {
+            // Basic form validation
+            $name = trim($_POST['name'] ?? '');
+            $email = trim($_POST['email'] ?? '');
+            $phone = trim($_POST['phone'] ?? '');
+            $company = trim($_POST['company'] ?? '');
+            $subject = trim($_POST['subject'] ?? '');
+            $message_text = trim($_POST['message'] ?? '');
+
+            $errors = [];
+
+            if (empty($name)) {
+                $errors[] = 'Name is required';
+            }
+
+            if (empty($email)) {
+                $errors[] = 'Email is required';
+            } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $errors[] = 'Please enter a valid email address';
+            }
+
+            if (empty($subject)) {
+                $errors[] = 'Subject is required';
+            }
+
+            if (empty($message_text)) {
+                $errors[] = 'Message is required';
+            }
+
+            if (empty($errors)) {
+                // Save to database
+                if (saveContactMessage($name, $email, $phone, $company, $subject, $message_text)) {
+                    $_SESSION['contact_submits'][] = time();
+
+                    // Also send email notification via SMTP (fails soft — the
+                    // message is already saved in the admin console either way)
+                    sendContactNotification($name, $email, $phone, $company, $subject, $message_text);
+
+                    $message = 'Thank you for your message! We will get back to you soon.';
+                    $messageType = 'success';
+
+                    // Clear form data
+                    $name = $email = $phone = $company = $subject = $message_text = '';
+                } else {
+                    $message = 'Sorry, there was an error sending your message. Please try again.';
+                    $messageType = 'danger';
+                }
+            } else {
+                $message = 'Please correct the following errors: ' . implode(', ', $errors);
+                $messageType = 'danger';
+            }
+        }
     }
 }
 
@@ -400,6 +414,10 @@ $subject_options = getContactSubjectOptions(); // Get contact form subject optio
                 <?php endif; ?>
                 
                 <form method="POST" action="contact.php">
+                    <?php echo csrfTokenField(); ?>
+                    <!-- Honeypot: invisible to humans, bots fill it and get silently dropped -->
+                    <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"
+                           style="position:absolute;left:-9999px;top:-9999px;height:0;width:0;opacity:0">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
                         <div>
                             <label for="name" class="block text-sm font-medium text-[#23332c] mb-2">Full Name *</label>

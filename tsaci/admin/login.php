@@ -11,11 +11,23 @@ if (isLoggedIn()) {
 $error = '';
 $success = '';
 
+// Sent here by requireLogin() after SESSION_IDLE_TIMEOUT of inactivity.
+// GET only — the form posts back to this same URL, and setting $error on
+// POST would block the login attempt below.
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' && !empty($_GET['timeout'])) {
+    $error = 'You were signed out after ' . round(SESSION_IDLE_TIMEOUT / 60) . ' minutes of inactivity. Please sign in again.';
+}
+
 // Progressive login lockout (see includes/session.php)
 $lockout_remaining = loginLockoutRemaining();
 
+// CSRF check for submitted logins (skipped while locked — the form is disabled then)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $lockout_remaining <= 0 && !verifyCsrfToken()) {
+    $error = 'Your session expired. Please reload the page and try again.';
+}
+
 // Handle login
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $lockout_remaining <= 0) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $lockout_remaining <= 0 && $error === '') {
     $username = sanitizeInput($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
     $failed = false;
@@ -42,6 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $lockout_remaining <= 0) {
                 $_SESSION['admin_id'] = $user['id'];
                 $_SESSION['admin_username'] = $user['username'];
                 $_SESSION['admin_role'] = $user['role'];
+                $_SESSION['last_activity'] = time();
                 
                 // Update last login
                 $update_stmt = $db->prepare("UPDATE admin_users SET last_login = NOW() WHERE id = ?");
@@ -56,6 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $lockout_remaining <= 0) {
                     setcookie(session_name(), session_id(), [
                         'expires'  => time() + 30 * 24 * 3600,
                         'path'     => '/',
+                        'secure'   => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
                         'httponly' => true,
                         'samesite' => 'Lax',
                     ]);
@@ -350,6 +364,7 @@ if ($login_help_url === '' || stripos($login_help_url, 'javascript:') === 0 || s
                     <?php endif; ?>
 
                     <form class="mt-8 space-y-5 fade-in fade-in-delay-3" method="POST" action="">
+                        <?php echo csrfTokenField(); ?>
                         <div>
                             <label for="username" class="block text-xs font-semibold text-[#23332c] mb-1.5">Username or Email</label>
                             <div class="relative">

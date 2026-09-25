@@ -2,6 +2,12 @@
 require_once 'config.php';
 requireLogin();
 
+// CSRF guard: all admin POSTs must carry a valid token
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !verifyCsrfToken()) {
+    http_response_code(403);
+    exit('Invalid security token. Reload the page and try again.');
+}
+
 $db = getDB();
 $action = $_GET['action'] ?? 'list';
 $id = $_GET['id'] ?? null;
@@ -269,6 +275,7 @@ $view_url = '../case-studies.php#main';
                     <!-- Left: form fields -->
                     <div>
                         <form method="POST" action="">
+                            <?php echo csrfTokenField(); ?>
                             <div class="space-y-6">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Title <span class="text-red-500">*</span></label>
@@ -991,6 +998,7 @@ $view_url = '../case-studies.php#main';
                                             <i class="fas fa-eye"></i>
                                         </a>
                                         <form method="POST" action="case-studies.php" class="inline" onsubmit="return confirm('Delete this case study? This cannot be undone.');">
+                                            <?php echo csrfTokenField(); ?>
                                             <input type="hidden" name="delete_id" value="<?php echo $case['id']; ?>">
                                             <button type="submit" class="text-red-600 hover:text-red-800" title="Delete">
                                                 <i class="fas fa-trash"></i>

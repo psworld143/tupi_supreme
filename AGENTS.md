@@ -66,7 +66,7 @@ Pure-PHP pages that pull dynamic content from the `tsaci_cms` database via `incl
 
 ## 3. TSACI Admin Console (`tsaci/admin/`)
 
-Standalone CMS back-office. Separate `config.php` (defines `ADMIN_ACCESS`, starts its own session `TSACI_ADMIN_SESSION`, 8h cookie lifetime / 30-day GC for "Remember me"). Auth gates via `requireLogin()` (returns 401 JSON for `/api/` requests); actions logged via `logActivity()` to `activity_logs`. Opt-in CSRF helpers: `generateCsrfToken()`, `csrfTokenField()`, `verifyCsrfToken()`.
+Standalone CMS back-office. Separate `config.php` (defines `ADMIN_ACCESS`, starts its own session `TSACI_ADMIN_SESSION`, 8h cookie lifetime / 30-day GC for "Remember me"). `requireLogin()` also enforces a 20-minute idle timeout (`SESSION_IDLE_TIMEOUT`) via `$_SESSION['last_activity']`; timed-out users are redirected to `login.php?timeout=1`. Auth gates via `requireLogin()` (returns 401 JSON for `/api/` requests); actions logged via `logActivity()` to `activity_logs`. Opt-in CSRF helpers: `generateCsrfToken()`, `csrfTokenField()`, `verifyCsrfToken()`.
 
 **Session storage:** admin config sets a custom `session.save_path` — `tsaci_sessions/` next to the docroot when possible, else `tsaci/sessions/` (auto-created with deny-all `.htaccess`) — to avoid `ps_files_cleanup_dir` permission notices on hosts like lsphp.
 

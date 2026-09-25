@@ -11,8 +11,8 @@ if (!defined('ADMIN_ACCESS')) {
 
 // Database Configuration
 define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASS', '');
+define('DB_USER', 'tsaci_app');
+define('DB_PASS', '52f5fc827ea1abd8463510e4');
 define('DB_NAME', 'tsaci_cms');
 
 // Site Configuration
@@ -23,6 +23,7 @@ define('ADMIN_URL', 'http://localhost/tupi_supreme/tsaci/admin');
 // Session Configuration
 define('SESSION_NAME', 'TSACI_ADMIN_SESSION');
 define('SESSION_LIFETIME', 3600 * 8); // 8 hours
+define('SESSION_IDLE_TIMEOUT', 20 * 60); // force logout after 20 minutes of inactivity
 
 // Security Configuration
 define('PASSWORD_MIN_LENGTH', 8);
@@ -38,9 +39,12 @@ define('ALLOWED_DOCUMENT_TYPES', ['application/pdf', 'application/msword', 'appl
 // Timezone
 date_default_timezone_set('Asia/Manila');
 
-// Error Reporting (Set to 0 in production)
+// Error Reporting — verbose on localhost, logged-but-hidden elsewhere.
+// To force silence locally: define APP_ENV = 'production' before this file.
+$app_env = getenv('APP_ENV') ?: (in_array($_SERVER['SERVER_NAME'] ?? '', ['localhost', '127.0.0.1', '::1'], true) ? 'development' : 'production');
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', $app_env === 'development' ? '1' : '0');
+ini_set('log_errors', '1');
 
 // Start Session
 if (session_status() === PHP_SESSION_NONE) {
@@ -75,6 +79,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_set_cookie_params([
         'lifetime' => SESSION_LIFETIME,
         'path'     => '/',
+        'secure'   => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
         'httponly' => true,
         'samesite' => 'Lax',
     ]);
@@ -150,6 +155,22 @@ function requireLogin() {
         header('Location: ' . ADMIN_URL . '/login.php');
         exit;
     }
+
+    // Idle timeout — kick the user out after SESSION_IDLE_TIMEOUT seconds
+    // without a request. Sessions older than this feature simply get the
+    // clock started now rather than being logged out immediately.
+    $now = time();
+    if (isset($_SESSION['last_activity']) && ($now - (int) $_SESSION['last_activity']) > SESSION_IDLE_TIMEOUT) {
+        logActivity('logout', 'admin_users', $_SESSION['admin_id'], 'Session expired (idle timeout)');
+        $_SESSION = [];
+        session_destroy();
+        if (strpos($_SERVER['REQUEST_URI'] ?? '', '/api/') !== false) {
+            jsonResponse(['success' => false, 'error' => 'Your session has expired. Please reload the page and log in again.'], 401);
+        }
+        header('Location: ' . ADMIN_URL . '/login.php?timeout=1');
+        exit;
+    }
+    $_SESSION['last_activity'] = $now;
 }
 
 function getCurrentUser() {

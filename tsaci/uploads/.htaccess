@@ -1,0 +1,14 @@
+# Never execute uploaded content — uploads are served as static files only.
+Options -ExecCGI
+
+<FilesMatch "\.(php|phtml|phar|php[0-9]|cgi|pl|py|sh|asp|aspx|jsp|htaccess)$">
+    Require all denied
+</FilesMatch>
+
+# Pre-2.4 fallback
+<IfModule !mod_authz_core.c>
+    <FilesMatch "\.(php|phtml|phar|php[0-9]|cgi|pl|py|sh|asp|aspx|jsp|htaccess)$">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+</IfModule>

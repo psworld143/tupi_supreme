@@ -9,10 +9,10 @@ if (!defined('DB_HOST')) {
     define('DB_HOST', 'localhost');
 }
 if (!defined('DB_USER')) {
-    define('DB_USER', 'root');
+    define('DB_USER', 'tsaci_app');
 }
 if (!defined('DB_PASS')) {
-    define('DB_PASS', '');
+    define('DB_PASS', '52f5fc827ea1abd8463510e4');
 }
 if (!defined('DB_NAME')) {
     define('DB_NAME', 'tsaci_cms');
@@ -590,5 +590,85 @@ function getCarouselSlides() {
         $slides[] = $row;
     }
     return $slides;
+}
+
+/**
+ * CSRF protection helpers for public forms (e.g. contact.php).
+ * The page must session_start() before calling these.
+ * Guarded so this file can coexist with admin/config.php's versions.
+ */
+if (!function_exists('generateCsrfToken')) {
+    function generateCsrfToken() {
+        if (empty($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
+        return $_SESSION['csrf_token'];
+    }
+}
+if (!function_exists('csrfTokenField')) {
+    function csrfTokenField() {
+        $token = generateCsrfToken();
+        return '<input type="hidden" name="csrf_token" value="' . htmlspecialchars($token, ENT_QUOTES, 'UTF-8') . '">';
+    }
+}
+if (!function_exists('verifyCsrfToken')) {
+    function verifyCsrfToken() {
+        $token = $_POST['csrf_token'] ?? '';
+        return is_string($token) && $token !== '' && !empty($_SESSION['csrf_token'])
+            && hash_equals($_SESSION['csrf_token'], $token);
+    }
+}
+
+/**
+ * Send a contact-form notification via PHPMailer over Gmail SMTP.
+ * Fails soft (returns false) — the message is already saved to
+ * contact_messages, so a mail outage loses nothing.
+ */
+if (!function_exists('sendContactNotification')) {
+    function sendContactNotification($name, $email, $phone, $company, $subject, $message_text) {
+        static $loaded = false;
+        if (!$loaded) {
+            $loaded = true;
+            $mail_config = __DIR__ . '/../admin/mail_config.php';
+            if (!file_exists($mail_config)) return false;
+            require_once $mail_config;
+            require_once __DIR__ . '/PHPMailer/PHPMailer.php';
+            require_once __DIR__ . '/PHPMailer/SMTP.php';
+            require_once __DIR__ . '/PHPMailer/Exception.php';
+        }
+        if (!defined('SMTP_ENABLED') || !SMTP_ENABLED || SMTP_USERNAME === '' || SMTP_PASSWORD === '') {
+            return false;
+        }
+        try {
+            $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+            $mail->isSMTP();
+            $mail->Host       = SMTP_HOST;
+            $mail->SMTPAuth   = true;
+            $mail->Username   = SMTP_USERNAME;
+            $mail->Password   = str_replace(' ', '', SMTP_PASSWORD);
+            $mail->SMTPSecure = SMTP_SECURE;
+            $mail->Port       = SMTP_PORT;
+            $mail->CharSet    = 'UTF-8';
+
+            $from = SMTP_FROM_EMAIL !== '' ? SMTP_FROM_EMAIL : SMTP_USERNAME;
+            $mail->setFrom($from, SMTP_FROM_NAME);
+            $mail->addAddress(getSiteSetting('contact_email', $from));
+            // Submitter goes in Reply-To — PHPMailer sanitises header injection
+            $mail->addReplyTo($email, $name);
+
+            $mail->Subject = 'Contact Form Submission: ' . $subject;
+            $mail->Body = "You have received a new contact form submission:\n\n"
+                . "Name: " . $name . "\n"
+                . "Email: " . $email . "\n"
+                . "Phone: " . $phone . "\n"
+                . "Company: " . $company . "\n"
+                . "Subject: " . $subject . "\n\n"
+                . "Message:\n" . $message_text . "\n";
+            $mail->send();
+            return true;
+        } catch (Throwable $e) {
+            return false;
+        }
+    }
 }
 

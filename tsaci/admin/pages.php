@@ -2,6 +2,12 @@
 require_once 'config.php';
 requireLogin();
 
+// CSRF guard: all admin POSTs must carry a valid token
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !verifyCsrfToken()) {
+    http_response_code(403);
+    exit('Invalid security token. Reload the page and try again.');
+}
+
 $db = getDB();
 $action = $_GET['action'] ?? 'list';
 $id = $_GET['id'] ?? null;
@@ -597,6 +603,7 @@ $show_missing = ($_GET['show_missing'] ?? '0') === '1';
                     <!-- Left: form fields -->
                     <div>
                         <form method="POST" action="">
+                            <?php echo csrfTokenField(); ?>
                             <div class="space-y-6">
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                     <div>
@@ -1140,6 +1147,7 @@ $show_missing = ($_GET['show_missing'] ?? '0') === '1';
 
                 <!-- Standalone bulk form (populated by JS from row checkboxes — avoids nesting forms) -->
                 <form id="bulk_form" method="POST" action="pages.php">
+                    <?php echo csrfTokenField(); ?>
                     <input type="hidden" name="bulk_action" id="bulk_action_field" value="">
                     <div id="bulk_ids_container"></div>
                 </form>
@@ -1224,6 +1232,7 @@ $show_missing = ($_GET['show_missing'] ?? '0') === '1';
                                         </a>
                                         <?php endif; ?>
                                         <form method="POST" action="pages.php" class="inline" onsubmit="return confirm('Delete this content? This cannot be undone.');">
+                                            <?php echo csrfTokenField(); ?>
                                             <input type="hidden" name="delete_id" value="<?php echo $content['id']; ?>">
                                             <button type="submit" class="text-red-600 hover:text-red-800" title="Delete">
                                                 <i class="fas fa-trash"></i>

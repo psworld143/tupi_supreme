@@ -2,6 +2,12 @@
 require_once 'config.php';
 requireLogin();
 
+// CSRF guard: all admin POSTs must carry a valid token
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !verifyCsrfToken()) {
+    http_response_code(403);
+    exit('Invalid security token. Reload the page and try again.');
+}
+
 $db = getDB();
 $action = $_GET['action'] ?? 'list';
 $id = $_GET['id'] ?? null;
@@ -261,6 +267,7 @@ $view_url = '../products.php#applications';
                     <!-- Left: form fields -->
                     <div>
                         <form method="POST" action="">
+                            <?php echo csrfTokenField(); ?>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 <div class="sm:col-span-2">
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Title <span class="text-red-500">*</span></label>
@@ -506,6 +513,7 @@ $view_url = '../products.php#applications';
                                             <i class="fas fa-eye"></i>
                                         </a>
                                         <form method="POST" action="applications.php" class="inline" onsubmit="return confirm('Delete this application? This cannot be undone.');">
+                                            <?php echo csrfTokenField(); ?>
                                             <input type="hidden" name="delete_id" value="<?php echo $app['id']; ?>">
                                             <button type="submit" class="text-red-600 hover:text-red-800" title="Delete">
                                                 <i class="fas fa-trash"></i>
