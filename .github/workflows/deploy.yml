@@ -62,14 +62,12 @@ jobs:
             --exclude 'documentation_backup/' \
             --exclude 'tsaci/documentation_backup/' \
             --exclude 'tsaci/database/' \
-            --exclude 'tsaci/sessions/' \
-            --exclude 'tsaci/includes/config.php' \
-            --exclude 'tsaci/includes/db_credentials.php' \
-            --exclude 'tsaci/admin/config.php' \
-            --exclude 'tsaci/admin/mail_config.php' \
-            --exclude 'tsaci/admin/mail.ini' \
-            --filter 'P tsaci/uploads/' \
-            --filter 'P tsaci/sessions/' \
+            --exclude 'config.php' \
+            --exclude 'db_credentials.php' \
+            --exclude 'mail_config.php' \
+            --exclude 'mail.ini' \
+            --filter 'P uploads/' \
+            --filter 'P sessions/' \
             ./ "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.DEPLOY_PATH }}/"
 
       - name: Verify PHP parses on server
@@ -81,7 +79,7 @@ jobs:
 # Notes on the rsync flags:
 #   --delete              Removes files on the server that were deleted from the repo,
 #                         except in protected paths below.
-#   --filter 'P ...'      "Protect": files under tsaci/uploads and tsaci/sessions that
+#   --filter 'P ...'      "Protect": files under any uploads/ or sessions/ directory that
 #                         already exist on the server are never deleted or overwritten
 #                         by deploys. New local files still get uploaded. Remove these
 #                         filters if you want uploads managed entirely by Git.
@@ -90,5 +88,6 @@ jobs:
 #   documentation_backup/ Reference docs are not needed at runtime and are excluded.
 #   config.php /          Gitignored config & secret files. They exist only on
 #   mail_config.php /     localhost and the server; excluding them prevents
-#   db_credentials.php /  --delete from wiping the server's copies.
-#   mail.ini
+#   db_credentials.php /  --delete from wiping the server's copies. These are
+#   mail.ini              basename patterns, so they match at any depth — this
+#                         covers both the tsaci/ copy and the root-level site copy.
