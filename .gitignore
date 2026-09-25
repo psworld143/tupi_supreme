@@ -1,14 +1,18 @@
 # Environment-specific configuration & secrets
-tsaci/includes/db_credentials.php
-tsaci/admin/mail.ini
+# Files stay on localhost/server — never committed or pushed.
+# **/ covers both the tsaci/ copy and the site copy at repo root.
+**/config.php
+**/db_credentials.php
+**/mail_config.php
+**/mail.ini
 
 # Runtime session files (keep the protective .htaccess tracked)
-tsaci/sessions/*
-!tsaci/sessions/.htaccess
+**/sessions/*
+!**/sessions/.htaccess
 
 # OS / editor junk
 .DS_Store
 Thumbs.db
 
-# Stray archives
-tsaci/tsaci.zip
+# Archives — site backups contain credential files
+*.zip

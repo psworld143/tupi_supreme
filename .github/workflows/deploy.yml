@@ -63,7 +63,10 @@ jobs:
             --exclude 'tsaci/documentation_backup/' \
             --exclude 'tsaci/database/' \
             --exclude 'tsaci/sessions/' \
+            --exclude 'tsaci/includes/config.php' \
             --exclude 'tsaci/includes/db_credentials.php' \
+            --exclude 'tsaci/admin/config.php' \
+            --exclude 'tsaci/admin/mail_config.php' \
             --exclude 'tsaci/admin/mail.ini' \
             --filter 'P tsaci/uploads/' \
             --filter 'P tsaci/sessions/' \
@@ -85,5 +88,7 @@ jobs:
 #   *.sql / *.zip         Schema dumps and archives are never deployed (already blocked
 #                         by .htaccess, but kept off the server entirely).
 #   documentation_backup/ Reference docs are not needed at runtime and are excluded.
-#   db_credentials.php /  Gitignored secret files. Excluding them prevents --delete
-#   mail.ini              from wiping the copies that live only on the server.
+#   config.php /          Gitignored config & secret files. They exist only on
+#   mail_config.php /     localhost and the server; excluding them prevents
+#   db_credentials.php /  --delete from wiping the server's copies.
+#   mail.ini
