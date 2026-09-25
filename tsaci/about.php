@@ -69,6 +69,7 @@ $company_full_name = getSiteSetting('company_name', 'Tupi Supreme Activated Carb
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="icon" type="image/png" href="uploads/images/favicon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About Us - <?php echo htmlspecialchars_safe($company_full_name); ?></title>

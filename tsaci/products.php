@@ -63,6 +63,7 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="icon" type="image/png" href="uploads/images/favicon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Premium 2mm granulated activated carbon for municipal water treatment facilities. Granulated Activated Carbon (GAC), Coconut Husk Products, and custom formulations. Serving 200+ municipal clients.">

@@ -116,6 +116,7 @@ $subject_options = getContactSubjectOptions(); // Get contact form subject optio
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="icon" type="image/png" href="uploads/images/favicon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="<?php echo htmlspecialchars_safe(getPageContent('contact', 'meta_description', 'Contact Tupi Supreme Activated Carbon, Inc. for all your activated carbon needs. Get in touch with our team for technical consultation, product information, and custom solutions.')); ?>">
