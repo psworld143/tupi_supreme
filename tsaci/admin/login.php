@@ -282,17 +282,21 @@ if ($login_help_url === '' || stripos($login_help_url, 'javascript:') === 0 || s
     <div class="flex min-h-screen">
 
         <!-- Left brand panel (desktop only) -->
-        <div class="brand-panel hidden lg:flex w-[62%] xl:w-[66%] relative flex-col p-12 xl:p-16 text-white overflow-hidden">
-            <p class="relative z-10 text-sm font-semibold tracking-wide text-white/90"><?php echo htmlspecialchars($L['login_brand_line']); ?></p>
-
-            <div class="relative z-10 flex-1 flex flex-col items-center justify-center text-center max-w-xl mx-auto">
-                <div class="w-24 h-24 rounded-full bg-white/95 flex items-center justify-center shadow-xl ring-4 ring-white/15 fade-in fade-in-delay-1">
-                    <img src="<?php echo htmlspecialchars($login_logo); ?>" alt="Logo" class="w-16 h-16 object-contain">
+        <div class="brand-panel hidden lg:flex w-[62%] xl:w-[66%] relative flex-col justify-between p-12 xl:p-16 text-white overflow-hidden">
+            <!-- Top-left header: logo mark + brand line -->
+            <div class="relative z-10 flex items-center gap-4 fade-in fade-in-delay-1">
+                <div class="w-12 h-12 rounded-full bg-white/95 flex items-center justify-center shadow-lg ring-2 ring-white/15 shrink-0">
+                    <img src="<?php echo htmlspecialchars($login_logo); ?>" alt="Logo" class="w-8 h-8 object-contain">
                 </div>
+                <p class="text-sm font-semibold tracking-wide text-white/90"><?php echo htmlspecialchars($L['login_brand_line']); ?></p>
+            </div>
+
+            <!-- Bottom-left anchored content block -->
+            <div class="relative z-10 max-w-2xl">
                 <?php if (trim($L['login_brand_eyebrow']) !== ''): ?>
-                    <p class="mt-8 text-[11px] font-semibold uppercase tracking-[0.25em] text-[#9fd4a8] fade-in fade-in-delay-2"><?php echo htmlspecialchars($L['login_brand_eyebrow']); ?></p>
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.25em] text-[#9fd4a8] fade-in fade-in-delay-2"><?php echo htmlspecialchars($L['login_brand_eyebrow']); ?></p>
                 <?php endif; ?>
-                <h1 class="mt-4 text-4xl xl:text-5xl font-bold leading-tight fade-in fade-in-delay-2">
+                <h1 class="mt-4 text-4xl xl:text-6xl font-bold leading-tight fade-in fade-in-delay-2">
                     <?php echo htmlspecialchars($L['login_brand_title']); ?><br><span style="color: <?php echo $login_accent; ?>"><?php echo htmlspecialchars($L['login_brand_title_accent']); ?></span>
                 </h1>
                 <?php if (trim($L['login_brand_description']) !== ''): ?>
@@ -308,7 +312,7 @@ if ($login_help_url === '' || stripos($login_help_url, 'javascript:') === 0 || s
                 }
                 ?>
                 <?php if (!empty($pills)): ?>
-                    <div class="mt-8 flex flex-wrap items-center justify-center gap-3 fade-in fade-in-delay-4">
+                    <div class="mt-8 flex flex-wrap items-center gap-3 fade-in fade-in-delay-4">
                         <?php foreach ($pills as $pill): ?>
                             <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/25 bg-white/10 text-xs font-medium">
                                 <i class="fas <?php echo $pill[0]; ?>" style="color: <?php echo $login_accent; ?>"></i> <?php echo htmlspecialchars($pill[1]); ?>
@@ -316,15 +320,15 @@ if ($login_help_url === '' || stripos($login_help_url, 'javascript:') === 0 || s
                         <?php endforeach; ?>
                     </div>
                 <?php endif; ?>
-            </div>
 
-            <div class="relative z-10 text-center">
-                <?php if (trim($L['login_brand_quote']) !== ''): ?>
-                    <p class="text-sm italic text-white/60">&ldquo;<?php echo htmlspecialchars($L['login_brand_quote']); ?>&rdquo;</p>
-                <?php endif; ?>
-                <?php if (trim($L['login_brand_footer']) !== ''): ?>
-                    <p class="mt-3 text-xs text-white/50"><?php echo htmlspecialchars($L['login_brand_footer']); ?></p>
-                <?php endif; ?>
+                <div class="mt-10 pt-6 border-t border-white/15 fade-in fade-in-delay-4">
+                    <?php if (trim($L['login_brand_quote']) !== ''): ?>
+                        <p class="text-sm italic text-white/60 border-l-2 pl-4" style="border-color: <?php echo $login_accent; ?>">&ldquo;<?php echo htmlspecialchars($L['login_brand_quote']); ?>&rdquo;</p>
+                    <?php endif; ?>
+                    <?php if (trim($L['login_brand_footer']) !== ''): ?>
+                        <p class="mt-3 text-xs text-white/50"><?php echo htmlspecialchars($L['login_brand_footer']); ?></p>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
 

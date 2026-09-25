@@ -699,7 +699,9 @@ $view_url = 'login.php';
         });
         xhr.addEventListener('load', function() {
             if (xhr.status === 200) {
-                const response = JSON.parse(xhr.responseText);
+                let response;
+                try { response = JSON.parse(xhr.responseText); }
+                catch (_) { response = { success: false, error: 'Unexpected server response' }; }
                 if (response.success) {
                     document.getElementById('image-url-input').value = response.url;
                     statusText.textContent = 'Upload successful!';
@@ -799,7 +801,16 @@ $view_url = 'login.php';
             return true;
         }
         if (uploadState === 'uploading') { alert('Please wait for the image upload to finish before saving.'); return false; }
-        if (selectedFile && uploadState === 'failed') { alert('The image upload failed. Please try again or pick a different file.'); return false; }
+        if (selectedFile && uploadState === 'failed') {
+            // A failed upload must not block saving the rest of the settings —
+            // if an image was already saved before, keep it and continue.
+            if (urlInput.value.trim()) {
+                if (!confirm('The new image failed to upload. Save the other settings and keep the current background image?')) { return false; }
+            } else {
+                alert('The image upload failed. Please try again, pick a smaller file, or turn off "Use background image" to save without one.');
+                return false;
+            }
+        }
         if (!urlInput.value.trim()) { alert('Please choose and upload an image file first, or turn off "Use background image".'); return false; }
         return true;
     }
