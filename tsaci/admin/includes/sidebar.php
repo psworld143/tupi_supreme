@@ -94,10 +94,6 @@ foreach ($nav_groups as $items) {
         <button id="sidebar-collapse" type="button" title="Collapse sidebar" class="hidden lg:flex w-8 h-8 rounded-full text-[#66746c] hover:bg-[#eaf0ec] hover:text-[#23332c] items-center justify-center transition-colors flex-shrink-0">
             <i class="fas fa-bars text-sm"></i>
         </button>
-        <!-- Mobile close button -->
-        <button id="sidebar-close" class="lg:hidden text-[#66746c] hover:text-[#23332c]">
-            <i class="fas fa-times text-xl"></i>
-        </button>
     </div>
 
     <div class="sidebar-scroll flex-1 overflow-y-auto px-3 pb-5">
@@ -174,6 +170,17 @@ foreach ($nav_groups as $items) {
     /* Dock the mobile menu button inside the top header bar */
     #sidebar-toggle {
         top: 0.375rem;
+        transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Mobile drawer open: the toggle rides along with the sidebar and lands
+       where the old close button sat — top-right of the sidebar header
+       (16rem sidebar - 1.25rem header padding - 2.75rem button width) */
+    @media (max-width: 1023.98px) {
+        body.sidebar-open #sidebar-toggle {
+            left: 12rem;
+            top: 0.625rem;
+        }
     }
 
     /* Inner cards become flat, minimal panels */
@@ -267,7 +274,6 @@ foreach ($nav_groups as $items) {
     // Sidebar toggle functionality
     const sidebar = document.getElementById('sidebar');
     const sidebarToggle = document.getElementById('sidebar-toggle');
-    const sidebarClose = document.getElementById('sidebar-close');
     const sidebarOverlay = document.getElementById('sidebar-overlay');
     const sidebarCollapse = document.getElementById('sidebar-collapse');
 
@@ -284,12 +290,14 @@ foreach ($nav_groups as $items) {
     function openSidebar() {
         sidebar.classList.remove('-translate-x-full');
         sidebarOverlay.classList.remove('hidden');
+        document.body.classList.add('sidebar-open');
         document.body.style.overflow = 'hidden';
     }
 
     function closeSidebar() {
         sidebar.classList.add('-translate-x-full');
         sidebarOverlay.classList.add('hidden');
+        document.body.classList.remove('sidebar-open');
         document.body.style.overflow = '';
     }
 
@@ -305,7 +313,6 @@ foreach ($nav_groups as $items) {
             openSidebar();
         }
     });
-    sidebarClose?.addEventListener('click', closeSidebar);
     sidebarOverlay?.addEventListener('click', closeSidebar);
 
     // Escape closes the mobile sidebar
