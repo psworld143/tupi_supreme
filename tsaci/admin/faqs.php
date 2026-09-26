@@ -86,7 +86,7 @@ $all_faqs = [];
 $total_faqs = 0;
 $total_pages = 1;
 $current_page_num = 1;
-$per_page = 10;
+$per_page = 5;
 $categories = [];
 
 if ($action === 'list') {

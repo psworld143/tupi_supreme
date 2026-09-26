@@ -142,11 +142,11 @@ $filter = $_GET['filter'] ?? 'all';
 $all_messages = [];
 $total_messages = 0;
 $total_pages = 1;
-$per_page = 10;
+$per_page = 5;
 $current_page_num = 1;
 
 if ($action === 'list') {
-    $per_page = 10;
+    $per_page = 5;
     $current_page_num = max(1, intval($_GET['page'] ?? 1));
     $search_q = trim($_GET['q'] ?? '');
 

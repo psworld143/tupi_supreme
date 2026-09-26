@@ -88,10 +88,10 @@ $all_stats = [];
 $total_stats = 0;
 $total_pages = 1;
 $current_page_num = 1;
-$per_page = 10;
+$per_page = 5;
 
 if ($action === 'list') {
-    $per_page = 10;
+    $per_page = 5;
     $current_page_num = max(1, intval($_GET['page'] ?? 1));
     $filter_status = $_GET['filter_status'] ?? '';
     $search_q = trim($_GET['q'] ?? '');
