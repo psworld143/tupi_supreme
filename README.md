@@ -1,170 +1,74 @@
-# Tupi Supreme - Project Documentation
-## Company Documentation & Website Files
+# TSACI - Tupi Supreme Activated Carbon, Inc.
+## Website & Documentation
 
-This directory contains documentation and website files for **Tupi Supreme** companies, which consist of two separate business entities: **TSACI** and **TSUCOVI**.
+This folder contains all files related to **Tupi Supreme Activated Carbon, Inc. (TSACI)**, including the website files and comprehensive documentation.
 
 ---
 
-## 📂 Directory Structure
+## 📁 Folder Structure
 
 ```
-tupi_supreme/
-├── tsaci/                          # TSACI - Tupi Supreme Activated Carbon, Inc.
-│   ├── Website Files (PHP)
-│   │   ├── index.php
-│   │   ├── about.php
-│   │   ├── products.php
-│   │   ├── services.php
-│   │   └── contact.php
-│   └── Documentation
-│       ├── README.md
-│       ├── TSACI_PROFILE.md
-│       ├── TSACI_WEBSITE_REQUIREMENTS.md
-│       └── SYSTEM_ANALYSIS.md
+tsaci/
+├── Website Files (PHP)
+│   ├── index.php              # Homepage
+│   ├── about.php              # About Us
+│   ├── products.php           # Products catalog
+│   ├── services.php           # Services
+│   ├── contact.php            # Contact form
+│   ├── case-studies.php       # Case Studies
+│   ├── resources.php          # Resources & Downloads
+│   └── certifications.php     # Certifications
 │
-├── Shared Documentation (Root)
-│   ├── BUSINESS_CONTEXT.md
-│   ├── COMPANY_SEPARATION_ANALYSIS.md
-│   ├── ANALYSIS_SUMMARY.md
-│   ├── WEBSITE_REQUIREMENTS_COMPARISON.md
-│   └── WEBSITE_REQUIREMENTS_MASTER.md
+├── Documentation
+│   ├── MASTER_DOCUMENTATION.md    # ⭐ All documentation in one file
+│   └── documentation_backup/      # Archived old documentation files
 │
-└── TSUCOVI Documentation (Root)
-    ├── TSUCOVI_PROFILE.md
-    └── TSUCOVI_WEBSITE_REQUIREMENTS.md
+└── README.md (this file)
 ```
 
 ---
 
-## 🏢 Company Overview
+## 📄 Documentation
 
-### TSACI - Tupi Supreme Activated Carbon, Inc.
-**Location:** `/tsaci/` folder  
-**Focus:** Activated Carbon & Environmental Solutions  
-**Primary Market:** Municipal Water Treatment Facilities  
-**Products:** Granulated Activated Carbon, Coconut Husk Products  
+**All documentation has been consolidated into one comprehensive file:**
 
-**Key Files:**
-- Current website: `tsaci/index.php`, `tsaci/about.php`, etc.
-- Business profile: `tsaci/TSACI_PROFILE.md`
-- Website requirements: `tsaci/TSACI_WEBSITE_REQUIREMENTS.md`
-
-### TSUCOVI - Tupi Supreme Coco Ventures Incorporated
-**Location:** Root directory (future: `/tsucovi/` folder)  
-**Focus:** Coconut Food Products  
-**Primary Market:** Food & Beverage Manufacturers  
-**Products:** Coconut Water Concentrate, Coconut Cream, Oils  
-
-**Key Files:**
-- Business profile: `TSUCOVI_PROFILE.md`
-- Website requirements: `TSUCOVI_WEBSITE_REQUIREMENTS.md`
+📘 **[MASTER_DOCUMENTATION.md](MASTER_DOCUMENTATION.md)** - Complete project documentation including:
+- Project Overview
+- Business Context & Company Profile
+- Website Requirements
+- System Analysis
+- Implementation Status
+- Compliance & Comparison
+- Company Separation Analysis
 
 ---
 
-## 📚 Documentation Index
+## 🎯 Quick Links
 
-### TSACI-Specific Documentation
-📁 **Located in `/tsaci/` folder:**
-- `TSACI_PROFILE.md` - Complete business profile
-- `TSACI_WEBSITE_REQUIREMENTS.md` - Full website specifications
-- `SYSTEM_ANALYSIS.md` - Current website technical analysis
-- `README.md` - TSACI folder guide
-
-### TSUCOVI-Specific Documentation
-📄 **Located in root directory:**
-- `TSUCOVI_PROFILE.md` - Complete business profile
-- `TSUCOVI_WEBSITE_REQUIREMENTS.md` - Full website specifications
-
-### Shared/Comparison Documentation
-📄 **Located in root directory:**
-- `BUSINESS_CONTEXT.md` - Original business context (both companies)
-- `COMPANY_SEPARATION_ANALYSIS.md` - Detailed comparison analysis
-- `ANALYSIS_SUMMARY.md` - Quick reference summary
-- `WEBSITE_REQUIREMENTS_COMPARISON.md` - Side-by-side website comparison
-- `WEBSITE_REQUIREMENTS_MASTER.md` - Master requirements reference
+- **View Documentation:** [MASTER_DOCUMENTATION.md](MASTER_DOCUMENTATION.md)
+- **Website Homepage:** [index.php](index.php)
+- **Products:** [products.php](products.php)
+- **Case Studies:** [case-studies.php](case-studies.php)
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Key Information
 
-### Working on TSACI:
-1. Navigate to `/tsaci/` folder
-2. Review `tsaci/TSACI_WEBSITE_REQUIREMENTS.md` for specifications
-3. Check `tsaci/SYSTEM_ANALYSIS.md` for current website analysis
-4. Update website files in `/tsaci/` folder
+### Company Focus:
+**Municipal Water Treatment Facilities** - Primary target market
 
-### Working on TSUCOVI:
-1. Review `TSUCOVI_WEBSITE_REQUIREMENTS.md` for specifications
-2. Check `TSUCOVI_PROFILE.md` for business context
-3. Future: Create `/tsucovi/` folder when ready
+### Products:
+- Granulated Activated Carbon (2mm below specification)
+- Coconut Husk Chips (growing medium)
+- Coconut Pit (horticultural growing medium)
 
-### Comparing Both Companies:
-1. Read `COMPANY_SEPARATION_ANALYSIS.md` for detailed comparison
-2. Check `WEBSITE_REQUIREMENTS_COMPARISON.md` for website differences
-3. Review `ANALYSIS_SUMMARY.md` for quick reference
-
----
-
-## 🔑 Key Points
-
-### Company Separation:
-- **TSACI** and **TSUCOVI** are **separate business entities**
-- Different products, markets, and specifications
-- Integrated operations with zero-waste philosophy
-- Each requires distinct website and branding
-
-### Current Status:
-- ✅ TSACI website exists (in `/tsaci/` folder)
-- ✅ TSACI documentation complete
-- ✅ TSUCOVI documentation complete
-- 🔄 TSUCOVI website not yet implemented
+### Implementation Status:
+- **Overall Progress:** ~65% Complete
+- **New Pages Created:** Case Studies, Resources, Certifications
+- **Homepage:** ✅ Complete with municipal focus
+- **Contact Form:** ✅ Updated with municipal inquiry option
+- **Remaining Work:** Products page restructuring, navigation updates, security improvements
 
 ---
 
-## 📋 File Locations Guide
-
-| File Type | TSACI Location | TSUCOVI Location |
-|-----------|----------------|------------------|
-| **Website Files** | `/tsaci/*.php` | Not yet created |
-| **Business Profile** | `/tsaci/TSACI_PROFILE.md` | `/TSUCOVI_PROFILE.md` |
-| **Website Requirements** | `/tsaci/TSACI_WEBSITE_REQUIREMENTS.md` | `/TSUCOVI_WEBSITE_REQUIREMENTS.md` |
-| **System Analysis** | `/tsaci/SYSTEM_ANALYSIS.md` | N/A |
-
----
-
-## 🔗 Important Notes
-
-1. **Website Access:** TSACI website files are in `/tsaci/` folder
-   - Update web server configuration to point to `/tsaci/` if needed
-   - Or access via: `http://localhost/tupi_supreme/tsaci/`
-
-2. **Documentation:** All TSACI-related docs are organized in `/tsaci/` folder
-   - Easy to find all TSACI files in one place
-   - Clean separation from TSUCOVI files
-
-3. **Shared Docs:** Comparison and shared documents remain in root
-   - Easy access for comparing both companies
-   - Reference materials for both projects
-
----
-
-## 📞 Next Steps
-
-### For TSACI Development:
-1. ✅ Files organized in `/tsaci/` folder
-2. Review requirements: `tsaci/TSACI_WEBSITE_REQUIREMENTS.md`
-3. Implement improvements from: `tsaci/SYSTEM_ANALYSIS.md`
-4. Update website to emphasize municipal water treatment
-
-### For TSUCOVI Development:
-1. Review requirements: `TSUCOVI_WEBSITE_REQUIREMENTS.md`
-2. Plan website development
-3. Create `/tsucovi/` folder when ready
-4. Implement with sample request system
-
----
-
-**Last Updated:** 2024  
-**Structure:** Organized with TSACI in dedicated folder  
-**Status:** TSACI ready for development work
-
+**For complete details, see [MASTER_DOCUMENTATION.md](MASTER_DOCUMENTATION.md)**

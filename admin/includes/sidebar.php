@@ -421,3 +421,6 @@ foreach ($nav_groups as $items) {
         });
     });
 </script>
+
+<!-- List/Grid view toggle for admin list tables -->
+<?php include __DIR__ . '/view-toggle.php'; ?>

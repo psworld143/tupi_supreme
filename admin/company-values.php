@@ -86,7 +86,7 @@ $all_values = [];
 $total_values = 0;
 $total_pages = 1;
 $current_page_num = 1;
-$per_page = 10;
+$per_page = 5;
 
 if ($action === 'list') {
     $current_page_num = max(1, intval($_GET['page'] ?? 1));

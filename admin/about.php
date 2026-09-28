@@ -193,7 +193,7 @@ $all_content = [];
 $total_content = 0;
 $total_pages = 1;
 $current_page_num = 1;
-$per_page = 10;
+$per_page = 5;
 
 // Section names already in use (used to disable duplicates in the Add dropdown)
 $used_section_names = [];

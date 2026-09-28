@@ -1,4 +1,0 @@
-; Gmail SMTP credentials — copy to mail.ini (gitignored) and fill in real values.
-; Create an app password: Google Account > Security > App passwords.
-username = "your-email@gmail.com"
-password = "your-16-char-app-password"
