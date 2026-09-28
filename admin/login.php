@@ -153,9 +153,27 @@ $strip_bad = function ($v) {
     return str_replace(["'", "\\", "\n", "\r", "<", ">"], '', (string) $v);
 };
 
-$login_bg_enabled = $L['login_bg_enabled'] === '1' && trim($L['login_bg_image']) !== '';
-$login_bg_alpha   = number_format(max(0, min(100, (int) $L['login_bg_overlay'])) / 100, 2);
-$login_bg_url     = $strip_bad($L['login_bg_image']);
+$login_bg_url   = trim($strip_bad($L['login_bg_image']));
+$login_bg_alpha = number_format(max(0, min(100, (int) $L['login_bg_overlay'])) / 100, 2);
+
+// Resolve a stored local image path to a real file. Absolute paths saved before
+// the install moved folders (e.g. /site/tsaci/uploads/... -> /site/uploads/...)
+// are remapped to uploads/images/ by filename; unresolvable ones fall back to
+// the gradient instead of silently rendering nothing.
+$login_bg_enabled = $L['login_bg_enabled'] === '1' && $login_bg_url !== '';
+if ($login_bg_enabled && !preg_match('#^https?://#i', $login_bg_url)) {
+    $bg_fs_path = $login_bg_url[0] === '/'
+        ? rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/\\') . str_replace('/', DIRECTORY_SEPARATOR, $login_bg_url)
+        : __DIR__ . DIRECTORY_SEPARATOR . $login_bg_url;
+    if (!is_file($bg_fs_path)) {
+        $bg_basename = basename(str_replace('\\', '/', $login_bg_url));
+        if (is_file(__DIR__ . '/../uploads/images/' . $bg_basename)) {
+            $login_bg_url = '../uploads/images/' . $bg_basename;
+        } else {
+            $login_bg_enabled = false;
+        }
+    }
+}
 $login_bg_color   = $hex6($L['login_bg_color'], $login_defaults['login_bg_color']);
 $login_grad_from  = $hex6($L['login_bg_gradient_from'], $login_defaults['login_bg_gradient_from']);
 $login_grad_to    = $hex6($L['login_bg_gradient_to'], $login_defaults['login_bg_gradient_to']);

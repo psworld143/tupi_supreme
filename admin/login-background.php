@@ -122,6 +122,19 @@ $s = function ($key) use ($settings) {
 };
 
 $bg_enabled = $settings['login_bg_enabled'] === '1';
+
+// Flag a saved local image path that no longer resolves to a real file
+// (e.g. the install moved folders after it was saved).
+$bg_image_missing = false;
+$stored_bg = trim($settings['login_bg_image']);
+if ($bg_enabled && $stored_bg !== '' && !preg_match('#^https?://#i', $stored_bg)) {
+    $bg_fs = ($stored_bg[0] === '/')
+        ? rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/\\') . str_replace('/', DIRECTORY_SEPARATOR, $stored_bg)
+        : __DIR__ . DIRECTORY_SEPARATOR . $stored_bg;
+    $bg_image_missing = !is_file($bg_fs)
+        && !is_file(__DIR__ . '/../uploads/images/' . basename(str_replace('\\', '/', $stored_bg)));
+}
+
 $view_url = 'login.php';
 ?>
 <!DOCTYPE html>
@@ -257,6 +270,13 @@ $view_url = 'login.php';
                             <!-- Image -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Background Image</label>
+
+                                <?php if ($bg_image_missing): ?>
+                                    <div class="mb-3 p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-sm flex items-start gap-2">
+                                        <i class="fas fa-exclamation-triangle mt-0.5"></i>
+                                        <span>The saved background image can't be found on the server — its stored path is outdated. Re-upload the image or paste a new URL, then save.</span>
+                                    </div>
+                                <?php endif; ?>
 
                                 <div class="mb-3">
                                     <label class="block text-xs font-medium text-gray-500 mb-1">Image source</label>
@@ -648,6 +668,9 @@ $view_url = 'login.php';
     // Keep the hidden submitted field in sync with the visible URL text box
     function syncUrlInput(value) {
         document.getElementById('image-url-input').value = value;
+        if (value.trim()) {
+            document.getElementById('login_bg_enabled').checked = true;
+        }
         const preview = document.getElementById('image-preview');
         if (value.trim()) {
             preview.src = value;
@@ -705,6 +728,7 @@ $view_url = 'login.php';
                 catch (_) { response = { success: false, error: 'Unexpected server response' }; }
                 if (response.success) {
                     document.getElementById('image-url-input').value = response.url;
+                    document.getElementById('login_bg_enabled').checked = true;
                     statusText.textContent = 'Upload successful!';
                     statusText.classList.add('text-green-600');
                     progressBar.classList.add('bg-green-500');
