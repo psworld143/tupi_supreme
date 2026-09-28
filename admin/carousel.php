@@ -438,7 +438,7 @@ $view_url = '../index.php#hero';
 
                                     <!-- URL Input (url mode — visible text field for manual entry) -->
                                     <div id="url-input-block" class="hidden mb-3">
-                                        <input type="url" id="image-url-visible" value="<?php echo htmlspecialchars($slide['image_url'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary" placeholder="https://example.com/image.jpg" oninput="syncUrlInput(this.value)">
+                                        <input type="text" id="image-url-visible" value="<?php echo htmlspecialchars($slide['image_url'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary" placeholder="https://example.com/image.jpg" oninput="syncUrlInput(this.value)">
                                         <p class="mt-1 text-xs text-gray-500">Paste a full image URL (https://...).</p>
                                     </div>
 

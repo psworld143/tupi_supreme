@@ -310,8 +310,8 @@ $view_url = 'login.php';
                                 </div>
 
                                 <div id="url-input-block" class="hidden mb-3">
-                                    <input type="url" id="image-url-visible" value="<?php echo $s('login_bg_image'); ?>" class="field" placeholder="https://example.com/image.jpg" oninput="syncUrlInput(this.value)">
-                                    <p class="mt-1 text-xs text-gray-500">Paste a full image URL (https://...).</p>
+                                    <input type="text" id="image-url-visible" value="<?php echo $s('login_bg_image'); ?>" class="field" placeholder="https://example.com/image.jpg" oninput="syncUrlInput(this.value)">
+                                    <p class="mt-1 text-xs text-gray-500">Paste a full image URL (https://...) or a site path like /uploads/images/photo.jpg.</p>
                                 </div>
 
                                 <input type="hidden" name="login_bg_image" id="image-url-input" value="<?php echo $s('login_bg_image'); ?>">

@@ -437,7 +437,7 @@ $view_url = '../certifications.php#iso-certifications';
                                     </div>
 
                                     <div id="url-input-block" class="hidden mb-3">
-                                        <input type="url" id="image-url-visible" value="<?php echo htmlspecialchars($edit_cert['image_url'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary" placeholder="https://example.com/cert-badge.png" oninput="syncImageUrl(this.value)">
+                                        <input type="text" id="image-url-visible" value="<?php echo htmlspecialchars($edit_cert['image_url'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary" placeholder="https://example.com/cert-badge.png" oninput="syncImageUrl(this.value)">
                                         <p class="mt-1 text-xs text-gray-500">Paste a full image URL (https://...).</p>
                                     </div>
 
@@ -472,7 +472,7 @@ $view_url = '../certifications.php#iso-certifications';
                                     </div>
 
                                     <div id="doc-url-block" class="hidden mb-3">
-                                        <input type="url" id="doc-url-visible" value="<?php echo htmlspecialchars($edit_cert['document_url'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary" placeholder="https://example.com/certificate.pdf" oninput="syncDocUrl(this.value)">
+                                        <input type="text" id="doc-url-visible" value="<?php echo htmlspecialchars($edit_cert['document_url'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary" placeholder="https://example.com/certificate.pdf" oninput="syncDocUrl(this.value)">
                                         <p class="mt-1 text-xs text-gray-500">Direct link to the certificate document.</p>
                                     </div>
 

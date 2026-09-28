@@ -366,7 +366,7 @@ function resourceViewUrl($category) {
 
                                     <!-- URL Input (url mode) -->
                                     <div id="url-input-block" class="hidden mb-3">
-                                        <input type="url" id="file-url-visible" value="<?php echo htmlspecialchars($edit_resource['file_url'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary" placeholder="https://example.com/datasheet.pdf" oninput="syncUrlInput(this.value)">
+                                        <input type="text" id="file-url-visible" value="<?php echo htmlspecialchars($edit_resource['file_url'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary" placeholder="https://example.com/datasheet.pdf" oninput="syncUrlInput(this.value)">
                                         <p class="mt-1 text-xs text-gray-500">Direct link to the downloadable file. Use <code>uploads/documents/…</code> for files stored on this site.</p>
                                     </div>
 

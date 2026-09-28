@@ -318,7 +318,7 @@ $view_url = '../about.php#team';
                                     </div>
 
                                     <div id="url-input-block" class="hidden mb-3">
-                                        <input type="url" id="image-url-visible" value="<?php echo htmlspecialchars($edit_member['photo_url'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary" placeholder="https://example.com/photo.jpg" oninput="syncImageUrl(this.value)">
+                                        <input type="text" id="image-url-visible" value="<?php echo htmlspecialchars($edit_member['photo_url'] ?? ''); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary" placeholder="https://example.com/photo.jpg" oninput="syncImageUrl(this.value)">
                                         <p class="mt-1 text-xs text-gray-500">Paste a full image URL (https://...).</p>
                                     </div>
 
