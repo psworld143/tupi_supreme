@@ -70,6 +70,14 @@ jobs:
             --filter 'P sessions/' \
             ./ "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.DEPLOY_PATH }}/"
 
+      - name: Make uploads writable on server
+        run: |
+          ssh -p "${{ secrets.SSH_PORT }}" \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
+            "mkdir -p '${{ secrets.DEPLOY_PATH }}/uploads/images' '${{ secrets.DEPLOY_PATH }}/uploads/documents' '${{ secrets.DEPLOY_PATH }}/sessions' \
+             && chmod -R 0775 '${{ secrets.DEPLOY_PATH }}/uploads' '${{ secrets.DEPLOY_PATH }}/sessions' \
+             && echo OK"
+
       - name: Verify PHP parses on server
         run: |
           ssh -p "${{ secrets.SSH_PORT }}" \
@@ -86,6 +94,13 @@ jobs:
 #   *.sql / *.zip         Schema dumps and archives are never deployed (already blocked
 #                         by .htaccess, but kept off the server entirely).
 #   documentation_backup/ Reference docs are not needed at runtime and are excluded.
+#
+# "Make uploads writable" step:
+#   mkdir -p + chmod -R 0775 on uploads/ and sessions/ after every deploy, so PHP
+#   can write uploaded files regardless of what rsync synced. If uploads still
+#   fail on your host (PHP running as a different user than the SSH user, no
+#   shared group), change 0775 to 0777 — uploads/.htaccess already blocks
+#   script execution in that directory, so the risk is limited.
 #   config.php /          Gitignored config & secret files. They exist only on
 #   mail_config.php /     localhost and the server; excluding them prevents
 #   db_credentials.php /  --delete from wiping the server's copies. These are
