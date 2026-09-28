@@ -172,29 +172,69 @@ function isValidImageUrl($url) {
             color: #23332c;
         }
 
-        /* Gallery items */
+        /* Gallery items — the photo fills the card; text overlays a bottom gradient */
         .gallery-item {
             transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.35s ease, box-shadow 0.35s ease;
             cursor: pointer;
             overflow: hidden;
         }
-        .gallery-item:hover {
+        .gallery-item:hover,
+        .gallery-item:focus-visible {
             transform: translateY(-6px);
             border-color: #3d7a66;
-            box-shadow: 0 12px 32px -12px rgba(35, 51, 44, 0.15);
+            box-shadow: 0 16px 36px -12px rgba(35, 51, 44, 0.35);
+        }
+        .gallery-item:focus-visible {
+            outline: 2px solid #3d7a66;
+            outline-offset: 2px;
         }
         .gallery-item img {
             transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            background-color: #f5f7f5;
-            min-height: 256px;
+            background-color: #1a2420;
             opacity: 0;
         }
-        .gallery-item:hover img {
+        .gallery-item:hover img,
+        .gallery-item:focus-visible img {
             transform: scale(1.06);
         }
         .gallery-item img[src=""],
         .gallery-item img:not([src]) {
             display: none;
+        }
+
+        /* Caption overlay — gradient keeps text readable on any photo */
+        .gallery-caption {
+            background: linear-gradient(to top, rgba(15, 23, 20, 0.88) 0%, rgba(15, 23, 20, 0.45) 55%, transparent 100%);
+        }
+
+        /* Description slides in on hover/focus */
+        .gallery-desc {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            transform: translateY(6px);
+            transition: max-height 0.35s ease, opacity 0.3s ease, transform 0.35s ease;
+        }
+        .gallery-item:hover .gallery-desc,
+        .gallery-item:focus-visible .gallery-desc {
+            max-height: 5.5em;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Expand affordance in the top-right corner */
+        .gallery-zoom {
+            opacity: 0;
+            transform: translateY(-4px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .gallery-item:hover .gallery-zoom,
+        .gallery-item:focus-visible .gallery-zoom {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         /* Lightbox Styles */
@@ -222,8 +262,12 @@ function isValidImageUrl($url) {
             margin: auto;
         }
         .lightbox-content img {
-            width: 100%;
+            display: block;
+            max-width: 100%;
+            width: auto;
             height: auto;
+            max-height: 72vh;
+            margin: 0 auto;
             border-radius: 1rem;
         }
         .lightbox-close {
@@ -402,27 +446,27 @@ function isValidImageUrl($url) {
                         // Use placeholder if no valid image URL or if it's a placeholder service URL
                         $imageUrl = $hasValidImage ? $imageUrlFromDb : $placeholderUrl;
                     ?>
-                        <div class="gallery-item gallery-<?php echo htmlspecialchars_safe($image['category']); ?> bg-white border border-[#e6ece8] rounded-2xl reveal <?php echo 'reveal-delay-' . ((($index % 4) + 1)); ?>" data-category="<?php echo htmlspecialchars_safe($image['category']); ?>" onclick="openLightbox(<?php echo $index; ?>)">
-                            <div class="relative h-64 overflow-hidden bg-[#f5f7f5]">
+                        <div class="gallery-item gallery-<?php echo htmlspecialchars_safe($image['category']); ?> rounded-2xl border border-[#e6ece8] reveal <?php echo 'reveal-delay-' . ((($index % 4) + 1)); ?>" data-category="<?php echo htmlspecialchars_safe($image['category']); ?>" onclick="openLightbox(<?php echo $index; ?>)" tabindex="0" role="button" aria-label="View <?php echo htmlspecialchars_safe($image['title']); ?>" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openLightbox(<?php echo $index; ?>);}">
+                            <div class="relative h-72 overflow-hidden">
                                 <img src="<?php echo htmlspecialchars_safe($imageUrl); ?>" 
                                      alt="<?php echo htmlspecialchars_safe($image['title']); ?>" 
-                                     class="w-full h-full object-cover"
+                                     class="absolute inset-0 w-full h-full object-cover"
                                      loading="lazy"
                                      data-placeholder="<?php echo htmlspecialchars_safe($placeholderUrl); ?>"
                                      onerror="handleImageError(this);"
                                      onload="this.style.opacity='1';">
                                 <noscript>
-                                    <img src="<?php echo htmlspecialchars_safe($placeholderUrl); ?>" alt="<?php echo htmlspecialchars_safe($image['title']); ?>" class="w-full h-full object-cover">
+                                    <img src="<?php echo htmlspecialchars_safe($placeholderUrl); ?>" alt="<?php echo htmlspecialchars_safe($image['title']); ?>" class="absolute inset-0 w-full h-full object-cover">
                                 </noscript>
-                                <div class="absolute inset-0 bg-[#23332c] opacity-0 hover:opacity-30 transition-opacity duration-300 flex items-center justify-center cursor-pointer">
-                                    <i class="fas fa-search-plus text-white text-3xl"></i>
+                                <div class="gallery-zoom absolute top-3 right-3 w-9 h-9 rounded-full bg-[#23332c]/50 backdrop-blur-sm border border-white/25 flex items-center justify-center text-white">
+                                    <i class="fas fa-expand text-xs"></i>
                                 </div>
-                            </div>
-                            <div class="p-5">
-                                <h3 class="font-semibold text-[#23332c] mb-1 text-sm"><?php echo htmlspecialchars_safe($image['title']); ?></h3>
-                                <?php if ($image['description']): ?>
-                                    <p class="text-xs text-[#7d8b84] leading-relaxed"><?php echo htmlspecialchars_safe($image['description']); ?></p>
-                                <?php endif; ?>
+                                <div class="gallery-caption absolute inset-x-0 bottom-0 p-5 pt-12">
+                                    <h3 class="text-white font-semibold text-sm leading-snug"><?php echo htmlspecialchars_safe($image['title']); ?></h3>
+                                    <?php if ($image['description']): ?>
+                                        <p class="gallery-desc mt-1.5 text-xs text-white/75 leading-relaxed"><?php echo htmlspecialchars_safe($image['description']); ?></p>
+                                    <?php endif; ?>
+                                </div>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -445,6 +489,10 @@ function isValidImageUrl($url) {
         <span class="lightbox-nav lightbox-next" onclick="changeImage(1, event)">&#10095;</span>
         <div class="lightbox-content">
             <img id="lightbox-img" src="" alt="Gallery Image">
+            <div class="pt-4 text-center">
+                <p id="lightbox-title" class="text-white font-semibold text-sm"></p>
+                <p id="lightbox-desc" class="text-white/60 text-xs mt-1 max-w-lg mx-auto leading-relaxed"></p>
+            </div>
         </div>
     </div>
 
@@ -505,6 +553,12 @@ function isValidImageUrl($url) {
 
         let currentImageIndex = 0;
 
+        // Show the photo's title + description under the lightbox image
+        function setLightboxCaption(imageData) {
+            document.getElementById('lightbox-title').textContent = imageData.title || '';
+            document.getElementById('lightbox-desc').textContent = imageData.description || '';
+        }
+
         // Filter Gallery
         function filterGallery(category, btn) {
             const items = document.querySelectorAll('.gallery-item');
@@ -544,6 +598,7 @@ function isValidImageUrl($url) {
             const imageData = galleryImages[index];
             img.src = imageData.src || imageData.placeholder;
             img.alt = imageData.title;
+            setLightboxCaption(imageData);
             
             // Ensure fallback if image fails to load
             img.onerror = function() {
@@ -589,6 +644,7 @@ function isValidImageUrl($url) {
             const imageData = galleryImages[currentImageIndex];
             img.src = imageData.src || imageData.placeholder;
             img.alt = imageData.title;
+            setLightboxCaption(imageData);
             
             // Ensure fallback if image fails to load
             img.onerror = function() {
