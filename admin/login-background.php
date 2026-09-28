@@ -32,10 +32,13 @@ $defaults = [
     'login_brand_description'  => 'Pages, products, services, gallery, messages, and settings — manage the entire TSACI website from a single admin console.',
     'login_pill_1_icon'        => 'fa-file-alt',
     'login_pill_1_text'        => 'Content & Pages',
+    'login_pill_1_desc'        => 'Manage your website\'s content and pages with ease.',
     'login_pill_2_icon'        => 'fa-cube',
     'login_pill_2_text'        => 'Products & Services',
+    'login_pill_2_desc'        => 'Update and manage your products and services.',
     'login_pill_3_icon'        => 'fa-envelope',
     'login_pill_3_text'        => 'Messages',
+    'login_pill_3_desc'        => 'View and handle inquiries and messages.',
     'login_brand_quote'        => 'Premium activated carbon solutions for cleaner water and a greener tomorrow.',
     'login_brand_footer'       => 'Tupi Supreme Activated Carbon, Inc. · Admin Console',
     'login_form_eyebrow'       => 'Admin Access',
@@ -421,12 +424,13 @@ $view_url = 'login.php';
                             </div>
 
                             <div>
-                                <label class="field-label">Feature pills <span class="text-gray-400 font-normal">(icon class + text; empty text hides the pill)</span></label>
+                                <label class="field-label">Feature columns <span class="text-gray-400 font-normal">(icon + title + short description; empty title hides the column)</span></label>
                                 <div class="space-y-2">
                                     <?php for ($i = 1; $i <= 3; $i++): ?>
                                         <div class="flex items-center gap-2">
-                                            <input type="text" name="login_pill_<?php echo $i; ?>_icon" id="login_pill_<?php echo $i; ?>_icon" value="<?php echo $s("login_pill_{$i}_icon"); ?>" class="field w-36 font-mono text-xs" placeholder="fa-star" oninput="updatePreview()">
-                                            <input type="text" name="login_pill_<?php echo $i; ?>_text" id="login_pill_<?php echo $i; ?>_text" value="<?php echo $s("login_pill_{$i}_text"); ?>" class="field" placeholder="Pill <?php echo $i; ?> text" oninput="updatePreview()">
+                                            <input type="text" name="login_pill_<?php echo $i; ?>_icon" id="login_pill_<?php echo $i; ?>_icon" value="<?php echo $s("login_pill_{$i}_icon"); ?>" class="field w-28 font-mono text-xs flex-shrink-0" placeholder="fa-star" oninput="updatePreview()">
+                                            <input type="text" name="login_pill_<?php echo $i; ?>_text" id="login_pill_<?php echo $i; ?>_text" value="<?php echo $s("login_pill_{$i}_text"); ?>" class="field w-44 flex-shrink-0" placeholder="Title <?php echo $i; ?>" oninput="updatePreview()">
+                                            <input type="text" name="login_pill_<?php echo $i; ?>_desc" id="login_pill_<?php echo $i; ?>_desc" value="<?php echo $s("login_pill_{$i}_desc"); ?>" class="field" placeholder="Short description" oninput="updatePreview()">
                                         </div>
                                     <?php endfor; ?>
                                 </div>
@@ -528,12 +532,16 @@ $view_url = 'login.php';
                                     <p id="pv_brand_eyebrow" class="mt-2 text-[7px] font-semibold uppercase tracking-[0.2em] text-[#9fd4a8]"></p>
                                     <p class="mt-1 text-sm font-bold leading-snug"><span id="pv_brand_title"></span><br><span id="pv_brand_title_accent"></span></p>
                                     <p id="pv_brand_description" class="mt-1.5 text-[7px] text-white/75 leading-relaxed"></p>
-                                    <div class="mt-2 flex flex-wrap justify-center gap-1">
-                                        <?php for ($i = 1; $i <= 3; $i++): ?>
-                                            <span id="pv_pill_<?php echo $i; ?>" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-white/25 bg-white/10 text-[7px]">
-                                                <i id="pv_pill_<?php echo $i; ?>_icon" class="fas"></i><span id="pv_pill_<?php echo $i; ?>_text"></span>
-                                            </span>
-                                        <?php endfor; ?>
+                                    <div id="pv_brand_card" class="mt-2 rounded-md border border-white/15 bg-white/10 px-2 py-1.5">
+                                        <div id="pv_pillrow" class="flex divide-x divide-white/20">
+                                            <?php for ($i = 1; $i <= 3; $i++): ?>
+                                                <div id="pv_pill_<?php echo $i; ?>" class="flex-1 px-1 first:pl-0 last:pr-0">
+                                                    <i id="pv_pill_<?php echo $i; ?>_icon" class="fas"></i>
+                                                    <p id="pv_pill_<?php echo $i; ?>_text" class="mt-0.5 text-[7px] font-semibold leading-tight"></p>
+                                                    <p id="pv_pill_<?php echo $i; ?>_desc" class="mt-0.5 text-[6px] text-white/60 leading-tight"></p>
+                                                </div>
+                                            <?php endfor; ?>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="text-center">
@@ -605,19 +613,24 @@ $view_url = 'login.php';
         accentEl.style.color = accent;
         setText('pv_brand_description', val('login_brand_description'));
 
+        var anyPill = false;
         for (var i = 1; i <= 3; i++) {
             var pill = document.getElementById('pv_pill_' + i);
             var text = val('login_pill_' + i + '_text');
             if (text === '') {
                 pill.style.display = 'none';
             } else {
+                anyPill = true;
                 pill.style.display = '';
                 setText('pv_pill_' + i + '_text', text);
+                setText('pv_pill_' + i + '_desc', val('login_pill_' + i + '_desc'));
                 var icon = document.getElementById('pv_pill_' + i + '_icon');
                 icon.className = 'fas ' + (val('login_pill_' + i + '_icon') || 'fa-circle');
                 icon.style.color = accent;
+                icon.style.fontSize = '9px';
             }
         }
+        document.getElementById('pv_brand_card').style.display = anyPill ? '' : 'none';
 
         var quote = val('login_brand_quote');
         setText('pv_brand_quote', quote ? '\u201C' + quote + '\u201D' : '');

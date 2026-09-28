@@ -120,10 +120,13 @@ $login_defaults = [
     'login_brand_description'  => 'Pages, products, services, gallery, messages, and settings — manage the entire TSACI website from a single admin console.',
     'login_pill_1_icon'        => 'fa-file-alt',
     'login_pill_1_text'        => 'Content & Pages',
+    'login_pill_1_desc'        => 'Manage your website\'s content and pages with ease.',
     'login_pill_2_icon'        => 'fa-cube',
     'login_pill_2_text'        => 'Products & Services',
+    'login_pill_2_desc'        => 'Update and manage your products and services.',
     'login_pill_3_icon'        => 'fa-envelope',
     'login_pill_3_text'        => 'Messages',
+    'login_pill_3_desc'        => 'View and handle inquiries and messages.',
     'login_brand_quote'        => 'Premium activated carbon solutions for cleaner water and a greener tomorrow.',
     'login_brand_footer'       => 'Tupi Supreme Activated Carbon, Inc. · Admin Console',
     'login_form_eyebrow'       => 'Admin Access',
@@ -234,7 +237,13 @@ if ($login_help_url === '' || stripos($login_help_url, 'javascript:') === 0 || s
         /* Left brand panel — custom image w/ dark overlay when enabled, else gradient */
         .brand-panel {
             <?php if ($login_bg_enabled): ?>
-            background-image: linear-gradient(rgba(21, 46, 30, <?php echo $login_bg_alpha; ?>), rgba(21, 46, 30, <?php echo $login_bg_alpha; ?>)), url('<?php echo $login_bg_url; ?>');
+            /* Layered scrims: a vignette behind the centered copy + a deeper
+               bottom fade for the footer line, over the user's flat dimmer */
+            background-image:
+                radial-gradient(ellipse 75% 60% at 50% 48%, rgba(10, 22, 15, 0.55) 0%, rgba(10, 22, 15, 0) 75%),
+                linear-gradient(to top, rgba(10, 22, 15, 0.8) 0%, rgba(10, 22, 15, 0) 35%),
+                linear-gradient(rgba(21, 46, 30, <?php echo $login_bg_alpha; ?>), rgba(21, 46, 30, <?php echo $login_bg_alpha; ?>)),
+                url('<?php echo $login_bg_url; ?>');
             background-color: <?php echo $login_bg_color; ?>;
             background-size: cover;
             background-position: center;
@@ -264,6 +273,13 @@ if ($login_help_url === '' || stripos($login_help_url, 'javascript:') === 0 || s
         }
         .form-input:hover:not(:focus) {
             border-color: #c0ccc5;
+        }
+
+        /* Text over a photo needs a shadow to stay readable on bright areas */
+        .brand-panel.has-image h1,
+        .brand-panel.has-image p,
+        .brand-panel.has-image i {
+            text-shadow: 0 1px 14px rgba(0, 0, 0, 0.45);
         }
 
         /* Fade-in animations */
@@ -301,9 +317,11 @@ if ($login_help_url === '' || stripos($login_help_url, 'javascript:') === 0 || s
     <div class="flex min-h-screen">
 
         <!-- Left brand panel (desktop only) -->
-        <div class="brand-panel hidden lg:flex w-[62%] xl:w-[66%] relative flex-col items-center justify-center p-12 xl:p-16 text-white overflow-hidden">
-            <!-- Soft ambient glow behind the content -->
-            <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(ellipse 55% 45% at 50% 42%, rgba(255, 255, 255, 0.08), transparent 70%);"></div>
+        <div class="brand-panel <?php echo $login_bg_enabled ? 'has-image' : ''; ?> hidden lg:flex w-[62%] xl:w-[66%] relative flex-col items-center justify-center p-12 xl:p-16 text-white overflow-hidden">
+            <?php if (!$login_bg_enabled): ?>
+                <!-- Soft ambient glow behind the content (gradient mode only — scrims handle image mode) -->
+                <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(ellipse 55% 45% at 50% 42%, rgba(255, 255, 255, 0.08), transparent 70%);"></div>
+            <?php endif; ?>
 
             <!-- Centered content block -->
             <div class="relative z-10 max-w-lg text-center">
@@ -318,27 +336,33 @@ if ($login_help_url === '' || stripos($login_help_url, 'javascript:') === 0 || s
                 <h1 class="mt-5 text-4xl xl:text-5xl font-semibold leading-[1.15] fade-in fade-in-delay-2">
                     <?php echo htmlspecialchars($L['login_brand_title']); ?><br><span style="color: <?php echo $login_accent; ?>"><?php echo htmlspecialchars($L['login_brand_title_accent']); ?></span>
                 </h1>
-                <?php if (trim($L['login_brand_description']) !== ''): ?>
-                    <p class="mt-5 mx-auto text-sm xl:text-base font-light text-white/60 leading-relaxed max-w-md fade-in fade-in-delay-3"><?php echo htmlspecialchars($L['login_brand_description']); ?></p>
-                <?php endif; ?>
                 <?php
                 $pills = [];
                 for ($i = 1; $i <= 3; $i++) {
                     $pill_text = trim($L["login_pill_{$i}_text"]);
                     if ($pill_text === '') continue;
                     $pill_icon = preg_match('/^fa[a-z0-9-]+$/', $L["login_pill_{$i}_icon"]) ? $L["login_pill_{$i}_icon"] : 'fa-circle';
-                    $pills[] = [$pill_icon, $pill_text];
+                    $pills[] = [$pill_icon, $pill_text, trim($L["login_pill_{$i}_desc"])];
                 }
                 ?>
+                <?php if (trim($L['login_brand_description']) !== ''): ?>
+                    <p class="mt-5 mx-auto text-sm xl:text-base font-light text-white/60 leading-relaxed max-w-md fade-in fade-in-delay-3"><?php echo htmlspecialchars($L['login_brand_description']); ?></p>
+                <?php endif; ?>
                 <?php if (!empty($pills)): ?>
-                    <div class="mt-9 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-white/60 fade-in fade-in-delay-4">
-                        <?php foreach ($pills as $idx => $pill): ?>
-                            <?php if ($idx > 0): ?><span class="w-1 h-1 rounded-full bg-white/25"></span><?php endif; ?>
-                            <span class="inline-flex items-center gap-2 font-medium tracking-wide">
-                                <i class="fas <?php echo $pill[0]; ?> text-[10px]" style="color: <?php echo $login_accent; ?>"></i>
-                                <?php echo htmlspecialchars($pill[1]); ?>
-                            </span>
-                        <?php endforeach; ?>
+                    <div class="mt-8 mx-auto max-w-xl rounded-2xl border border-white/15 bg-white/[0.06] px-6 sm:px-8 py-5 backdrop-blur-sm shadow-lg shadow-black/10 fade-in fade-in-delay-3">
+                        <div class="grid grid-flow-col auto-cols-fr divide-x divide-white/15">
+                            <?php foreach ($pills as $pill): ?>
+                                <div class="px-4 first:pl-0 last:pr-0">
+                                    <span class="mx-auto w-10 h-10 rounded-full flex items-center justify-center" style="background-color: <?php echo $login_accent; ?>26; color: <?php echo $login_accent; ?>;">
+                                        <i class="fas <?php echo $pill[0]; ?> text-sm"></i>
+                                    </span>
+                                    <p class="mt-2.5 text-xs font-semibold text-white/90"><?php echo htmlspecialchars($pill[1]); ?></p>
+                                    <?php if ($pill[2] !== ''): ?>
+                                        <p class="mt-1 text-[11px] font-light text-white/55 leading-relaxed"><?php echo htmlspecialchars($pill[2]); ?></p>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
                     </div>
                 <?php endif; ?>
 
