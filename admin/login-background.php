@@ -817,26 +817,13 @@ $view_url = 'login.php';
     wireLogoUpload('logo-alt-file-input', 'login_logo_alt', 'logo-alt-preview', 'logo-alt-upload-status');
 
     function validateImageUpload() {
-        const urlInput = document.getElementById('image-url-input');
-        const enabled = document.getElementById('login_bg_enabled').checked;
-        // Saving with the feature off is always fine — no image needed
-        if (!enabled) { return true; }
-        if (imageMode === 'url') {
-            if (!urlInput.value.trim()) { alert('Please enter an image URL, or turn off "Use background image".'); return false; }
-            return true;
+        // Only hard-block while an upload is in flight. A failed, missing, or
+        // empty image is safe to save — login.php falls back to the gradient,
+        // and the warning banner flags any stored path that doesn't resolve.
+        if (uploadState === 'uploading') {
+            alert('Please wait for the image upload to finish before saving.');
+            return false;
         }
-        if (uploadState === 'uploading') { alert('Please wait for the image upload to finish before saving.'); return false; }
-        if (selectedFile && uploadState === 'failed') {
-            // A failed upload must not block saving the rest of the settings —
-            // if an image was already saved before, keep it and continue.
-            if (urlInput.value.trim()) {
-                if (!confirm('The new image failed to upload. Save the other settings and keep the current background image?')) { return false; }
-            } else {
-                alert('The image upload failed. Please try again, pick a smaller file, or turn off "Use background image" to save without one.');
-                return false;
-            }
-        }
-        if (!urlInput.value.trim()) { alert('Please choose and upload an image file first, or turn off "Use background image".'); return false; }
         return true;
     }
 
