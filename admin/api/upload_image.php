@@ -64,6 +64,17 @@ if (move_uploaded_file($file_tmp, $upload_path)) {
     ]);
 } else {
     http_response_code(500);
-    echo json_encode(['success' => false, 'error' => 'Failed to save file']);
+    // Log the real reason — move_uploaded_file() failures are otherwise silent
+    // (common causes: AV locking the temp file, permissions, disk full).
+    $last = error_get_last();
+    error_log(sprintf(
+        'upload_image.php: move_uploaded_file failed (%s) tmp_exists=%s dir_writable=%s dest=%s',
+        $last['message'] ?? 'no PHP error',
+        var_export(is_uploaded_file($file_tmp), true),
+        var_export(is_writable(UPLOAD_DIR . 'images/'), true),
+        $upload_path
+    ));
+    $hint = is_writable(UPLOAD_DIR . 'images/') ? '' : ' — the uploads/images folder is not writable';
+    echo json_encode(['success' => false, 'error' => 'Failed to save file' . $hint]);
 }
 
