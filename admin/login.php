@@ -283,25 +283,25 @@ if ($login_help_url === '' || stripos($login_help_url, 'javascript:') === 0 || s
     <div class="flex min-h-screen">
 
         <!-- Left brand panel (desktop only) -->
-        <div class="brand-panel hidden lg:flex w-[62%] xl:w-[66%] relative flex-col justify-between p-12 xl:p-16 text-white overflow-hidden">
-            <!-- Top-left header: logo mark + brand line -->
-            <div class="relative z-10 flex items-center gap-4 fade-in fade-in-delay-1">
-                <div class="w-12 h-12 rounded-full bg-white/95 flex items-center justify-center shadow-lg ring-2 ring-white/15 shrink-0">
-                    <img src="<?php echo htmlspecialchars($login_logo); ?>" alt="Logo" class="w-8 h-8 object-contain">
-                </div>
-                <p class="text-sm font-semibold tracking-wide text-white/90"><?php echo htmlspecialchars($L['login_brand_line']); ?></p>
-            </div>
+        <div class="brand-panel hidden lg:flex w-[62%] xl:w-[66%] relative flex-col items-center justify-center p-12 xl:p-16 text-white overflow-hidden">
+            <!-- Soft ambient glow behind the content -->
+            <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(ellipse 55% 45% at 50% 42%, rgba(255, 255, 255, 0.08), transparent 70%);"></div>
 
-            <!-- Bottom-left anchored content block -->
-            <div class="relative z-10 max-w-2xl">
+            <!-- Centered content block -->
+            <div class="relative z-10 max-w-lg text-center">
+                <div class="w-14 h-14 mx-auto rounded-full bg-white/95 flex items-center justify-center shadow-xl ring-1 ring-white/20 fade-in fade-in-delay-1">
+                    <img src="<?php echo htmlspecialchars($login_logo); ?>" alt="Logo" class="w-9 h-9 object-contain">
+                </div>
+                <p class="mt-4 text-xs font-medium tracking-[0.15em] text-white/70 fade-in fade-in-delay-1"><?php echo htmlspecialchars($L['login_brand_line']); ?></p>
+
                 <?php if (trim($L['login_brand_eyebrow']) !== ''): ?>
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.25em] text-[#9fd4a8] fade-in fade-in-delay-2"><?php echo htmlspecialchars($L['login_brand_eyebrow']); ?></p>
+                    <p class="mt-14 text-[11px] font-medium uppercase tracking-[0.3em] text-[#9fd4a8] fade-in fade-in-delay-2"><?php echo htmlspecialchars($L['login_brand_eyebrow']); ?></p>
                 <?php endif; ?>
-                <h1 class="mt-4 text-4xl xl:text-6xl font-bold leading-tight fade-in fade-in-delay-2">
+                <h1 class="mt-5 text-4xl xl:text-5xl font-semibold leading-[1.15] fade-in fade-in-delay-2">
                     <?php echo htmlspecialchars($L['login_brand_title']); ?><br><span style="color: <?php echo $login_accent; ?>"><?php echo htmlspecialchars($L['login_brand_title_accent']); ?></span>
                 </h1>
                 <?php if (trim($L['login_brand_description']) !== ''): ?>
-                    <p class="mt-5 text-sm xl:text-base text-white/75 leading-relaxed max-w-md fade-in fade-in-delay-3"><?php echo htmlspecialchars($L['login_brand_description']); ?></p>
+                    <p class="mt-5 mx-auto text-sm xl:text-base font-light text-white/60 leading-relaxed max-w-md fade-in fade-in-delay-3"><?php echo htmlspecialchars($L['login_brand_description']); ?></p>
                 <?php endif; ?>
                 <?php
                 $pills = [];
@@ -313,24 +313,28 @@ if ($login_help_url === '' || stripos($login_help_url, 'javascript:') === 0 || s
                 }
                 ?>
                 <?php if (!empty($pills)): ?>
-                    <div class="mt-8 flex flex-wrap items-center gap-3 fade-in fade-in-delay-4">
-                        <?php foreach ($pills as $pill): ?>
-                            <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/25 bg-white/10 text-xs font-medium">
-                                <i class="fas <?php echo $pill[0]; ?>" style="color: <?php echo $login_accent; ?>"></i> <?php echo htmlspecialchars($pill[1]); ?>
+                    <div class="mt-9 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-white/60 fade-in fade-in-delay-4">
+                        <?php foreach ($pills as $idx => $pill): ?>
+                            <?php if ($idx > 0): ?><span class="w-1 h-1 rounded-full bg-white/25"></span><?php endif; ?>
+                            <span class="inline-flex items-center gap-2 font-medium tracking-wide">
+                                <i class="fas <?php echo $pill[0]; ?> text-[10px]" style="color: <?php echo $login_accent; ?>"></i>
+                                <?php echo htmlspecialchars($pill[1]); ?>
                             </span>
                         <?php endforeach; ?>
                     </div>
                 <?php endif; ?>
 
-                <div class="mt-10 pt-6 border-t border-white/15 fade-in fade-in-delay-4">
-                    <?php if (trim($L['login_brand_quote']) !== ''): ?>
-                        <p class="text-sm italic text-white/60 border-l-2 pl-4" style="border-color: <?php echo $login_accent; ?>">&ldquo;<?php echo htmlspecialchars($L['login_brand_quote']); ?>&rdquo;</p>
-                    <?php endif; ?>
-                    <?php if (trim($L['login_brand_footer']) !== ''): ?>
-                        <p class="mt-3 text-xs text-white/50"><?php echo htmlspecialchars($L['login_brand_footer']); ?></p>
-                    <?php endif; ?>
-                </div>
+                <?php if (trim($L['login_brand_quote']) !== ''): ?>
+                    <div class="mt-12 fade-in fade-in-delay-4">
+                        <span class="block w-8 h-px mx-auto" style="background-color: <?php echo $login_accent; ?>"></span>
+                        <p class="mt-4 text-sm font-light italic text-white/50">&ldquo;<?php echo htmlspecialchars($L['login_brand_quote']); ?>&rdquo;</p>
+                    </div>
+                <?php endif; ?>
             </div>
+
+            <?php if (trim($L['login_brand_footer']) !== ''): ?>
+                <p class="absolute bottom-6 inset-x-0 z-10 text-center text-[11px] font-light tracking-wide text-white/35"><?php echo htmlspecialchars($L['login_brand_footer']); ?></p>
+            <?php endif; ?>
         </div>
 
         <!-- Right form panel -->
