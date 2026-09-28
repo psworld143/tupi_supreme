@@ -75,7 +75,7 @@ jobs:
           ssh -p "${{ secrets.SSH_PORT }}" \
             "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
             "mkdir -p '${{ secrets.DEPLOY_PATH }}/uploads/images' '${{ secrets.DEPLOY_PATH }}/uploads/documents' '${{ secrets.DEPLOY_PATH }}/sessions' \
-             && chmod -R 0775 '${{ secrets.DEPLOY_PATH }}/uploads' '${{ secrets.DEPLOY_PATH }}/sessions' \
+             && chmod -R 0777 '${{ secrets.DEPLOY_PATH }}/uploads' '${{ secrets.DEPLOY_PATH }}/sessions' \
              && echo OK"
 
       - name: Verify PHP parses on server
