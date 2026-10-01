@@ -398,7 +398,7 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
                             <a href="resources.php" class="bg-[#23332c] hover:bg-[#3a4a41] text-white font-medium py-3 px-7 rounded-full transition-colors text-center inline-flex items-center justify-center gap-2">
                                 <i class="fas fa-download text-xs"></i>Download Technical Data Sheet
                             </a>
-                            <a href="contact.php" class="border border-[#d6ded9] text-[#23332c] hover:bg-[#eff4f1] font-medium py-3 px-7 rounded-full transition-colors text-center inline-flex items-center justify-center gap-2">
+                            <a href="contact.php?product=<?php echo urlencode($gac_product['name'] ?? 'Granulated Activated Carbon'); ?>#contact-form" class="border border-[#d6ded9] text-[#23332c] hover:bg-[#eff4f1] font-medium py-3 px-7 rounded-full transition-colors text-center inline-flex items-center justify-center gap-2">
                                 <i class="fas fa-quote-left text-xs"></i>Request Quote
                             </a>
                         </div>
@@ -435,7 +435,12 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
                                             <?php if ($index === 0 && stripos($application, 'municipal') !== false): ?>
                                                 <span class="eyebrow mb-4">Primary Application</span>
                                             <?php endif; ?>
-                                            <a href="contact.php" class="inline-flex items-center gap-2 border border-[#d6ded9] text-[#23332c] hover:bg-[#23332c] hover:text-white hover:border-[#23332c] font-medium py-2.5 px-5 rounded-full transition-colors text-sm mt-4">Learn More <i class="fas fa-arrow-right text-xs"></i></a>
+                                            <?php
+                                            $learn_subject = (stripos($application, 'municipal') !== false || stripos($application, 'water') !== false)
+                                                ? 'Municipal Water Treatment Inquiry'
+                                                : 'Product Information';
+                                            ?>
+                                            <a href="contact.php?topic=<?php echo urlencode(ucwords($application)); ?>&subject=<?php echo urlencode($learn_subject); ?>#contact-form" class="inline-flex items-center gap-2 border border-[#d6ded9] text-[#23332c] hover:bg-[#23332c] hover:text-white hover:border-[#23332c] font-medium py-2.5 px-5 rounded-full transition-colors text-sm mt-4">Learn More <i class="fas fa-arrow-right text-xs"></i></a>
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
@@ -546,7 +551,7 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
                                 <?php endif; ?>
 
                                 <div class="flex flex-col gap-3 mt-6">
-                                    <a href="contact.php" class="bg-[#23332c] hover:bg-[#3a4a41] text-white font-medium py-3 px-7 rounded-full transition-colors text-center inline-flex items-center justify-center gap-2">
+                                    <a href="contact.php?product=<?php echo urlencode($product['name']); ?>#contact-form" class="bg-[#23332c] hover:bg-[#3a4a41] text-white font-medium py-3 px-7 rounded-full transition-colors text-center inline-flex items-center justify-center gap-2">
                                         <i class="fas fa-quote-left text-xs"></i>Request Quote
                                     </a>
                                     <a href="resources.php" class="border border-[#d6ded9] text-[#23332c] hover:bg-[#eff4f1] font-medium py-2.5 px-6 rounded-full transition-colors text-center inline-flex items-center justify-center gap-2 text-sm">
@@ -678,7 +683,7 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
                                             </ul>
                                         <?php endif; ?>
                                         <div class="mt-auto pt-4">
-                                            <a href="contact.php" class="inline-flex items-center gap-2 bg-[#23332c] hover:bg-[#3a4a41] text-white font-medium py-2.5 px-5 rounded-full transition-colors text-sm">
+                                            <a href="contact.php?product=<?php echo urlencode($product['name']); ?>#contact-form" class="inline-flex items-center gap-2 bg-[#23332c] hover:bg-[#3a4a41] text-white font-medium py-2.5 px-5 rounded-full transition-colors text-sm">
                                                 <i class="fas fa-quote-left text-xs"></i>Request Quote
                                             </a>
                                         </div>
@@ -763,7 +768,7 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
                                     </div>
                                 <?php endif; ?>
                                 <div class="mt-auto pt-4">
-                                    <a href="contact.php" class="inline-flex items-center gap-2 bg-[#23332c] hover:bg-[#3a4a41] text-white font-medium py-2.5 px-5 rounded-full transition-colors text-sm">
+                                    <a href="contact.php?product=<?php echo urlencode($product['name']); ?>#contact-form" class="inline-flex items-center gap-2 bg-[#23332c] hover:bg-[#3a4a41] text-white font-medium py-2.5 px-5 rounded-full transition-colors text-sm">
                                         <i class="fas fa-quote-left text-xs"></i>Request Quote
                                     </a>
                                 </div>

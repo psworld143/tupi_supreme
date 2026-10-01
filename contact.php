@@ -112,6 +112,26 @@ $contact_emails = getContactInfo('email');
 $office_hours = getOfficeHours();
 $contact_faqs = getFAQs(5); // Get first 5 FAQs for contact page
 $subject_options = getContactSubjectOptions(); // Get contact form subject options
+
+// Pre-fill the form when arriving via a "Request Quote"/"Learn More" link
+// (?product=..., ?topic=..., optional &subject=... validated against the options)
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    $available_subjects = array_column($subject_options, 'option_text');
+    $pre_subject = trim((string)($_GET['subject'] ?? ''));
+    if ($pre_subject !== '' && in_array($pre_subject, $available_subjects, true)) {
+        $subject = $pre_subject;
+    }
+    $quote_product = trim((string)($_GET['product'] ?? ''));
+    $topic = trim((string)($_GET['topic'] ?? ''));
+    if ($quote_product !== '') {
+        $message_text = "Hello, I would like to request a quote for {$quote_product}.";
+        if (!isset($subject) && in_array('Request Quote', $available_subjects, true)) {
+            $subject = 'Request Quote';
+        }
+    } elseif ($topic !== '') {
+        $message_text = "Hello, I would like to learn more about {$topic}.";
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
