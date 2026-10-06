@@ -56,12 +56,13 @@ jobs:
             -e "ssh -p ${{ secrets.SSH_PORT }}" \
             --exclude '.git/' \
             --exclude '.github/' \
+            --exclude '.devin/' \
             --exclude '.DS_Store' \
             --exclude '*.sql' \
             --exclude '*.zip' \
             --exclude 'documentation_backup/' \
-            --exclude 'tsaci/documentation_backup/' \
-            --exclude 'tsaci/database/' \
+            --exclude 'database/' \
+            --exclude 'upload_diag.php' \
             --exclude 'config.php' \
             --exclude 'db_credentials.php' \
             --exclude 'mail_config.php' \
@@ -82,7 +83,7 @@ jobs:
         run: |
           ssh -p "${{ secrets.SSH_PORT }}" \
             "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
-            "find '${{ secrets.DEPLOY_PATH }}/tsaci' -maxdepth 1 -name '*.php' -exec php -l {} \; >/dev/null && echo OK"
+            "find '${{ secrets.DEPLOY_PATH }}' -maxdepth 1 -name '*.php' -exec php -l {} \; >/dev/null && echo OK"
 
 # Notes on the rsync flags:
 #   --delete              Removes files on the server that were deleted from the repo,
