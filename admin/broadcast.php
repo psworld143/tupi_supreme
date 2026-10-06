@@ -276,7 +276,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </thead>
                         <tbody>
                             <?php foreach ($recipients as $r): ?>
-                                <tr class="border-b border-zinc-50 hover:bg-zinc-50/60 transition-colors cursor-pointer" onclick="if (event.target.type !== 'checkbox') { var cb = this.querySelector('.bc-check'); cb.checked = !cb.checked; } updateSelected();">
+                                <tr class="border-b border-zinc-50 hover:bg-zinc-50/60 transition-colors cursor-pointer" onclick="if (event.target.type !== 'checkbox') { var cb = this.querySelector('.bc-check'); cb.checked = !cb.checked; cb.dispatchEvent(new Event('change', { bubbles: true })); }">
                                     <td class="px-5 py-3">
                                         <input type="checkbox" class="bc-check w-4 h-4 accent-[#2c5530] align-middle"
                                                name="recipients[]" value="<?php echo htmlspecialchars($r['email']); ?>"

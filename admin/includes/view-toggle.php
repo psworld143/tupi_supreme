@@ -534,16 +534,26 @@ if (!defined('ADMIN_ACCESS')) {
                 }
             );
 
-            // Leading grip + selection-checkbox columns (header = select all)
+            // Leading grip + selection-checkbox columns (header = select all).
+            // Tables that already ship their own selection column (a checkbox
+            // in thead — e.g. broadcast recipients, bulk-select pages) get
+            // theirs adopted instead of a second checkbox column.
             var headRow = table.querySelector('thead tr');
+            var ownCheckAll = headRow ? headRow.querySelector('input[type="checkbox"]') : null;
             if (headRow) {
-                var th = document.createElement('th');
-                th.className = 'lv-check';
-                th.innerHTML = '<input type="checkbox" class="lv-check-all" aria-label="Select all rows">';
-                headRow.insertBefore(th, headRow.firstChild);
                 var thGrip = document.createElement('th');
                 thGrip.className = 'lv-grip';
-                headRow.insertBefore(thGrip, th);
+                if (ownCheckAll) {
+                    ownCheckAll.classList.add('lv-check-all');
+                    ownCheckAll.closest('th').classList.add('lv-check');
+                    headRow.insertBefore(thGrip, headRow.firstChild);
+                } else {
+                    var th = document.createElement('th');
+                    th.className = 'lv-check';
+                    th.innerHTML = '<input type="checkbox" class="lv-check-all" aria-label="Select all rows">';
+                    headRow.insertBefore(th, headRow.firstChild);
+                    headRow.insertBefore(thGrip, th);
+                }
             }
 
             table.querySelectorAll('tbody tr').forEach(function (tr) {
@@ -551,21 +561,30 @@ if (!defined('ADMIN_ACCESS')) {
                 var isEmptyRow = cells.length === 1 && cells[0].hasAttribute('colspan');
 
                 // Checkbox + grip cells first
-                var checkTd = document.createElement('td');
-                checkTd.className = 'lv-check';
-                checkTd.setAttribute('data-label', '');
                 var gripTd = document.createElement('td');
                 gripTd.className = 'lv-grip';
                 gripTd.setAttribute('data-label', '');
+                var checkTd = null;
+                if (ownCheckAll) {
+                    var ownCheck = tr.querySelector('td input[type="checkbox"]');
+                    if (ownCheck) {
+                        ownCheck.classList.add('lv-row-check');
+                        ownCheck.closest('td').classList.add('lv-check');
+                    }
+                } else {
+                    checkTd = document.createElement('td');
+                    checkTd.className = 'lv-check';
+                    checkTd.setAttribute('data-label', '');
+                }
                 if (isEmptyRow) {
-                    checkTd.style.display = 'none';
+                    if (checkTd) checkTd.style.display = 'none';
                     gripTd.style.display = 'none';
                 } else {
-                    checkTd.innerHTML = '<input type="checkbox" class="lv-row-check" aria-label="Select row">';
+                    if (checkTd) checkTd.innerHTML = '<input type="checkbox" class="lv-row-check" aria-label="Select row">';
                     gripTd.innerHTML = '<i class="fas fa-grip-vertical"></i>';
                 }
-                tr.insertBefore(checkTd, tr.firstChild);
-                tr.insertBefore(gripTd, checkTd);
+                if (checkTd) tr.insertBefore(checkTd, tr.firstChild);
+                tr.insertBefore(gripTd, tr.firstChild);
 
                 var first = true;
                 cells.forEach(function (td, i) {
@@ -576,6 +595,7 @@ if (!defined('ADMIN_ACCESS')) {
                     }
                     var label = headers[i] || '';
                     td.setAttribute('data-label', label);
+                    if (td.classList.contains('lv-check')) return;
                     if (first) {
                         td.classList.add('lv-title');
                         first = false;
@@ -728,7 +748,12 @@ if (!defined('ADMIN_ACCESS')) {
                 if (e.target.classList.contains('lv-row-check')) updateSelection();
             });
             clearBtn.addEventListener('click', function () {
-                table.querySelectorAll('.lv-row-check:checked').forEach(function (c) { c.checked = false; });
+                table.querySelectorAll('.lv-row-check:checked').forEach(function (c) {
+                    c.checked = false;
+                    // Fire change so pages using their own checkboxes (e.g.
+                    // broadcast) refresh their selection counters too.
+                    c.dispatchEvent(new Event('change', { bubbles: true }));
+                });
                 updateSelection();
             });
 

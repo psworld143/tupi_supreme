@@ -1273,7 +1273,10 @@ $show_missing = ($_GET['show_missing'] ?? '0') === '1';
                 count.classList.toggle('hidden', !active);
                 if (!active) {
                     // Leaving select mode — clear all checks
-                    document.querySelectorAll('input.row-check').forEach(function (cb) { cb.checked = false; });
+                    document.querySelectorAll('input.row-check').forEach(function (cb) {
+                        cb.checked = false;
+                        cb.dispatchEvent(new Event('change', { bubbles: true }));
+                    });
                     var selectAll = document.getElementById('select_all');
                     if (selectAll) selectAll.checked = false;
                 }
