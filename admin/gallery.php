@@ -641,7 +641,7 @@ $view_url = '../gallery.php#gallery-grid';
                     </form>
                 </div>
 
-                <div class="overflow-auto" style="max-height: 55vh;">
+                <div class="overflow-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50 sticky top-0">
                         <tr>
