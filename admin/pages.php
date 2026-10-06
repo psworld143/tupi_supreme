@@ -241,7 +241,7 @@ $known_section_names = [
     ],
     // 'about' reads from the about_content table (managed in about.php), not page_content.
     'certifications' => [
-        'page_header_title', 'page_header_subtitle',
+        'page_header_title', 'page_header_subtitle', 'page_header_image',
         'iso_title', 'iso_subtitle',
         'product_certs_title', 'product_certs_subtitle',
         'quality_title', 'quality_subtitle',
@@ -251,7 +251,7 @@ $known_section_names = [
         'cta_button_2_text', 'cta_button_2_link', 'meta_description',
     ],
     'products' => [
-        'page_header_title', 'page_header_subtitle', 'section_title', 'section_subtitle',
+        'page_header_title', 'page_header_subtitle', 'page_header_image', 'section_title', 'section_subtitle',
         'tab_granulated_label', 'tab_husk_label', 'tab_custom_label',
         'specifications_title', 'specifications_subtitle', 'applications_title', 'applications_subtitle',
         'all_products_title', 'all_products_subtitle',
@@ -261,22 +261,22 @@ $known_section_names = [
         'cta_button_2_text', 'cta_button_2_link',
     ],
     'services' => [
-        'page_header_title', 'page_header_subtitle', 'section_title', 'section_subtitle',
+        'page_header_title', 'page_header_subtitle', 'page_header_image', 'section_title', 'section_subtitle',
         'process_title', 'process_subtitle', 'features_title', 'features_subtitle',
         'testimonials_title', 'testimonials_subtitle',
         'cta_title', 'cta_description', 'cta_button_1_text', 'cta_button_1_link',
         'cta_button_2_text', 'cta_button_2_link',
     ],
     'case-studies' => [
-        'page_header_title', 'page_header_subtitle', 'section_title', 'section_subtitle',
+        'page_header_title', 'page_header_subtitle', 'page_header_image', 'section_title', 'section_subtitle',
         'cta_title', 'cta_description', 'cta_button_1_text', 'cta_button_1_link',
         'cta_button_2_text', 'cta_button_2_link',
     ],
     'gallery' => [
-        'page_header_title', 'page_header_subtitle',
+        'page_header_title', 'page_header_subtitle', 'page_header_image',
     ],
     'resources' => [
-        'page_header_title', 'page_header_subtitle', 'data_sheets_title', 'data_sheets_subtitle',
+        'page_header_title', 'page_header_subtitle', 'page_header_image', 'data_sheets_title', 'data_sheets_subtitle',
         'catalogs_title', 'catalogs_subtitle', 'guides_title', 'guides_subtitle',
         'other_title', 'other_subtitle', 'faqs_title', 'faqs_subtitle',
         'download_button_text', 'download_guide_text',
@@ -284,7 +284,7 @@ $known_section_names = [
         'cta_button_2_text', 'cta_button_2_link', 'meta_description',
     ],
     'contact' => [
-        'page_header_title', 'page_header_subtitle', 'contact_section_title', 'contact_section_subtitle',
+        'page_header_title', 'page_header_subtitle', 'page_header_image', 'contact_section_title', 'contact_section_subtitle',
         'form_title', 'form_subtitle', 'map_title', 'map_subtitle', 'map_embed_url',
         'office_hours_title', 'office_hours_subtitle', 'faqs_title', 'faqs_subtitle',
         'timezone_note', 'meta_description',
@@ -299,6 +299,7 @@ $section_descriptions = [
     // Generic prefixes
     'page_header_title'    => 'The large heading at the top of the page.',
     'page_header_subtitle' => 'The subtitle text below the page header heading.',
+    'page_header_image'    => 'Optional background photo shown behind the page header. Set Content Type to "Image URL". The title/subtitle stay readable on a dark overlay.',
     'section_title'        => 'The main section heading on the page.',
     'section_subtitle'    => 'The subtitle below the main section heading.',
     'meta_description'     => 'The SEO meta description (used by search engines, not shown on the page). Only read on the Resources and Contact pages — the homepage uses Site Settings instead.',
@@ -541,17 +542,16 @@ $show_missing = ($_GET['show_missing'] ?? '0') === '1';
 
     <style>
         @media (min-width: 1024px) {
-            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #d2dcd5 transparent; }
+            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #e4e4e7 transparent; }
             .lg\:ml-64::-webkit-scrollbar { width: 8px; }
             .lg\:ml-64::-webkit-scrollbar-track { background: transparent; }
-            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #d2dcd5; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
-            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #c0ccc5; }
+            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #e4e4e7; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
+            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #d4d4d8; }
         }
     </style>
 
     <!-- Main Content -->
     <div class="relative lg:ml-64 p-4 lg:p-8">
-        <?php $logo_pulse_logo = '../uploads/images/tupi_supreme_logo.png'; $logo_pulse_mode = 'absolute'; include '../includes/logo_pulse_loader.php'; ?>
 
         <!-- Page Header -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-6">

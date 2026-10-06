@@ -185,11 +185,11 @@ $view_url = '../contact.php#office-hours';
 
     <style>
         @media (min-width: 1024px) {
-            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #d2dcd5 transparent; }
+            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #e4e4e7 transparent; }
             .lg\:ml-64::-webkit-scrollbar { width: 8px; }
             .lg\:ml-64::-webkit-scrollbar-track { background: transparent; }
-            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #d2dcd5; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
-            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #c0ccc5; }
+            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #e4e4e7; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
+            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #d4d4d8; }
         }
         .quick-pick { padding: 3px 8px; font-size: 11px; border: 1px solid #d1d5db; background: #fff; border-radius: 4px; cursor: pointer; color: #4b5563; }
         .quick-pick:hover { background: #f3f4f6; border-color: #9ca3af; }
@@ -197,7 +197,6 @@ $view_url = '../contact.php#office-hours';
 
     <!-- Main Content -->
     <div class="relative lg:ml-64 p-4 lg:p-8">
-        <?php $logo_pulse_logo = '../uploads/images/tupi_supreme_logo.png'; $logo_pulse_mode = 'absolute'; include '../includes/logo_pulse_loader.php'; ?>
 
         <!-- Page Header -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -329,15 +328,15 @@ $view_url = '../contact.php#office-hours';
                             <i class="fas fa-eye text-gray-400"></i> Live Preview
                             <span class="text-xs text-gray-400 font-normal">(hours card row)</span>
                         </p>
-                        <div class="bg-white border border-[#e6ece8] rounded-2xl p-8">
+                        <div class="bg-white border border-[#e4e4e7] rounded-2xl p-8">
                             <div class="text-center mb-6">
-                                <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto bg-[#eef3f0]">
-                                    <i class="fas fa-clock text-2xl text-[#3d7a66]"></i>
+                                <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto bg-[#f4f4f5]">
+                                    <i class="fas fa-clock text-2xl text-[#18181b]"></i>
                                 </div>
                             </div>
-                            <div class="flex items-center justify-between" style="padding: 12px 0; border-bottom: 1px solid #e6ece8;">
-                                <span id="preview_day" class="font-medium text-[#23332c] text-sm"><?php echo htmlspecialchars($edit_hours['day_label'] ?? 'Day label'); ?></span>
-                                <span id="preview_hours" class="text-[#7d8b84] text-sm"><?php echo htmlspecialchars($edit_hours['hours'] ?? 'Hours'); ?></span>
+                            <div class="flex items-center justify-between" style="padding: 12px 0; border-bottom: 1px solid #e4e4e7;">
+                                <span id="preview_day" class="font-medium text-[#18181b] text-sm"><?php echo htmlspecialchars($edit_hours['day_label'] ?? 'Day label'); ?></span>
+                                <span id="preview_hours" class="text-[#71717a] text-sm"><?php echo htmlspecialchars($edit_hours['hours'] ?? 'Hours'); ?></span>
                             </div>
                         </div>
                         <p class="text-xs text-gray-400 mt-2">The preview mirrors one row of the office hours card on the public Contact page.</p>
@@ -464,14 +463,6 @@ $view_url = '../contact.php#office-hours';
                     'base_query'    => $_GET,
                 ]);
                 ?>
-            </div>
-
-            <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 class="font-semibold text-blue-900 mb-2">Quick Links</h3>
-                <ul class="text-sm text-blue-800 space-y-1">
-                    <li><a href="<?php echo $view_url; ?>" target="_blank" class="hover:underline"><i class="fas fa-external-link-alt mr-1"></i>View Office Hours on Contact Page</a></li>
-                    <li><a href="index.php" class="hover:underline"><i class="fas fa-home mr-1"></i>Back to Admin Dashboard</a></li>
-                </ul>
             </div>
         <?php endif; ?>
     </div>

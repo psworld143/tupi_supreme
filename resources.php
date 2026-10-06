@@ -1,10 +1,17 @@
 <?php
 require_once 'includes/config.php';
+
+if (!isModuleEnabled('page_resources')) {
+    header('Location: index.php');
+    exit;
+}
+
 $current_page = 'resources';
 
 // Get dynamic content
 $page_header_title = getPageContent('resources', 'page_header_title', 'Resources & Documentation');
 $page_header_subtitle = getPageContent('resources', 'page_header_subtitle', 'Download technical data sheets, product specifications, and application guides');
+$page_header_image = getPageHeaderImage('resources');
 $data_sheets_title = getPageContent('resources', 'data_sheets_title', 'Technical Data Sheets');
 $data_sheets_subtitle = getPageContent('resources', 'data_sheets_subtitle', 'Comprehensive technical specifications for our activated carbon products');
 $catalogs_title = getPageContent('resources', 'catalogs_title', 'Product Catalogs');
@@ -215,7 +222,10 @@ $faqs = getFAQs();
     <?php include 'includes/navbar.php'; ?>
 
     <!-- Page Header -->
-    <section id="page-header" class="page-header-gradient text-white relative overflow-hidden pt-24 pb-20">
+    <section id="page-header" class="page-header-gradient text-white relative overflow-hidden pt-24 pb-20"<?php if (!empty($page_header_image)) echo ' style="background-image: url(\'' . htmlspecialchars($page_header_image, ENT_QUOTES) . '\'); background-size: cover; background-position: center;"'; ?>>
+        <?php if (!empty($page_header_image)): ?>
+        <div class="absolute inset-0" style="background-color: rgba(12, 25, 14, 0.72);"></div>
+        <?php endif; ?>
         <div class="page-header-pattern absolute inset-0 opacity-30"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="text-center">
@@ -463,7 +473,7 @@ $faqs = getFAQs();
                     <?php endforeach; ?>
                 </div>
                 <p class="text-center text-white/60 text-sm mt-10 reveal">
-                    Still have questions? <a href="contact.php" class="text-[#8bc34a] font-medium hover:underline">Contact our team</a>
+                    <?php if (isModuleEnabled('page_contact')): ?>Still have questions? <a href="contact.php" class="text-[#8bc34a] font-medium hover:underline">Contact our team</a><?php endif; ?>
                 </p>
             <?php else: ?>
                 <div class="text-center py-12 reveal">
@@ -487,13 +497,13 @@ $faqs = getFAQs();
             <h2 class="text-3xl lg:text-4xl font-bold mb-4 mt-4"><?php echo htmlspecialchars_safe($cta_title); ?></h2>
             <p class="text-lg mb-8 text-white/85 max-w-2xl mx-auto"><?php echo htmlspecialchars_safe($cta_description); ?></p>
             <div class="flex flex-col sm:flex-row justify-center gap-3">
-                <?php if ($cta_button_1_text): ?>
+                <?php if ($cta_button_1_text && isPageLinkEnabled($cta_button_1_link)): ?>
                     <a href="<?php echo htmlspecialchars_safe($cta_button_1_link); ?>" class="bg-white text-[#23332c] hover:bg-[#eff4f1] font-medium py-3 px-8 rounded-full transition-colors inline-flex items-center justify-center gap-2">
                         <?php echo htmlspecialchars_safe($cta_button_1_text); ?>
                         <i class="fas fa-arrow-right text-xs"></i>
                     </a>
                 <?php endif; ?>
-                <?php if ($cta_button_2_text): ?>
+                <?php if ($cta_button_2_text && isPageLinkEnabled($cta_button_2_link)): ?>
                     <a href="<?php echo htmlspecialchars_safe($cta_button_2_link); ?>" class="border-2 border-white/80 text-white hover:bg-white hover:text-[#23332c] font-medium py-3 px-8 rounded-full transition-colors inline-flex items-center justify-center gap-2">
                         <i class="fas fa-phone text-xs"></i>
                         <?php echo htmlspecialchars_safe($cta_button_2_text); ?>

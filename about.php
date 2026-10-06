@@ -1,6 +1,11 @@
 <?php
 require_once 'includes/config.php';
 
+if (!isModuleEnabled('page_about')) {
+    header('Location: index.php');
+    exit;
+}
+
 $current_page = 'about';
 
 // Get dynamic content - all from database
@@ -8,6 +13,7 @@ $page_header = getAboutContent('page_header_title');
 $page_header_title = $page_header && !empty($page_header['title']) ? $page_header['title'] : 'About Tupi Supreme';
 $page_header_subtitle_content = getAboutContent('page_header_subtitle');
 $page_header_subtitle = $page_header_subtitle_content && !empty($page_header_subtitle_content['content']) ? $page_header_subtitle_content['content'] : 'Leading the way in activated carbon solutions for a sustainable future';
+$page_header_image = getPageHeaderImage('about');
 
 // Company Story - from database
 $company_story = getAboutContent('company_story_content');
@@ -195,7 +201,7 @@ $company_full_name = getSiteSetting('company_name', 'Tupi Supreme Activated Carb
             background: #3d7a66;
         }
 
-        /* Timeline — modern vertical rail with alternating cards */
+        /* Timeline — modern vertical rail with alternating milestone cards */
         .timeline::before {
             content: '';
             position: absolute;
@@ -203,7 +209,20 @@ $company_full_name = getSiteSetting('company_name', 'Tupi Supreme Activated Carb
             top: 0;
             bottom: 0;
             width: 2px;
-            background: #c0ccc5;
+            background: #dce4df;
+            border-radius: 2px;
+            transform: translateX(-50%);
+        }
+        /* Rail end cap — accent dot marking the present */
+        .timeline::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: -6px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #8bc34a;
             transform: translateX(-50%);
         }
 
@@ -211,55 +230,120 @@ $company_full_name = getSiteSetting('company_name', 'Tupi Supreme Activated Carb
             margin-left: 0;
             margin-right: 50%;
             text-align: right;
-            padding-right: 30px;
+            padding-right: 34px;
         }
 
         .timeline-item:nth-child(even) .timeline-content {
             margin-left: 50%;
             margin-right: 0;
             text-align: left;
-            padding-left: 30px;
+            padding-left: 34px;
         }
 
         .timeline-content {
             transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.35s ease, box-shadow 0.35s ease;
         }
-        .timeline-content:hover {
+        .timeline-item:hover .timeline-content {
             transform: translateY(-4px);
             border-color: #3d7a66;
-            box-shadow: 0 12px 32px -12px rgba(35, 51, 44, 0.15);
+            box-shadow: 0 14px 34px -14px rgba(35, 51, 44, 0.18);
+        }
+        /* Accent strip that fades in on hover */
+        .timeline-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 24px;
+            right: 24px;
+            height: 3px;
+            border-radius: 0 0 3px 3px;
+            background: transparent;
+            transition: background 0.3s ease;
+        }
+        .timeline-item:hover .timeline-content::before { background: #8bc34a; }
+
+        /* Hairline connector from each card to its rail node (desktop only) */
+        @media (min-width: 769px) {
+            .timeline-item .timeline-content::after {
+                content: '';
+                position: absolute;
+                top: 38px;
+                width: 34px;
+                height: 2px;
+                background: #d7e0da;
+            }
+            .timeline-item:nth-child(odd) .timeline-content::after  { right: -34px; }
+            .timeline-item:nth-child(even) .timeline-content::after { left: -34px; }
         }
 
-        .timeline-dot {
+        /* Numbered node on the rail — the latest milestone pulses in accent green */
+        .timeline-node {
             position: absolute;
             left: 50%;
-            top: 20px;
-            width: 20px;
-            height: 20px;
-            background: #8bc34a;
+            top: 14px;
+            width: 44px;
+            height: 44px;
+            background: #2c5530;
+            color: #fff;
             border: 4px solid #f7faf8;
             border-radius: 50%;
             transform: translateX(-50%);
             z-index: 2;
             box-shadow: 0 0 0 2px #3d7a66;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 0.03em;
+        }
+        .timeline-item.is-latest .timeline-node {
+            background: #8bc34a;
+            color: #23332c;
+            box-shadow: 0 0 0 2px #8bc34a;
+        }
+        .timeline-item.is-latest .timeline-node::after {
+            content: '';
+            position: absolute;
+            inset: -10px;
+            border-radius: 50%;
+            border: 2px solid #8bc34a;
+            animation: timelinePulse 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+        @keyframes timelinePulse {
+            0%   { transform: scale(0.75); opacity: 0.8; }
+            70%  { transform: scale(1.35); opacity: 0; }
+            100% { transform: scale(1.35); opacity: 0; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .timeline-item.is-latest .timeline-node::after { animation: none; }
+        }
+
+        /* Year pill inside each milestone card */
+        .timeline-year {
+            display: inline-block;
+            background: #e8f1ea;
+            color: #2c5530;
+            font-weight: 700;
+            font-size: 0.8rem;
+            letter-spacing: 0.08em;
+            padding: 0.3rem 0.9rem;
+            border-radius: 9999px;
         }
 
         @media (max-width: 768px) {
-            .timeline::before {
-                left: 30px;
-            }
+            .timeline::before { left: 30px; }
+            .timeline::after { left: 30px; }
 
             .timeline-item .timeline-content {
-                margin-left: 60px !important;
+                margin-left: 64px !important;
                 margin-right: 0 !important;
                 text-align: left !important;
-                padding-left: 20px !important;
-                padding-right: 20px !important;
+                padding-left: 22px !important;
+                padding-right: 22px !important;
             }
 
-            .timeline-dot {
-                left: 30px;
-            }
+            .timeline-node { left: 30px; }
         }
 
         /* Scroll-triggered reveal — modern alternative to always-on fade-in.
@@ -321,7 +405,10 @@ $company_full_name = getSiteSetting('company_name', 'Tupi Supreme Activated Carb
     <?php include 'includes/navbar.php'; ?>
 
     <!-- Page Header -->
-    <section id="page-header" class="page-header-gradient text-white relative overflow-hidden pt-24 pb-20">
+    <section id="page-header" class="page-header-gradient text-white relative overflow-hidden pt-24 pb-20"<?php if (!empty($page_header_image)) echo ' style="background-image: url(\'' . htmlspecialchars($page_header_image, ENT_QUOTES) . '\'); background-size: cover; background-position: center;"'; ?>>
+        <?php if (!empty($page_header_image)): ?>
+        <div class="absolute inset-0" style="background-color: rgba(12, 25, 14, 0.72);"></div>
+        <?php endif; ?>
         <div class="page-header-pattern absolute inset-0 opacity-30"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="text-center">
@@ -412,12 +499,13 @@ $company_full_name = getSiteSetting('company_name', 'Tupi Supreme Activated Carb
                 <p class="text-lg text-[#7d8b84] max-w-2xl mx-auto"><?php echo htmlspecialchars_safe($timeline_subtitle); ?></p>
             </div>
             <div class="timeline relative">
+                <?php $timeline_last = count($timeline_events) - 1; ?>
                 <?php foreach ($timeline_events as $index => $event): ?>
-                    <div class="timeline-item relative mb-10 reveal <?php echo 'reveal-delay-' . ((($index % 4) + 1)); ?>">
-                        <div class="timeline-dot"></div>
-                        <div class="timeline-content bg-white border border-[#e6ece8] p-6 rounded-2xl relative">
-                            <span class="eyebrow mb-3 <?php echo ($index % 2 === 0) ? '' : ''; ?>"><?php echo htmlspecialchars_safe($event['year']); ?></span>
-                            <h4 class="text-xl font-semibold text-[#23332c] mb-2 mt-2"><?php echo htmlspecialchars_safe($event['title']); ?></h4>
+                    <div class="timeline-item relative mb-12 reveal <?php echo 'reveal-delay-' . ((($index % 4) + 1)) . ($index === $timeline_last ? ' is-latest' : ''); ?>">
+                        <div class="timeline-node"><?php echo str_pad((string)($index + 1), 2, '0', STR_PAD_LEFT); ?></div>
+                        <div class="timeline-content bg-white border border-[#e6ece8] p-6 lg:p-7 rounded-2xl relative">
+                            <span class="timeline-year"><?php echo htmlspecialchars_safe($event['year']); ?></span>
+                            <h4 class="text-xl font-bold text-[#23332c] mb-2 mt-3"><?php echo htmlspecialchars_safe($event['title']); ?></h4>
                             <div class="text-[#7d8b84] leading-relaxed text-sm"><?php echo $event['description']; ?></div>
                         </div>
                     </div>

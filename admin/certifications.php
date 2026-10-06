@@ -211,11 +211,11 @@ $view_url = '../certifications.php#iso-certifications';
 
     <style>
         @media (min-width: 1024px) {
-            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #d2dcd5 transparent; }
+            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #e4e4e7 transparent; }
             .lg\:ml-64::-webkit-scrollbar { width: 8px; }
             .lg\:ml-64::-webkit-scrollbar-track { background: transparent; }
-            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #d2dcd5; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
-            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #c0ccc5; }
+            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #e4e4e7; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
+            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #d4d4d8; }
         }
         .quick-pick { padding: 3px 8px; font-size: 11px; border: 1px solid #d1d5db; background: #fff; border-radius: 4px; cursor: pointer; color: #4b5563; }
         .quick-pick:hover { background: #f3f4f6; border-color: #9ca3af; }
@@ -223,7 +223,6 @@ $view_url = '../certifications.php#iso-certifications';
 
     <!-- Main Content -->
     <div class="relative lg:ml-64 p-4 lg:p-8">
-        <?php $logo_pulse_logo = '../uploads/images/tupi_supreme_logo.png'; $logo_pulse_mode = 'absolute'; include '../includes/logo_pulse_loader.php'; ?>
 
         <!-- Page Header -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -531,25 +530,25 @@ $view_url = '../certifications.php#iso-certifications';
                             <i class="fas fa-eye text-gray-400"></i> Live Preview
                             <span class="text-xs text-gray-400 font-normal">(certification card)</span>
                         </p>
-                        <div class="cert-card bg-white border border-[#e6ece8] rounded-2xl p-8" id="preview_card">
+                        <div class="cert-card bg-white border border-[#e4e4e7] rounded-2xl p-8" id="preview_card">
                             <div class="flex items-start" id="preview_layout">
-                                <div class="cert-badge w-16 h-16 rounded-2xl flex items-center justify-center mr-5 flex-shrink-0 overflow-hidden" style="background: #3d7a66;" id="preview_badge_wrap">
+                                <div class="cert-badge w-16 h-16 rounded-2xl flex items-center justify-center mr-5 flex-shrink-0 overflow-hidden" style="background: #18181b;" id="preview_badge_wrap">
                                     <img id="preview_badge_img" src="<?php echo htmlspecialchars($edit_cert['image_url'] ?? ''); ?>" alt="" class="w-full h-full object-cover <?php echo empty($edit_cert['image_url'] ?? '') ? 'hidden' : ''; ?>">
                                     <i id="preview_badge_icon" class="<?php echo htmlspecialchars($edit_cert['icon'] ?? '') ?: 'fas fa-certificate'; ?> text-2xl text-white <?php echo empty($edit_cert['image_url'] ?? '') ? '' : 'hidden'; ?>"></i>
                                 </div>
                                 <div class="flex-1" id="preview_body">
-                                    <h3 id="preview_title" class="text-xl font-semibold text-[#23332c] mb-1"><?php echo htmlspecialchars($edit_cert['title'] ?? 'Certification title'); ?></h3>
-                                    <p id="preview_subtitle" class="text-[#3d7a66] text-sm font-medium mb-3 <?php echo empty($edit_cert['subtitle'] ?? '') ? 'hidden' : ''; ?>"><?php echo htmlspecialchars($edit_cert['subtitle'] ?? ''); ?></p>
+                                    <h3 id="preview_title" class="text-xl font-semibold text-[#18181b] mb-1"><?php echo htmlspecialchars($edit_cert['title'] ?? 'Certification title'); ?></h3>
+                                    <p id="preview_subtitle" class="text-[#18181b] text-sm font-medium mb-3 <?php echo empty($edit_cert['subtitle'] ?? '') ? 'hidden' : ''; ?>"><?php echo htmlspecialchars($edit_cert['subtitle'] ?? ''); ?></p>
                                     <p id="preview_desc" class="text-[#5a6b62] mb-4 leading-relaxed text-sm <?php echo empty($edit_cert['description'] ?? '') ? 'hidden' : ''; ?>"><?php echo htmlspecialchars($edit_cert['description'] ?? ''); ?></p>
-                                    <ul id="preview_features" class="text-sm text-[#7d8b84] space-y-1.5 <?php echo empty($edit_cert['features'] ?? '') ? 'hidden' : ''; ?>"></ul>
+                                    <ul id="preview_features" class="text-sm text-[#71717a] space-y-1.5 <?php echo empty($edit_cert['features'] ?? '') ? 'hidden' : ''; ?>"></ul>
                                     <div id="preview_badge_label_wrap" class="<?php echo empty($edit_cert['badge_label'] ?? '') ? 'hidden' : ''; ?>">
-                                        <span id="preview_badge_label" class="inline-block text-xs font-semibold bg-[#eef3f0] text-[#3d7a66] px-2.5 py-1 rounded-full"><?php echo htmlspecialchars($edit_cert['badge_label'] ?? ''); ?></span>
+                                        <span id="preview_badge_label" class="inline-block text-xs font-semibold bg-[#f4f4f5] text-[#18181b] px-2.5 py-1 rounded-full"><?php echo htmlspecialchars($edit_cert['badge_label'] ?? ''); ?></span>
                                     </div>
-                                    <div id="preview_dates" class="text-sm text-[#7d8b84] space-y-1 <?php echo empty($edit_cert['issue_date'] ?? '') && empty($edit_cert['expiry_date'] ?? '') ? 'hidden' : ''; ?>">
-                                        <p id="preview_issue" class="flex items-center <?php echo empty($edit_cert['issue_date'] ?? '') ? 'hidden' : ''; ?>"><i class="fas fa-calendar-check text-[#3d7a66] mr-2 text-xs"></i>Issued: <span class="ml-1" id="preview_issue_text"></span></p>
-                                        <p id="preview_expiry" class="flex items-center <?php echo empty($edit_cert['expiry_date'] ?? '') ? 'hidden' : ''; ?>"><i class="fas fa-calendar-times text-[#3d7a66] mr-2 text-xs"></i>Valid until: <span class="ml-1" id="preview_expiry_text"></span></p>
+                                    <div id="preview_dates" class="text-sm text-[#71717a] space-y-1 <?php echo empty($edit_cert['issue_date'] ?? '') && empty($edit_cert['expiry_date'] ?? '') ? 'hidden' : ''; ?>">
+                                        <p id="preview_issue" class="flex items-center <?php echo empty($edit_cert['issue_date'] ?? '') ? 'hidden' : ''; ?>"><i class="fas fa-calendar-check text-[#18181b] mr-2 text-xs"></i>Issued: <span class="ml-1" id="preview_issue_text"></span></p>
+                                        <p id="preview_expiry" class="flex items-center <?php echo empty($edit_cert['expiry_date'] ?? '') ? 'hidden' : ''; ?>"><i class="fas fa-calendar-times text-[#18181b] mr-2 text-xs"></i>Valid until: <span class="ml-1" id="preview_expiry_text"></span></p>
                                     </div>
-                                    <p id="preview_cert_num" class="text-xs text-[#8a978f] mt-3 <?php echo empty($edit_cert['certificate_number'] ?? '') ? 'hidden' : ''; ?>">Certificate #: <span id="preview_cert_num_text"><?php echo htmlspecialchars($edit_cert['certificate_number'] ?? ''); ?></span></p>
+                                    <p id="preview_cert_num" class="text-xs text-[#a1a1aa] mt-3 <?php echo empty($edit_cert['certificate_number'] ?? '') ? 'hidden' : ''; ?>">Certificate #: <span id="preview_cert_num_text"><?php echo htmlspecialchars($edit_cert['certificate_number'] ?? ''); ?></span></p>
                                 </div>
                             </div>
                         </div>
@@ -588,7 +587,7 @@ $view_url = '../certifications.php#iso-certifications';
 
                 // Card layout follows the category: iso = left icon row, product = centered
                 var isProduct = (category === 'product');
-                document.getElementById('preview_card').className = 'cert-card bg-white border border-[#e6ece8] rounded-2xl p-8' + (isProduct ? ' text-center' : '');
+                document.getElementById('preview_card').className = 'cert-card bg-white border border-[#e4e4e7] rounded-2xl p-8' + (isProduct ? ' text-center' : '');
                 document.getElementById('preview_layout').className = isProduct ? '' : 'flex items-start';
                 document.getElementById('preview_badge_wrap').className = 'cert-badge rounded-2xl flex items-center justify-center flex-shrink-0 overflow-hidden ' + (isProduct ? 'w-20 h-20 mx-auto mb-6' : 'w-16 h-16 mr-5');
 
@@ -608,7 +607,7 @@ $view_url = '../certifications.php#iso-certifications';
                         var li = document.createElement('li');
                         li.className = 'flex items-center' + (isProduct ? ' justify-center' : '');
                         var i = document.createElement('i');
-                        i.className = 'fas fa-check text-[#3d7a66] mr-2 text-xs';
+                        i.className = 'fas fa-check text-[#18181b] mr-2 text-xs';
                         li.appendChild(i);
                         li.appendChild(document.createTextNode(s));
                         return li.outerHTML;
@@ -999,14 +998,6 @@ $view_url = '../certifications.php#iso-certifications';
                     'base_query'    => $_GET,
                 ]);
                 ?>
-            </div>
-
-            <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 class="font-semibold text-blue-900 mb-2">Quick Links</h3>
-                <ul class="text-sm text-blue-800 space-y-1">
-                    <li><a href="<?php echo $view_url; ?>" target="_blank" class="hover:underline"><i class="fas fa-external-link-alt mr-1"></i>View Certifications Page</a></li>
-                    <li><a href="index.php" class="hover:underline"><i class="fas fa-home mr-1"></i>Back to Admin Dashboard</a></li>
-                </ul>
             </div>
         <?php endif; ?>
     </div>

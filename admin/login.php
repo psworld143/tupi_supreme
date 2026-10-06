@@ -225,14 +225,9 @@ if ($login_help_url === '' || stripos($login_help_url, 'javascript:') === 0 || s
         }
     </script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/admin-theme.css">
     <style>
-        body {
-            font-family: 'Poppins', ui-sans-serif, system-ui, sans-serif;
-            color: #23332c;
-        }
+        body { color: #09090b; }
 
         /* Left brand panel — custom image w/ dark overlay when enabled, else gradient */
         .brand-panel {
@@ -272,7 +267,7 @@ if ($login_help_url === '' || stripos($login_help_url, 'javascript:') === 0 || s
             outline: none;
         }
         .form-input:hover:not(:focus) {
-            border-color: #c0ccc5;
+            border-color: #d4d4d8;
         }
 
         /* Text over a photo needs a shadow to stay readable on bright areas */
@@ -313,6 +308,40 @@ if ($login_help_url === '' || stripos($login_help_url, 'javascript:') === 0 || s
     </style>
 </head>
 <body class="min-h-screen" style="background-color: <?php echo $login_form_bg; ?>">
+
+    <div id="admin-loader" class="fixed inset-0 z-[9999] bg-white flex flex-col items-center justify-center gap-8 transition-opacity duration-500">
+        <div class="relative w-24 h-24 flex items-center justify-center">
+            <span class="absolute inset-0 rounded-full border-2 border-[#2c5530]/30 animate-[alring_1.8s_cubic-bezier(.2,.6,.4,1)_infinite]"></span>
+            <span class="absolute inset-0 rounded-full border-2 border-[#2c5530]/30 animate-[alring_1.8s_cubic-bezier(.2,.6,.4,1)_infinite] [animation-delay:.9s]"></span>
+            <img src="../uploads/images/tupi_supreme_logo.png" alt="" class="w-14 h-14 object-contain animate-[alpulse_1.6s_ease-in-out_infinite]" onerror="this.style.display='none'">
+        </div>
+        <div class="w-40 h-[3px] rounded-full bg-zinc-100 overflow-hidden">
+            <div class="h-full w-1/3 rounded-full bg-[#2c5530] animate-[albar_1.2s_ease-in-out_infinite]"></div>
+        </div>
+    </div>
+    <style>
+        @keyframes alring { 0% { transform: scale(.55); opacity: .9; } 100% { transform: scale(1.45); opacity: 0; } }
+        @keyframes alpulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: .85; } }
+        @keyframes albar { 0% { transform: translateX(-120%); } 100% { transform: translateX(400%); } }
+        @media (prefers-reduced-motion: reduce) { #admin-loader * { animation: none !important; } }
+    </style>
+    <script>
+        (function () {
+            var el = document.getElementById('admin-loader');
+            if (!el) return;
+            var shownAt = Date.now();
+            function hide() {
+                var wait = Math.max(0, 1400 - (Date.now() - shownAt));
+                setTimeout(function () {
+                    el.style.opacity = '0';
+                    el.style.pointerEvents = 'none';
+                    setTimeout(function () { el.remove(); }, 500);
+                }, wait);
+            }
+            if (document.readyState === 'complete') { hide(); }
+            else { window.addEventListener('load', hide); setTimeout(hide, 5000); }
+        })();
+    </script>
 
     <div class="flex min-h-screen">
 
@@ -381,22 +410,22 @@ if ($login_help_url === '' || stripos($login_help_url, 'javascript:') === 0 || s
 
         <!-- Right form panel -->
         <div class="flex-1 flex flex-col relative" style="background-color: <?php echo $login_form_bg; ?>">
-            <a href="../index.php" title="Back to website" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-white border border-[#e6ece8] flex items-center justify-center text-[#66746c] hover:text-[#23332c] hover:border-[#c0ccc5] transition-colors z-10">
+            <a href="../index.php" title="Back to website" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-white border border-[#e4e4e7] flex items-center justify-center text-[#71717a] hover:text-[#18181b] hover:border-[#d4d4d8] transition-colors z-10">
                 <i class="fas fa-arrow-left text-xs"></i>
             </a>
 
             <div class="flex-1 flex items-center justify-center px-6 sm:px-10 py-14">
                 <div class="w-full max-w-sm">
                     <div class="text-center fade-in fade-in-delay-1">
-                        <div class="w-20 h-20 mx-auto rounded-full bg-white flex items-center justify-center shadow-lg ring-4 ring-[#e2eae4]">
+                        <div class="w-20 h-20 mx-auto rounded-full bg-white flex items-center justify-center shadow-lg ring-4 ring-[#e4e4e7]">
                             <img src="<?php echo htmlspecialchars($login_logo_form); ?>" alt="Logo" class="w-14 h-14 object-contain">
                         </div>
                         <?php if (trim($L['login_form_eyebrow']) !== ''): ?>
-                            <p class="mt-6 text-[11px] font-semibold uppercase tracking-[0.25em] text-[#3d7a66]"><?php echo htmlspecialchars($L['login_form_eyebrow']); ?></p>
+                            <p class="mt-6 text-[11px] font-semibold uppercase tracking-[0.25em] text-[#18181b]"><?php echo htmlspecialchars($L['login_form_eyebrow']); ?></p>
                         <?php endif; ?>
-                        <h2 class="mt-2 text-3xl font-bold text-[#23332c]"><?php echo htmlspecialchars($L['login_form_heading']); ?></h2>
+                        <h2 class="mt-2 text-3xl font-bold text-[#18181b]"><?php echo htmlspecialchars($L['login_form_heading']); ?></h2>
                         <?php if (trim($L['login_form_subtext']) !== ''): ?>
-                            <p class="mt-1 text-sm text-[#7d8b84]"><?php echo htmlspecialchars($L['login_form_subtext']); ?></p>
+                            <p class="mt-1 text-sm text-[#71717a]"><?php echo htmlspecialchars($L['login_form_subtext']); ?></p>
                         <?php endif; ?>
                     </div>
 
@@ -408,8 +437,8 @@ if ($login_help_url === '' || stripos($login_help_url, 'javascript:') === 0 || s
                     <?php endif; ?>
 
                     <?php if ($success): ?>
-                        <div class="mt-8 p-4 rounded-2xl flex items-start gap-3 bg-[#eef3f0] border border-[#c0ccc5] text-[#23332c] fade-in fade-in-delay-2" role="alert">
-                            <i class="fas fa-check-circle text-[#3d7a66] text-lg mt-0.5"></i>
+                        <div class="mt-8 p-4 rounded-2xl flex items-start gap-3 bg-[#f4f4f5] border border-[#d4d4d8] text-[#18181b] fade-in fade-in-delay-2" role="alert">
+                            <i class="fas fa-check-circle text-[#18181b] text-lg mt-0.5"></i>
                             <span class="text-sm"><?php echo htmlspecialchars($success); ?></span>
                         </div>
                     <?php endif; ?>
@@ -417,22 +446,22 @@ if ($login_help_url === '' || stripos($login_help_url, 'javascript:') === 0 || s
                     <form class="mt-8 space-y-5 fade-in fade-in-delay-3" method="POST" action="">
                         <?php echo csrfTokenField(); ?>
                         <div>
-                            <label for="username" class="block text-xs font-semibold text-[#23332c] mb-1.5">Username or Email</label>
+                            <label for="username" class="block text-xs font-semibold text-[#18181b] mb-1.5">Username or Email</label>
                             <div class="relative">
-                                <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-[#a8b3ac] text-sm"></i>
+                                <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-[#a1a1aa] text-sm"></i>
                                 <input id="username" name="username" type="text" required <?php echo $lockout_remaining > 0 ? 'disabled' : ''; ?>
-                                       class="form-input w-full pl-11 pr-4 py-3 border border-[#e2eae4] rounded-xl bg-white text-sm text-[#23332c] placeholder-[#a8b3ac] disabled:opacity-60 disabled:cursor-not-allowed"
+                                       class="form-input w-full pl-11 pr-4 py-3 border border-[#e4e4e7] rounded-xl bg-white text-sm text-[#18181b] placeholder-[#a1a1aa] disabled:opacity-60 disabled:cursor-not-allowed"
                                        placeholder="Enter your username or email" value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>">
                             </div>
                         </div>
                         <div>
-                            <label for="password" class="block text-xs font-semibold text-[#23332c] mb-1.5">Password</label>
+                            <label for="password" class="block text-xs font-semibold text-[#18181b] mb-1.5">Password</label>
                             <div class="relative">
-                                <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-[#a8b3ac] text-sm"></i>
+                                <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-[#a1a1aa] text-sm"></i>
                                 <input id="password" name="password" type="password" required <?php echo $lockout_remaining > 0 ? 'disabled' : ''; ?>
-                                       class="form-input w-full pl-11 pr-11 py-3 border border-[#e2eae4] rounded-xl bg-white text-sm text-[#23332c] placeholder-[#a8b3ac] disabled:opacity-60 disabled:cursor-not-allowed"
+                                       class="form-input w-full pl-11 pr-11 py-3 border border-[#e4e4e7] rounded-xl bg-white text-sm text-[#18181b] placeholder-[#a1a1aa] disabled:opacity-60 disabled:cursor-not-allowed"
                                        placeholder="Enter your password">
-                                <button type="button" id="toggle-password" title="Show password" class="absolute right-4 top-1/2 -translate-y-1/2 text-[#a8b3ac] hover:text-[#66746c] transition-colors">
+                                <button type="button" id="toggle-password" title="Show password" class="absolute right-4 top-1/2 -translate-y-1/2 text-[#a1a1aa] hover:text-[#71717a] transition-colors">
                                     <i class="fas fa-eye text-sm"></i>
                                 </button>
                             </div>
@@ -441,7 +470,7 @@ if ($login_help_url === '' || stripos($login_help_url, 'javascript:') === 0 || s
                         <div class="flex items-center justify-between">
                             <label class="inline-flex items-center gap-2 cursor-pointer select-none">
                                 <input type="checkbox" name="remember" value="1" class="w-4 h-4 rounded accent-[#2c5530]">
-                                <span class="text-xs text-[#66746c]">Remember me</span>
+                                <span class="text-xs text-[#71717a]">Remember me</span>
                             </label>
                             <?php if (trim($L['login_help_link_text']) !== ''): ?>
                                 <a href="<?php echo htmlspecialchars($login_help_url); ?>" class="text-xs font-medium hover:underline" style="color: <?php echo $login_btn_color; ?>"><?php echo htmlspecialchars($L['login_help_link_text']); ?></a>
@@ -458,7 +487,7 @@ if ($login_help_url === '' || stripos($login_help_url, 'javascript:') === 0 || s
                     </form>
 
                     <?php if (trim($L['login_help_text']) !== ''): ?>
-                        <p class="mt-8 text-center text-xs text-[#8a978f] fade-in fade-in-delay-4">
+                        <p class="mt-8 text-center text-xs text-[#a1a1aa] fade-in fade-in-delay-4">
                             <?php echo htmlspecialchars($L['login_help_text']); ?>
                             <?php if (trim($L['login_help_link_text']) !== ''): ?>
                                 <a href="<?php echo htmlspecialchars($login_help_url); ?>" class="font-medium hover:underline" style="color: <?php echo $login_btn_color; ?>"><?php echo htmlspecialchars($L['login_help_link_text']); ?></a>
@@ -469,7 +498,7 @@ if ($login_help_url === '' || stripos($login_help_url, 'javascript:') === 0 || s
             </div>
 
             <?php if (trim($L['login_brand_footer']) !== ''): ?>
-                <p class="pb-5 text-center text-[11px] text-[#a8b3ac]">&copy; <?php echo date('Y'); ?> <?php echo htmlspecialchars($L['login_brand_footer']); ?></p>
+                <p class="pb-5 text-center text-[11px] text-[#a1a1aa]">&copy; <?php echo date('Y'); ?> <?php echo htmlspecialchars($L['login_brand_footer']); ?></p>
             <?php endif; ?>
         </div>
     </div>

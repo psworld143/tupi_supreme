@@ -194,11 +194,11 @@ $view_url = '../index.php#hero';
 
     <style>
         @media (min-width: 1024px) {
-            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #d2dcd5 transparent; }
+            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #e4e4e7 transparent; }
             .lg\:ml-64::-webkit-scrollbar { width: 8px; }
             .lg\:ml-64::-webkit-scrollbar-track { background: transparent; }
-            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #d2dcd5; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
-            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #c0ccc5; }
+            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #e4e4e7; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
+            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #d4d4d8; }
         }
         /* Quick-pick suggestion buttons */
         .quick-pick { padding: 3px 8px; font-size: 11px; border: 1px solid #d1d5db; background: #fff; border-radius: 4px; cursor: pointer; color: #4b5563; }
@@ -209,7 +209,6 @@ $view_url = '../index.php#hero';
 
     <!-- Main Content -->
     <div class="relative lg:ml-64 p-4 lg:p-8">
-        <?php $logo_pulse_logo = '../uploads/images/tupi_supreme_logo.png'; $logo_pulse_mode = 'absolute'; include '../includes/logo_pulse_loader.php'; ?>
 
         <!-- Page Header -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -359,14 +358,6 @@ $view_url = '../index.php#hero';
                     'base_query'    => $_GET,
                 ]);
                 ?>
-            </div>
-
-            <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 class="font-semibold text-blue-900 mb-2">Quick Links</h3>
-                <ul class="text-sm text-blue-800 space-y-1">
-                    <li><a href="<?php echo $view_url; ?>" target="_blank" class="hover:underline"><i class="fas fa-external-link-alt mr-1"></i>View Homepage (hero carousel)</a></li>
-                    <li><a href="index.php" class="hover:underline"><i class="fas fa-home mr-1"></i>Back to Admin Dashboard</a></li>
-                </ul>
             </div>
 
         <?php elseif ($action === 'add' || $action === 'edit'): ?>
@@ -535,7 +526,7 @@ $view_url = '../index.php#hero';
                                     <h1 id="preview_title" class="text-2xl lg:text-3xl font-bold mb-3 leading-tight mt-2 text-white"><?php echo htmlspecialchars($slide['title'] ?? 'Slide title'); ?></h1>
                                     <p id="preview_desc" class="text-sm mb-4 text-white/85 max-w-md"><?php echo htmlspecialchars($slide['description'] ?? 'Slide description appears here…'); ?></p>
                                     <div id="preview_btn_wrap" class="<?php echo empty($slide['button_text'] ?? '') ? 'hidden' : ''; ?>">
-                                        <span id="preview_btn" class="bg-white text-[#23332c] font-medium py-2 px-5 rounded-full text-sm inline-flex items-center gap-2">
+                                        <span id="preview_btn" class="bg-white text-[#18181b] font-medium py-2 px-5 rounded-full text-sm inline-flex items-center gap-2">
                                             <span id="preview_btn_text"><?php echo htmlspecialchars($slide['button_text'] ?? ''); ?></span>
                                             <i class="fas fa-arrow-right text-xs"></i>
                                         </span>

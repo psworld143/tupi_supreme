@@ -186,11 +186,11 @@ $view_url = '../about.php#values';
 
     <style>
         @media (min-width: 1024px) {
-            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #d2dcd5 transparent; }
+            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #e4e4e7 transparent; }
             .lg\:ml-64::-webkit-scrollbar { width: 8px; }
             .lg\:ml-64::-webkit-scrollbar-track { background: transparent; }
-            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #d2dcd5; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
-            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #c0ccc5; }
+            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #e4e4e7; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
+            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #d4d4d8; }
         }
         .quick-pick { padding: 3px 8px; font-size: 11px; border: 1px solid #d1d5db; background: #fff; border-radius: 4px; cursor: pointer; color: #4b5563; }
         .quick-pick:hover { background: #f3f4f6; border-color: #9ca3af; }
@@ -198,7 +198,6 @@ $view_url = '../about.php#values';
 
     <!-- Main Content -->
     <div class="relative lg:ml-64 p-4 lg:p-8">
-        <?php $logo_pulse_logo = '../uploads/images/tupi_supreme_logo.png'; $logo_pulse_mode = 'absolute'; include '../includes/logo_pulse_loader.php'; ?>
 
         <!-- Page Header -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -337,9 +336,9 @@ $view_url = '../about.php#values';
                             <i class="fas fa-eye text-gray-400"></i> Live Preview
                             <span class="text-xs text-gray-400 font-normal">(value card)</span>
                         </p>
-                        <div class="rounded-2xl p-6" style="background: #23332c;">
+                        <div class="rounded-2xl p-6" style="background: #18181b;">
                             <div class="rounded-2xl p-8 text-center border border-white/10" style="background: rgba(255,255,255,0.05);">
-                                <div id="preview_icon_wrap" class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 <?php echo empty($edit_value['icon'] ?? '') ? 'hidden' : ''; ?>" style="background: #3d7a66;">
+                                <div id="preview_icon_wrap" class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 <?php echo empty($edit_value['icon'] ?? '') ? 'hidden' : ''; ?>" style="background: #18181b;">
                                     <i id="preview_icon" class="<?php echo htmlspecialchars($edit_value['icon'] ?? 'fas fa-check-circle'); ?> text-2xl text-white"></i>
                                 </div>
                                 <h4 id="preview_title" class="text-xl font-semibold mb-3 text-white"><?php echo htmlspecialchars($edit_value['title'] ?? 'Value title'); ?></h4>
@@ -448,7 +447,7 @@ $view_url = '../about.php#values';
                                     <td class="px-6 py-4 text-sm">
                                         <?php if ($value['icon']): ?>
                                             <span class="inline-flex items-center gap-2">
-                                                <span class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: #3d7a66;">
+                                                <span class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: #18181b;">
                                                     <i class="<?php echo htmlspecialchars($value['icon']); ?> text-white text-sm"></i>
                                                 </span>
                                                 <code class="text-xs text-gray-400"><?php echo htmlspecialchars($value['icon']); ?></code>
@@ -496,15 +495,6 @@ $view_url = '../about.php#values';
                     'base_query'    => $_GET,
                 ]);
                 ?>
-            </div>
-
-            <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 class="font-semibold text-blue-900 mb-2">Quick Links</h3>
-                <ul class="text-sm text-blue-800 space-y-1">
-                    <li><a href="<?php echo $view_url; ?>" target="_blank" class="hover:underline"><i class="fas fa-external-link-alt mr-1"></i>View Values on About Page</a></li>
-                    <li><a href="about.php" class="hover:underline"><i class="fas fa-info-circle mr-1"></i>Edit About Page Sections</a></li>
-                    <li><a href="index.php" class="hover:underline"><i class="fas fa-home mr-1"></i>Back to Admin Dashboard</a></li>
-                </ul>
             </div>
         <?php endif; ?>
     </div>

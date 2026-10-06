@@ -1,10 +1,17 @@
 <?php
 require_once 'includes/config.php';
+
+if (!isModuleEnabled('page_case-studies')) {
+    header('Location: index.php');
+    exit;
+}
+
 $current_page = 'case-studies';
 
 // Get dynamic content
 $page_header_title = getPageContent('case-studies', 'page_header_title', 'Municipal Water Treatment Case Studies');
 $page_header_subtitle = getPageContent('case-studies', 'page_header_subtitle', 'Real-world success stories from municipal facilities using our activated carbon solutions');
+$page_header_image = getPageHeaderImage('case-studies');
 $section_title = getPageContent('case-studies', 'section_title', 'Success Stories');
 $section_subtitle = getPageContent('case-studies', 'section_subtitle', 'Discover how municipal water treatment facilities have achieved outstanding results with our 2mm granulated activated carbon');
 $cta_title = getPageContent('case-studies', 'cta_title', 'Ready to Achieve Similar Results?');
@@ -169,7 +176,10 @@ $case_studies = getCaseStudies();
     <?php include 'includes/navbar.php'; ?>
 
     <!-- Page Header -->
-    <section id="page-header" class="page-header-gradient text-white relative overflow-hidden pt-24 pb-20">
+    <section id="page-header" class="page-header-gradient text-white relative overflow-hidden pt-24 pb-20"<?php if (!empty($page_header_image)) echo ' style="background-image: url(\'' . htmlspecialchars($page_header_image, ENT_QUOTES) . '\'); background-size: cover; background-position: center;"'; ?>>
+        <?php if (!empty($page_header_image)): ?>
+        <div class="absolute inset-0" style="background-color: rgba(12, 25, 14, 0.72);"></div>
+        <?php endif; ?>
         <div class="page-header-pattern absolute inset-0 opacity-30"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="text-center">
@@ -333,13 +343,13 @@ $case_studies = getCaseStudies();
             <h2 class="text-3xl lg:text-4xl font-bold mb-4 mt-4"><?php echo htmlspecialchars_safe($cta_title); ?></h2>
             <p class="text-lg mb-8 text-white/85 max-w-2xl mx-auto"><?php echo htmlspecialchars_safe($cta_description); ?></p>
             <div class="flex flex-col sm:flex-row justify-center gap-3">
-                <?php if ($cta_button_1_text): ?>
+                <?php if ($cta_button_1_text && isPageLinkEnabled($cta_button_1_link)): ?>
                     <a href="<?php echo htmlspecialchars_safe($cta_button_1_link); ?>" class="bg-white text-[#23332c] hover:bg-[#eff4f1] font-medium py-3 px-8 rounded-full transition-colors inline-flex items-center justify-center gap-2">
                         <?php echo htmlspecialchars_safe($cta_button_1_text); ?>
                         <i class="fas fa-arrow-right text-xs"></i>
                     </a>
                 <?php endif; ?>
-                <?php if ($cta_button_2_text): ?>
+                <?php if ($cta_button_2_text && isPageLinkEnabled($cta_button_2_link)): ?>
                     <a href="<?php echo htmlspecialchars_safe($cta_button_2_link); ?>" class="border-2 border-white/80 text-white hover:bg-white hover:text-[#23332c] font-medium py-3 px-8 rounded-full transition-colors inline-flex items-center justify-center gap-2">
                         <i class="fas fa-download text-xs"></i>
                         <?php echo htmlspecialchars_safe($cta_button_2_text); ?>

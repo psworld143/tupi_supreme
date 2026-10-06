@@ -204,11 +204,11 @@ $last_login_disp = $user['last_login']  ? formatDate($user['last_login'],  'F d,
 
     <style>
         @media (min-width: 1024px) {
-            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #d2dcd5 transparent; }
+            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #e4e4e7 transparent; }
             .lg\:ml-64::-webkit-scrollbar { width: 8px; }
             .lg\:ml-64::-webkit-scrollbar-track { background: transparent; }
-            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #d2dcd5; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
-            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #c0ccc5; }
+            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #e4e4e7; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
+            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #d4d4d8; }
         }
 
         /* Tab cards */
@@ -216,9 +216,9 @@ $last_login_disp = $user['last_login']  ? formatDate($user['last_login'],  'F d,
             transition: all 0.2s ease;
         }
         .settings-tab[aria-selected="true"] {
-            background-color: #23332c;
+            background-color: #18181b;
             color: #ffffff;
-            border-color: #23332c;
+            border-color: #18181b;
             box-shadow: 0 4px 14px -4px rgba(35, 51, 44, 0.35);
         }
         .settings-tab[aria-selected="true"] .tab-icon {
@@ -226,8 +226,8 @@ $last_login_disp = $user['last_login']  ? formatDate($user['last_login'],  'F d,
             color: #ffffff;
         }
         .settings-tab[aria-selected="false"]:hover {
-            border-color: #c0ccc5;
-            background-color: #f7faf8;
+            border-color: #d4d4d8;
+            background-color: #fafafa;
         }
 
         /* Form inputs (match login.php aesthetic) */
@@ -235,25 +235,24 @@ $last_login_disp = $user['last_login']  ? formatDate($user['last_login'],  'F d,
             transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
         }
         .form-input:focus {
-            border-color: #3d7a66;
+            border-color: #18181b;
             box-shadow: 0 0 0 3px rgba(61, 122, 102, 0.15);
             outline: none;
         }
         .form-input:hover:not(:focus) {
-            border-color: #c0ccc5;
+            border-color: #d4d4d8;
         }
 
         /* Read-only field styling */
         .form-input:read-only {
-            background-color: #f5f7f5;
-            color: #45524b;
+            background-color: #f4f4f5;
+            color: #3f3f46;
             cursor: default;
         }
     </style>
 
     <!-- Main Content -->
     <div class="relative lg:ml-64 p-4 lg:p-8">
-        <?php $logo_pulse_logo = '../uploads/images/tupi_supreme_logo.png'; $logo_pulse_mode = 'absolute'; include '../includes/logo_pulse_loader.php'; ?>
 
         <!-- Page Header -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -286,7 +285,7 @@ $last_login_disp = $user['last_login']  ? formatDate($user['last_login'],  'F d,
             <button type="button" role="tab" id="tab-profile" aria-selected="<?php echo $active_tab === 'profile' ? 'true' : 'false'; ?>"
                     data-tab="profile"
                     class="settings-tab flex items-center gap-3 p-4 rounded-xl border bg-white text-left">
-                <span class="tab-icon w-10 h-10 rounded-full bg-[#eaf0ec] text-[#23332c] flex items-center justify-center flex-shrink-0">
+                <span class="tab-icon w-10 h-10 rounded-full bg-[#f4f4f5] text-[#18181b] flex items-center justify-center flex-shrink-0">
                     <i class="fas fa-user"></i>
                 </span>
                 <span class="min-w-0">
@@ -298,7 +297,7 @@ $last_login_disp = $user['last_login']  ? formatDate($user['last_login'],  'F d,
             <button type="button" role="tab" id="tab-security" aria-selected="<?php echo $active_tab === 'security' ? 'true' : 'false'; ?>"
                     data-tab="security"
                     class="settings-tab flex items-center gap-3 p-4 rounded-xl border bg-white text-left">
-                <span class="tab-icon w-10 h-10 rounded-full bg-[#eaf0ec] text-[#23332c] flex items-center justify-center flex-shrink-0">
+                <span class="tab-icon w-10 h-10 rounded-full bg-[#f4f4f5] text-[#18181b] flex items-center justify-center flex-shrink-0">
                     <i class="fas fa-shield-alt"></i>
                 </span>
                 <span class="min-w-0">
@@ -310,7 +309,7 @@ $last_login_disp = $user['last_login']  ? formatDate($user['last_login'],  'F d,
             <button type="button" role="tab" id="tab-account" aria-selected="<?php echo $active_tab === 'account' ? 'true' : 'false'; ?>"
                     data-tab="account"
                     class="settings-tab flex items-center gap-3 p-4 rounded-xl border bg-white text-left">
-                <span class="tab-icon w-10 h-10 rounded-full bg-[#eaf0ec] text-[#23332c] flex items-center justify-center flex-shrink-0">
+                <span class="tab-icon w-10 h-10 rounded-full bg-[#f4f4f5] text-[#18181b] flex items-center justify-center flex-shrink-0">
                     <i class="fas fa-id-card"></i>
                 </span>
                 <span class="min-w-0">
@@ -339,15 +338,15 @@ $last_login_disp = $user['last_login']  ? formatDate($user['last_login'],  'F d,
                         <div class="relative flex-shrink-0">
                             <?php if ($profile_picture): ?>
                                 <img id="profile-preview" src="<?php echo htmlspecialchars($profile_picture); ?>" alt="Profile picture"
-                                     class="w-20 h-20 rounded-full object-cover border-2 border-[#e2eae4]">
+                                     class="w-20 h-20 rounded-full object-cover border-2 border-[#e4e4e7]">
                             <?php else: ?>
-                                <div id="profile-preview" class="w-20 h-20 rounded-full bg-[#23332c] text-white flex items-center justify-center font-semibold text-2xl border-2 border-[#e2eae4]">
+                                <div id="profile-preview" class="w-20 h-20 rounded-full bg-[#18181b] text-white flex items-center justify-center font-semibold text-2xl border-2 border-[#e4e4e7]">
                                     <?php echo htmlspecialchars($avatar_initial); ?>
                                 </div>
                             <?php endif; ?>
                         </div>
                         <div class="flex-1">
-                            <label for="profile_picture" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#eaf0ec] text-[#23332c] text-sm font-medium hover:bg-[#dde7e1] transition-colors cursor-pointer">
+                            <label for="profile_picture" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#f4f4f5] text-[#18181b] text-sm font-medium hover:bg-[#dde7e1] transition-colors cursor-pointer">
                                 <i class="fas fa-upload"></i> Change Photo
                             </label>
                             <input type="file" id="profile_picture" name="profile_picture" accept="image/jpeg,image/png,image/gif,image/webp" class="hidden">
@@ -357,30 +356,30 @@ $last_login_disp = $user['last_login']  ? formatDate($user['last_login'],  'F d,
 
                     <!-- Full Name -->
                     <div class="mb-5">
-                        <label for="full_name" class="block text-sm font-medium text-[#23332c] mb-2">Full Name</label>
+                        <label for="full_name" class="block text-sm font-medium text-[#18181b] mb-2">Full Name</label>
                         <input type="text" id="full_name" name="full_name" required
                                value="<?php echo htmlspecialchars($user['full_name'] ?? ''); ?>"
-                               class="form-input w-full px-4 py-2.5 border border-[#d6ded9] rounded-xl bg-[#f7faf8] text-[#23332c]">
+                               class="form-input w-full px-4 py-2.5 border border-[#e4e4e7] rounded-xl bg-[#fafafa] text-[#18181b]">
                     </div>
 
                     <!-- Username -->
                     <div class="mb-5">
-                        <label for="username" class="block text-sm font-medium text-[#23332c] mb-2">Username</label>
+                        <label for="username" class="block text-sm font-medium text-[#18181b] mb-2">Username</label>
                         <input type="text" id="username" name="username" required
                                value="<?php echo htmlspecialchars($user['username']); ?>"
-                               class="form-input w-full px-4 py-2.5 border border-[#d6ded9] rounded-xl bg-[#f7faf8] text-[#23332c]">
+                               class="form-input w-full px-4 py-2.5 border border-[#e4e4e7] rounded-xl bg-[#fafafa] text-[#18181b]">
                     </div>
 
                     <!-- Email -->
                     <div class="mb-6">
-                        <label for="email" class="block text-sm font-medium text-[#23332c] mb-2">Email</label>
+                        <label for="email" class="block text-sm font-medium text-[#18181b] mb-2">Email</label>
                         <input type="email" id="email" name="email" required
                                value="<?php echo htmlspecialchars($user['email']); ?>"
-                               class="form-input w-full px-4 py-2.5 border border-[#d6ded9] rounded-xl bg-[#f7faf8] text-[#23332c]">
+                               class="form-input w-full px-4 py-2.5 border border-[#e4e4e7] rounded-xl bg-[#fafafa] text-[#18181b]">
                     </div>
 
                     <div class="flex items-center gap-3 pt-2">
-                        <button type="submit" class="bg-[#23332c] text-white px-5 py-2.5 rounded-xl hover:bg-[#3a4a41] transition-colors inline-flex items-center gap-2 font-medium">
+                        <button type="submit" class="bg-[#18181b] text-white px-5 py-2.5 rounded-xl hover:bg-[#27272a] transition-colors inline-flex items-center gap-2 font-medium">
                             <i class="fas fa-save"></i> Save Changes
                         </button>
                         <a href="settings.php?tab=profile" class="px-5 py-2.5 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors inline-flex items-center gap-2">
@@ -403,12 +402,12 @@ $last_login_disp = $user['last_login']  ? formatDate($user['last_login'],  'F d,
 
                     <!-- Current Password -->
                     <div class="mb-5">
-                        <label for="current_password" class="block text-sm font-medium text-[#23332c] mb-2">Current Password</label>
+                        <label for="current_password" class="block text-sm font-medium text-[#18181b] mb-2">Current Password</label>
                         <div class="relative">
-                            <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-[#8a978f] text-sm"></i>
+                            <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-[#a1a1aa] text-sm"></i>
                             <input type="password" id="current_password" name="current_password" required
-                                   class="form-input w-full pl-11 pr-11 py-2.5 border border-[#d6ded9] rounded-xl bg-[#f7faf8] text-[#23332c]">
-                            <button type="button" class="toggle-password absolute right-3 top-1/2 -translate-y-1/2 text-[#8a978f] hover:text-[#23332c]" data-target="current_password" tabindex="-1">
+                                   class="form-input w-full pl-11 pr-11 py-2.5 border border-[#e4e4e7] rounded-xl bg-[#fafafa] text-[#18181b]">
+                            <button type="button" class="toggle-password absolute right-3 top-1/2 -translate-y-1/2 text-[#a1a1aa] hover:text-[#18181b]" data-target="current_password" tabindex="-1">
                                 <i class="fas fa-eye"></i>
                             </button>
                         </div>
@@ -416,12 +415,12 @@ $last_login_disp = $user['last_login']  ? formatDate($user['last_login'],  'F d,
 
                     <!-- New Password -->
                     <div class="mb-5">
-                        <label for="new_password" class="block text-sm font-medium text-[#23332c] mb-2">New Password</label>
+                        <label for="new_password" class="block text-sm font-medium text-[#18181b] mb-2">New Password</label>
                         <div class="relative">
-                            <i class="fas fa-key absolute left-4 top-1/2 -translate-y-1/2 text-[#8a978f] text-sm"></i>
+                            <i class="fas fa-key absolute left-4 top-1/2 -translate-y-1/2 text-[#a1a1aa] text-sm"></i>
                             <input type="password" id="new_password" name="new_password" required minlength="<?php echo PASSWORD_MIN_LENGTH; ?>"
-                                   class="form-input w-full pl-11 pr-11 py-2.5 border border-[#d6ded9] rounded-xl bg-[#f7faf8] text-[#23332c]">
-                            <button type="button" class="toggle-password absolute right-3 top-1/2 -translate-y-1/2 text-[#8a978f] hover:text-[#23332c]" data-target="new_password" tabindex="-1">
+                                   class="form-input w-full pl-11 pr-11 py-2.5 border border-[#e4e4e7] rounded-xl bg-[#fafafa] text-[#18181b]">
+                            <button type="button" class="toggle-password absolute right-3 top-1/2 -translate-y-1/2 text-[#a1a1aa] hover:text-[#18181b]" data-target="new_password" tabindex="-1">
                                 <i class="fas fa-eye"></i>
                             </button>
                         </div>
@@ -429,19 +428,19 @@ $last_login_disp = $user['last_login']  ? formatDate($user['last_login'],  'F d,
 
                     <!-- Confirm Password -->
                     <div class="mb-6">
-                        <label for="confirm_password" class="block text-sm font-medium text-[#23332c] mb-2">Confirm New Password</label>
+                        <label for="confirm_password" class="block text-sm font-medium text-[#18181b] mb-2">Confirm New Password</label>
                         <div class="relative">
-                            <i class="fas fa-check-double absolute left-4 top-1/2 -translate-y-1/2 text-[#8a978f] text-sm"></i>
+                            <i class="fas fa-check-double absolute left-4 top-1/2 -translate-y-1/2 text-[#a1a1aa] text-sm"></i>
                             <input type="password" id="confirm_password" name="confirm_password" required minlength="<?php echo PASSWORD_MIN_LENGTH; ?>"
-                                   class="form-input w-full pl-11 pr-11 py-2.5 border border-[#d6ded9] rounded-xl bg-[#f7faf8] text-[#23332c]">
-                            <button type="button" class="toggle-password absolute right-3 top-1/2 -translate-y-1/2 text-[#8a978f] hover:text-[#23332c]" data-target="confirm_password" tabindex="-1">
+                                   class="form-input w-full pl-11 pr-11 py-2.5 border border-[#e4e4e7] rounded-xl bg-[#fafafa] text-[#18181b]">
+                            <button type="button" class="toggle-password absolute right-3 top-1/2 -translate-y-1/2 text-[#a1a1aa] hover:text-[#18181b]" data-target="confirm_password" tabindex="-1">
                                 <i class="fas fa-eye"></i>
                             </button>
                         </div>
                     </div>
 
                     <div class="flex items-center gap-3 pt-2">
-                        <button type="submit" class="bg-[#23332c] text-white px-5 py-2.5 rounded-xl hover:bg-[#3a4a41] transition-colors inline-flex items-center gap-2 font-medium">
+                        <button type="submit" class="bg-[#18181b] text-white px-5 py-2.5 rounded-xl hover:bg-[#27272a] transition-colors inline-flex items-center gap-2 font-medium">
                             <i class="fas fa-key"></i> Change Password
                         </button>
                         <a href="settings.php?tab=security" class="px-5 py-2.5 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors inline-flex items-center gap-2">
@@ -462,31 +461,31 @@ $last_login_disp = $user['last_login']  ? formatDate($user['last_login'],  'F d,
                     <div>
                         <label for="account_id" class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Account ID</label>
                         <input type="text" id="account_id" value="#<?php echo htmlspecialchars($user['id']); ?>" readonly
-                               class="form-input w-full px-4 py-2.5 border border-[#d6ded9] rounded-xl bg-[#f5f7f5] text-[#23332c] font-medium">
+                               class="form-input w-full px-4 py-2.5 border border-[#e4e4e7] rounded-xl bg-[#f4f4f5] text-[#18181b] font-medium">
                     </div>
 
                     <div>
                         <label for="account_role" class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Role</label>
                         <input type="text" id="account_role" value="<?php echo htmlspecialchars($role_label); ?>" readonly
-                               class="form-input w-full px-4 py-2.5 border border-[#d6ded9] rounded-xl bg-[#f5f7f5] text-[#23332c] font-medium">
+                               class="form-input w-full px-4 py-2.5 border border-[#e4e4e7] rounded-xl bg-[#f4f4f5] text-[#18181b] font-medium">
                     </div>
 
                     <div>
                         <label for="account_created" class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Account Created</label>
                         <input type="text" id="account_created" value="<?php echo htmlspecialchars($created_display); ?>" readonly
-                               class="form-input w-full px-4 py-2.5 border border-[#d6ded9] rounded-xl bg-[#f5f7f5] text-[#23332c] font-medium">
+                               class="form-input w-full px-4 py-2.5 border border-[#e4e4e7] rounded-xl bg-[#f4f4f5] text-[#18181b] font-medium">
                     </div>
 
                     <div>
                         <label for="account_last_login" class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Last Login</label>
                         <input type="text" id="account_last_login" value="<?php echo htmlspecialchars($last_login_disp); ?>" readonly
-                               class="form-input w-full px-4 py-2.5 border border-[#d6ded9] rounded-xl bg-[#f5f7f5] text-[#23332c] font-medium">
+                               class="form-input w-full px-4 py-2.5 border border-[#e4e4e7] rounded-xl bg-[#f4f4f5] text-[#18181b] font-medium">
                     </div>
                 </div>
 
-                <div class="mt-6 p-4 bg-[#f7faf8] border border-[#e2eae4] rounded-xl flex items-start gap-3 max-w-2xl">
-                    <i class="fas fa-info-circle text-[#3d7a66] mt-0.5"></i>
-                    <p class="text-sm text-[#45524b]">
+                <div class="mt-6 p-4 bg-[#fafafa] border border-[#e4e4e7] rounded-xl flex items-start gap-3 max-w-2xl">
+                    <i class="fas fa-info-circle text-[#18181b] mt-0.5"></i>
+                    <p class="text-sm text-[#3f3f46]">
                         Need to change your role or account status? Contact another Super Admin. These fields are read-only for security reasons.
                     </p>
                 </div>
@@ -550,7 +549,7 @@ $last_login_disp = $user['last_login']  ? formatDate($user['last_login'],  'F d,
                             var img = document.createElement('img');
                             img.src = e.target.result;
                             img.alt = 'Profile picture preview';
-                            img.className = 'w-20 h-20 rounded-full object-cover border-2 border-[#e2eae4]';
+                            img.className = 'w-20 h-20 rounded-full object-cover border-2 border-[#e4e4e7]';
                             img.id = 'profile-preview';
                             preview.replaceWith(img);
                         };

@@ -171,11 +171,11 @@ $view_url = 'login.php';
 
     <style>
         @media (min-width: 1024px) {
-            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #d2dcd5 transparent; }
+            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #e4e4e7 transparent; }
             .lg\:ml-64::-webkit-scrollbar { width: 8px; }
             .lg\:ml-64::-webkit-scrollbar-track { background: transparent; }
-            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #d2dcd5; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
-            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #c0ccc5; }
+            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #e4e4e7; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
+            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #d4d4d8; }
         }
         .bg-preview { background-size: cover; background-position: center; }
         .field { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.875rem; }
@@ -185,7 +185,6 @@ $view_url = 'login.php';
 
     <!-- Main Content -->
     <div class="relative lg:ml-64 p-4 lg:p-8">
-        <?php $logo_pulse_logo = '../uploads/images/tupi_supreme_logo.png'; $logo_pulse_mode = 'absolute'; include '../includes/logo_pulse_loader.php'; ?>
 
         <!-- Page Header -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -551,18 +550,18 @@ $view_url = 'login.php';
                             </div>
                             <!-- Form panel replica -->
                             <div id="pv_form" class="w-[38%] flex flex-col items-center justify-center p-4 text-center">
-                                <div class="w-9 h-9 rounded-full bg-white shadow ring-2 ring-[#e2eae4] flex items-center justify-center">
+                                <div class="w-9 h-9 rounded-full bg-white shadow ring-2 ring-[#e4e4e7] flex items-center justify-center">
                                     <img id="pv_logo2" src="<?php echo $s('login_logo'); ?>" alt="" class="w-6 h-6 object-contain">
                                 </div>
-                                <p id="pv_form_eyebrow" class="mt-2 text-[7px] font-semibold uppercase tracking-[0.2em] text-[#3d7a66]"></p>
-                                <p id="pv_form_heading" class="text-sm font-bold text-[#23332c] leading-tight"></p>
-                                <p id="pv_form_subtext" class="text-[8px] text-[#7d8b84]"></p>
+                                <p id="pv_form_eyebrow" class="mt-2 text-[7px] font-semibold uppercase tracking-[0.2em] text-[#18181b]"></p>
+                                <p id="pv_form_heading" class="text-sm font-bold text-[#18181b] leading-tight"></p>
+                                <p id="pv_form_subtext" class="text-[8px] text-[#71717a]"></p>
                                 <div class="mt-3 w-full space-y-1.5">
-                                    <div class="h-6 rounded-md bg-white border border-[#e2eae4]"></div>
-                                    <div class="h-6 rounded-md bg-white border border-[#e2eae4]"></div>
+                                    <div class="h-6 rounded-md bg-white border border-[#e4e4e7]"></div>
+                                    <div class="h-6 rounded-md bg-white border border-[#e4e4e7]"></div>
                                     <div id="pv_button" class="h-7 rounded-md flex items-center justify-center text-[8px] font-semibold text-white"><span id="pv_button_text"></span></div>
                                 </div>
-                                <p class="mt-2 text-[7px] text-[#8a978f]"><span id="pv_help_text"></span> <span id="pv_help_link" class="font-medium"></span></p>
+                                <p class="mt-2 text-[7px] text-[#a1a1aa]"><span id="pv_help_text"></span> <span id="pv_help_link" class="font-medium"></span></p>
                             </div>
                         </div>
                     </div>

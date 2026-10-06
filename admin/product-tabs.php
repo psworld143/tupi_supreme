@@ -186,11 +186,11 @@ $icon_options = ['fa-cube', 'fa-cubes', 'fa-seedling', 'fa-leaf', 'fa-cogs', 'fa
 
     <style>
         @media (min-width: 1024px) {
-            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #d2dcd5 transparent; }
+            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #e4e4e7 transparent; }
             .lg\:ml-64::-webkit-scrollbar { width: 8px; }
             .lg\:ml-64::-webkit-scrollbar-track { background: transparent; }
-            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #d2dcd5; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
-            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #c0ccc5; }
+            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #e4e4e7; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
+            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #d4d4d8; }
         }
         .quick-pick { padding: 3px 8px; font-size: 11px; border: 1px solid #d1d5db; background: #fff; border-radius: 4px; cursor: pointer; color: #4b5563; }
         .quick-pick:hover { background: #f3f4f6; border-color: #9ca3af; }
@@ -198,7 +198,6 @@ $icon_options = ['fa-cube', 'fa-cubes', 'fa-seedling', 'fa-leaf', 'fa-cogs', 'fa
 
     <!-- Main Content -->
     <div class="relative lg:ml-64 p-4 lg:p-8">
-        <?php $logo_pulse_logo = '../uploads/images/tupi_supreme_logo.png'; $logo_pulse_mode = 'absolute'; include '../includes/logo_pulse_loader.php'; ?>
 
         <!-- Page Header -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -372,13 +371,13 @@ $icon_options = ['fa-cube', 'fa-cubes', 'fa-seedling', 'fa-leaf', 'fa-cogs', 'fa
                         <div class="border border-gray-200 rounded-lg p-6 bg-gray-50 mb-4">
                             <p class="text-xs text-gray-400 mb-3">Tab button (among other tabs):</p>
                             <div class="flex flex-wrap gap-3">
-                                <button class="border-2 border-[#d6ded9] text-[#23332c] px-6 py-3 rounded-full font-medium text-sm bg-white">
+                                <button class="border-2 border-[#e4e4e7] text-[#18181b] px-6 py-3 rounded-full font-medium text-sm bg-white">
                                     <i class="fas fa-cubes mr-2"></i>Granulated
                                 </button>
                                 <button class="border-2 border-primary text-white px-6 py-3 rounded-full font-medium text-sm bg-primary">
                                     <i id="preview_icon" class="fas <?php echo htmlspecialchars($edit_tab['icon'] ?? 'fa-cube'); ?> mr-2"></i><span id="preview_label"><?php echo htmlspecialchars($edit_tab['label'] ?? 'Tab label'); ?></span>
                                 </button>
-                                <button class="border-2 border-[#d6ded9] text-[#23332c] px-6 py-3 rounded-full font-medium text-sm bg-white">
+                                <button class="border-2 border-[#e4e4e7] text-[#18181b] px-6 py-3 rounded-full font-medium text-sm bg-white">
                                     <i class="fas fa-cogs mr-2"></i>Custom
                                 </button>
                             </div>
@@ -386,7 +385,7 @@ $icon_options = ['fa-cube', 'fa-cubes', 'fa-seedling', 'fa-leaf', 'fa-cogs', 'fa
 
                         <!-- Tab pane header preview -->
                         <div class="rounded-lg overflow-hidden border border-gray-200">
-                            <div class="bg-[#60796e] text-white p-8 text-center relative overflow-hidden">
+                            <div class="bg-[#71717a] text-white p-8 text-center relative overflow-hidden">
                                 <div class="absolute inset-0 opacity-25" style="background: #8bc34a; border-radius: 50%; filter: blur(40px); width: 100px; height: 100px; top: -20px; right: -20px;"></div>
                                 <div class="relative">
                                     <span class="bg-white/15 text-white/90 mb-4 inline-block px-2 py-0.5 text-xs rounded-full">

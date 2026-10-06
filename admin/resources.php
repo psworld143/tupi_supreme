@@ -217,11 +217,11 @@ function resourceViewUrl($category) {
 
     <style>
         @media (min-width: 1024px) {
-            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #d2dcd5 transparent; }
+            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #e4e4e7 transparent; }
             .lg\:ml-64::-webkit-scrollbar { width: 8px; }
             .lg\:ml-64::-webkit-scrollbar-track { background: transparent; }
-            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #d2dcd5; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
-            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #c0ccc5; }
+            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #e4e4e7; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
+            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #d4d4d8; }
         }
         .quick-pick { padding: 3px 8px; font-size: 11px; border: 1px solid #d1d5db; background: #fff; border-radius: 4px; cursor: pointer; color: #4b5563; }
         .quick-pick:hover { background: #f3f4f6; border-color: #9ca3af; }
@@ -229,7 +229,6 @@ function resourceViewUrl($category) {
 
     <!-- Main Content -->
     <div class="relative lg:ml-64 p-4 lg:p-8">
-        <?php $logo_pulse_logo = '../uploads/images/tupi_supreme_logo.png'; $logo_pulse_mode = 'absolute'; include '../includes/logo_pulse_loader.php'; ?>
 
         <!-- Page Header -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -426,16 +425,16 @@ function resourceViewUrl($category) {
                             <i class="fas fa-eye text-gray-400"></i> Live Preview
                             <span class="text-xs text-gray-400 font-normal">(download card on the Resources page)</span>
                         </p>
-                        <div class="resource-card bg-white border border-[#e6ece8] rounded-2xl p-8">
+                        <div class="resource-card bg-white border border-[#e4e4e7] rounded-2xl p-8">
                             <div class="text-center mb-6">
-                                <div class="download-icon w-16 h-16 rounded-2xl flex items-center justify-center mx-auto" style="background: #3d7a66;">
+                                <div class="download-icon w-16 h-16 rounded-2xl flex items-center justify-center mx-auto" style="background: #18181b;">
                                     <i id="preview_icon" class="fas fa-file-pdf text-2xl text-white"></i>
                                 </div>
                             </div>
-                            <h3 id="preview_title" class="text-xl font-semibold text-[#23332c] mb-3 text-center"><?php echo htmlspecialchars($edit_resource['title'] ?? 'Resource title'); ?></h3>
-                            <p id="preview_file_type" class="text-[#8a978f] mb-3 text-center text-sm <?php echo empty($edit_resource['file_type'] ?? '') ? 'hidden' : ''; ?>"><?php echo htmlspecialchars($edit_resource['file_type'] ?? ''); ?></p>
-                            <p id="preview_desc" class="text-[#7d8b84] mb-6 text-sm leading-relaxed <?php echo empty($edit_resource['description'] ?? '') ? 'hidden' : ''; ?>"><?php echo htmlspecialchars($edit_resource['description'] ?? ''); ?></p>
-                            <a id="preview_download" href="#" class="block w-full bg-[#23332c] hover:bg-[#3a4a41] text-white font-medium py-3 px-6 rounded-full transition-colors text-center inline-flex items-center justify-center gap-2">
+                            <h3 id="preview_title" class="text-xl font-semibold text-[#18181b] mb-3 text-center"><?php echo htmlspecialchars($edit_resource['title'] ?? 'Resource title'); ?></h3>
+                            <p id="preview_file_type" class="text-[#a1a1aa] mb-3 text-center text-sm <?php echo empty($edit_resource['file_type'] ?? '') ? 'hidden' : ''; ?>"><?php echo htmlspecialchars($edit_resource['file_type'] ?? ''); ?></p>
+                            <p id="preview_desc" class="text-[#71717a] mb-6 text-sm leading-relaxed <?php echo empty($edit_resource['description'] ?? '') ? 'hidden' : ''; ?>"><?php echo htmlspecialchars($edit_resource['description'] ?? ''); ?></p>
+                            <a id="preview_download" href="#" class="block w-full bg-[#18181b] hover:bg-[#27272a] text-white font-medium py-3 px-6 rounded-full transition-colors text-center inline-flex items-center justify-center gap-2">
                                 <i class="fas fa-download text-xs"></i><span id="preview_btn_text">Download</span>
                             </a>
                         </div>
@@ -751,16 +750,6 @@ function resourceViewUrl($category) {
                     'base_query'    => $_GET,
                 ]);
                 ?>
-            </div>
-
-            <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 class="font-semibold text-blue-900 mb-2">Quick Links</h3>
-                <ul class="text-sm text-blue-800 space-y-1">
-                    <li><a href="../resources.php#data-sheets" target="_blank" class="hover:underline"><i class="fas fa-external-link-alt mr-1"></i>View Resources — Data Sheets</a></li>
-                    <li><a href="../resources.php#catalogs" target="_blank" class="hover:underline"><i class="fas fa-external-link-alt mr-1"></i>View Resources — Catalogs</a></li>
-                    <li><a href="../resources.php#guides" target="_blank" class="hover:underline"><i class="fas fa-external-link-alt mr-1"></i>View Resources — Guides</a></li>
-                    <li><a href="index.php" class="hover:underline"><i class="fas fa-home mr-1"></i>Back to Admin Dashboard</a></li>
-                </ul>
             </div>
         <?php endif; ?>
     </div>

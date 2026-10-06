@@ -32,6 +32,7 @@ $legal_links = getFooterLinks('legal');
                 <h6 class="text-sm font-semibold uppercase tracking-wider text-white/60 mb-4">Quick Links</h6>
                 <ul class="space-y-2.5">
                     <?php foreach ($quick_links as $link): ?>
+                        <?php if (!isPageLinkEnabled($link['url'])) continue; ?>
                         <li><a href="<?php echo htmlspecialchars_safe($link['url']); ?>" class="text-white/75 hover:text-[#8bc34a] transition-colors text-sm"><?php echo htmlspecialchars_safe($link['label']); ?></a></li>
                     <?php endforeach; ?>
                 </ul>
@@ -40,6 +41,7 @@ $legal_links = getFooterLinks('legal');
                 <h6 class="text-sm font-semibold uppercase tracking-wider text-white/60 mb-4">Products</h6>
                 <ul class="space-y-2.5">
                     <?php foreach ($product_links as $link): ?>
+                        <?php if (!isPageLinkEnabled($link['url'])) continue; ?>
                         <li><a href="<?php echo htmlspecialchars_safe($link['url']); ?>" class="text-white/75 hover:text-[#8bc34a] transition-colors text-sm"><?php echo htmlspecialchars_safe($link['label']); ?></a></li>
                     <?php endforeach; ?>
                 </ul>
@@ -64,6 +66,7 @@ $legal_links = getFooterLinks('legal');
             <p class="text-white/60 text-sm">&copy; <?php echo htmlspecialchars_safe($copyright_year); ?> <?php echo htmlspecialchars_safe(getSiteSetting('company_name', 'Tupi Supreme Activated Carbon, Inc.')); ?>. All rights reserved.</p>
             <div class="flex space-x-5 mt-4 md:mt-0">
                 <?php foreach ($legal_links as $link): ?>
+                    <?php if (!isPageLinkEnabled($link['url'])) continue; ?>
                     <a href="<?php echo htmlspecialchars_safe($link['url']); ?>" class="text-white/60 hover:text-[#8bc34a] transition-colors text-sm"><?php echo htmlspecialchars_safe($link['label']); ?></a>
                 <?php endforeach; ?>
             </div>

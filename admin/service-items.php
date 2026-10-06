@@ -204,21 +204,20 @@ $view_url = '../services.php';
 
     <style>
         @media (min-width: 1024px) {
-            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #d2dcd5 transparent; }
+            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #e4e4e7 transparent; }
             .lg\:ml-64::-webkit-scrollbar { width: 8px; }
             .lg\:ml-64::-webkit-scrollbar-track { background: transparent; }
-            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #c0ccc5; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
-            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #96a39b; }
+            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #d4d4d8; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
+            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #a1a1aa; }
         }
         .quick-pick { padding: 3px 8px; font-size: 11px; border: 1px solid #d1d5db; background: #fff; border-radius: 4px; cursor: pointer; color: #4b5563; }
         .quick-pick:hover { background: #f3f4f6; border-color: #9ca3af; }
         /* Matches services.php */
-        .item-icon { background: #3d7a66; }
+        .item-icon { background: #18181b; }
     </style>
 
     <!-- Main Content -->
     <div class="relative lg:ml-64 p-4 lg:p-8">
-        <?php $logo_pulse_logo = '../uploads/images/tupi_supreme_logo.png'; $logo_pulse_mode = 'absolute'; include '../includes/logo_pulse_loader.php'; ?>
 
         <!-- Page Header -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -374,24 +373,24 @@ $view_url = '../services.php';
                             <i class="fas fa-eye text-gray-400"></i> Live Preview
                             <span class="text-xs text-gray-400 font-normal">(how this item looks on the services page)</span>
                         </p>
-                        <div class="rounded-lg p-6 bg-[#f0f4f1]">
+                        <div class="rounded-lg p-6 bg-[#f4f4f5]">
                             <!-- Process-style preview (numbered step on dark background) -->
-                            <div id="preview_process" class="rounded-2xl p-6 bg-[#23332c] text-white text-center <?php echo ($edit_item['section'] ?? 'features') === 'process' ? '' : 'hidden'; ?>">
+                            <div id="preview_process" class="rounded-2xl p-6 bg-[#18181b] text-white text-center <?php echo ($edit_item['section'] ?? 'features') === 'process' ? '' : 'hidden'; ?>">
                                 <div class="item-icon w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 relative">
                                     <i id="preview_icon_process" class="<?php echo htmlspecialchars($edit_item['icon'] ?? '') ?: 'fas fa-star'; ?> text-xl text-white"></i>
-                                    <span class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-[#8bc34a] text-[#23332c] text-xs font-bold flex items-center justify-center">1</span>
+                                    <span class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-[#8bc34a] text-[#18181b] text-xs font-bold flex items-center justify-center">1</span>
                                 </div>
                                 <h5 id="preview_title_process" class="text-base font-semibold mb-2"><?php echo htmlspecialchars($edit_item['title'] ?? 'Step Title'); ?></h5>
                                 <p id="preview_desc_process" class="text-sm text-white/70"><?php echo htmlspecialchars($edit_item['description'] ?? 'Step description appears here.'); ?></p>
                             </div>
                             <!-- Features-style preview (white row) -->
-                            <div id="preview_features" class="rounded-2xl p-5 bg-white border border-[#e6ece8] flex items-center <?php echo ($edit_item['section'] ?? 'features') === 'features' ? '' : 'hidden'; ?>">
+                            <div id="preview_features" class="rounded-2xl p-5 bg-white border border-[#e4e4e7] flex items-center <?php echo ($edit_item['section'] ?? 'features') === 'features' ? '' : 'hidden'; ?>">
                                 <div class="item-icon w-12 h-12 rounded-2xl flex items-center justify-center mr-4 flex-shrink-0">
                                     <i id="preview_icon_features" class="<?php echo htmlspecialchars($edit_item['icon'] ?? '') ?: 'fas fa-star'; ?> text-lg text-white"></i>
                                 </div>
                                 <div>
-                                    <h5 id="preview_title_features" class="text-base font-semibold text-[#23332c] mb-1"><?php echo htmlspecialchars($edit_item['title'] ?? 'Feature Title'); ?></h5>
-                                    <p id="preview_desc_features" class="text-sm text-[#7d8b84]"><?php echo htmlspecialchars($edit_item['description'] ?? 'Feature description appears here.'); ?></p>
+                                    <h5 id="preview_title_features" class="text-base font-semibold text-[#18181b] mb-1"><?php echo htmlspecialchars($edit_item['title'] ?? 'Feature Title'); ?></h5>
+                                    <p id="preview_desc_features" class="text-sm text-[#71717a]"><?php echo htmlspecialchars($edit_item['description'] ?? 'Feature description appears here.'); ?></p>
                                 </div>
                             </div>
                         </div>
@@ -499,7 +498,7 @@ $view_url = '../services.php';
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <?php if ($item['section'] === 'process'): ?>
-                                            <span class="px-2 py-1 text-xs rounded-full bg-[#23332c] text-white font-semibold">Process</span>
+                                            <span class="px-2 py-1 text-xs rounded-full bg-[#18181b] text-white font-semibold">Process</span>
                                         <?php else: ?>
                                             <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800 font-semibold">Features</span>
                                         <?php endif; ?>
@@ -551,16 +550,6 @@ $view_url = '../services.php';
                     'base_query'    => $_GET,
                 ]);
                 ?>
-            </div>
-
-            <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 class="font-semibold text-blue-900 mb-2">Quick Links</h3>
-                <ul class="text-sm text-blue-800 space-y-1">
-                    <li><a href="<?php echo $view_url; ?>#process" target="_blank" class="hover:underline"><i class="fas fa-external-link-alt mr-1"></i>View Services Page (process section)</a></li>
-                    <li><a href="<?php echo $view_url; ?>#features" target="_blank" class="hover:underline"><i class="fas fa-external-link-alt mr-1"></i>View Services Page (features section)</a></li>
-                    <li><a href="pages.php" class="hover:underline"><i class="fas fa-file-alt mr-1"></i>Edit section titles &amp; subtitles (Pages → services)</a></li>
-                    <li><a href="index.php" class="hover:underline"><i class="fas fa-home mr-1"></i>Back to Admin Dashboard</a></li>
-                </ul>
             </div>
         <?php endif; ?>
     </div>

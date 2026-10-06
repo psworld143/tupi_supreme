@@ -239,17 +239,16 @@ $view_url = '../products.php#main';
 
     <style>
         @media (min-width: 1024px) {
-            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #d2dcd5 transparent; }
+            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #e4e4e7 transparent; }
             .lg\:ml-64::-webkit-scrollbar { width: 8px; }
             .lg\:ml-64::-webkit-scrollbar-track { background: transparent; }
-            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #d2dcd5; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
-            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #c0ccc5; }
+            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #e4e4e7; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
+            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #d4d4d8; }
         }
     </style>
 
     <!-- Main Content -->
     <div class="relative lg:ml-64 p-4 lg:p-8">
-        <?php $logo_pulse_logo = '../uploads/images/tupi_supreme_logo.png'; $logo_pulse_mode = 'absolute'; include '../includes/logo_pulse_loader.php'; ?>
 
         <!-- Page Header -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -502,21 +501,21 @@ $view_url = '../products.php#main';
                             <span class="text-xs text-gray-400 font-normal">(product card on the Products page)</span>
                         </p>
                         <div class="border border-gray-200 rounded-2xl overflow-hidden bg-white">
-                            <div class="aspect-video bg-[#f7faf8] flex items-center justify-center overflow-hidden" id="preview_img_wrap">
+                            <div class="aspect-video bg-[#fafafa] flex items-center justify-center overflow-hidden" id="preview_img_wrap">
                                 <img id="preview_img" src="<?php echo htmlspecialchars($edit_product['image_url'] ?? ''); ?>" alt="" class="w-full h-full object-cover <?php echo empty($edit_product['image_url'] ?? '') ? 'hidden' : ''; ?>">
-                                <div id="preview_img_placeholder" class="aspect-video bg-[#3d7a66] flex items-center justify-center w-full h-full <?php echo empty($edit_product['image_url'] ?? '') ? '' : 'hidden'; ?>">
+                                <div id="preview_img_placeholder" class="aspect-video bg-[#18181b] flex items-center justify-center w-full h-full <?php echo empty($edit_product['image_url'] ?? '') ? '' : 'hidden'; ?>">
                                     <i id="preview_img_icon" class="<?php echo htmlspecialchars($edit_product['icon'] ?? '') ?: 'fas fa-box'; ?> text-5xl text-white/80"></i>
                                 </div>
                             </div>
                             <div class="p-6">
-                                <h4 id="preview_name" class="text-xl font-semibold text-[#23332c] mb-2"><?php echo htmlspecialchars($edit_product['name'] ?? 'Product name'); ?></h4>
-                                <span id="preview_tagline" class="inline-block bg-[#eef3f0] text-[#3d7a66] text-xs font-medium px-3 py-1 rounded-full mb-3 <?php echo empty($edit_product['tagline'] ?? '') ? 'hidden' : ''; ?>"><?php echo htmlspecialchars($edit_product['tagline'] ?? ''); ?></span>
-                                <div id="preview_desc" class="text-[#7d8b84] text-sm leading-relaxed mb-4 prose prose-sm max-w-none"><?php echo $edit_product['description'] ?? '<span class="text-gray-400">Product description appears here…</span>'; ?></div>
+                                <h4 id="preview_name" class="text-xl font-semibold text-[#18181b] mb-2"><?php echo htmlspecialchars($edit_product['name'] ?? 'Product name'); ?></h4>
+                                <span id="preview_tagline" class="inline-block bg-[#f4f4f5] text-[#18181b] text-xs font-medium px-3 py-1 rounded-full mb-3 <?php echo empty($edit_product['tagline'] ?? '') ? 'hidden' : ''; ?>"><?php echo htmlspecialchars($edit_product['tagline'] ?? ''); ?></span>
+                                <div id="preview_desc" class="text-[#71717a] text-sm leading-relaxed mb-4 prose prose-sm max-w-none"><?php echo $edit_product['description'] ?? '<span class="text-gray-400">Product description appears here…</span>'; ?></div>
                                 <ul id="preview_features" class="text-sm text-[#5a6b62] space-y-1 mb-4">
                                     <li class="text-gray-400">Features appear here when added (split on • )…</li>
                                 </ul>
                                 <div class="mt-auto pt-4">
-                                    <span class="inline-flex items-center gap-2 bg-[#23332c] text-white font-medium py-2.5 px-5 rounded-full text-sm">
+                                    <span class="inline-flex items-center gap-2 bg-[#18181b] text-white font-medium py-2.5 px-5 rounded-full text-sm">
                                         <i class="fas fa-quote-left text-xs"></i>Request Quote
                                     </span>
                                 </div>
@@ -602,7 +601,7 @@ $view_url = '../products.php#main';
                 var ul = document.getElementById('preview_features');
                 if (feats.length > 0) {
                     ul.innerHTML = feats.map(function(f) {
-                        return '<li class="flex items-start"><i class="fas fa-check text-[#3d7a66] mt-1 mr-2 text-xs"></i>' + f + '</li>';
+                        return '<li class="flex items-start"><i class="fas fa-check text-[#18181b] mt-1 mr-2 text-xs"></i>' + f + '</li>';
                     }).join('');
                 } else {
                     ul.innerHTML = '<li class="text-gray-400">Features appear here when added (split on • )…</li>';
@@ -871,14 +870,6 @@ $view_url = '../products.php#main';
                     'base_query'    => $_GET,
                 ]);
                 ?>
-            </div>
-
-            <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 class="font-semibold text-blue-900 mb-2">Quick Links</h3>
-                <ul class="text-sm text-blue-800 space-y-1">
-                    <li><a href="<?php echo $view_url; ?>" target="_blank" class="hover:underline"><i class="fas fa-external-link-alt mr-1"></i>View Products Page</a></li>
-                    <li><a href="index.php" class="hover:underline"><i class="fas fa-home mr-1"></i>Back to Admin Dashboard</a></li>
-                </ul>
             </div>
         <?php endif; ?>
     </div>

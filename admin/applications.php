@@ -198,24 +198,23 @@ $view_url = '../products.php#applications';
 
     <style>
         @media (min-width: 1024px) {
-            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #d2dcd5 transparent; }
+            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #e4e4e7 transparent; }
             .lg\:ml-64::-webkit-scrollbar { width: 8px; }
             .lg\:ml-64::-webkit-scrollbar-track { background: transparent; }
-            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #d2dcd5; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
-            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #c0ccc5; }
+            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #e4e4e7; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
+            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #d4d4d8; }
         }
         /* Quick-pick suggestion buttons */
         .quick-pick { padding: 3px 8px; font-size: 11px; border: 1px solid #d1d5db; background: #fff; border-radius: 4px; cursor: pointer; color: #4b5563; }
         .quick-pick:hover { background: #f3f4f6; border-color: #9ca3af; }
         /* Matches products.php */
         .application-icon {
-            background: #3d7a66;
+            background: #18181b;
         }
     </style>
 
     <!-- Main Content -->
     <div class="relative lg:ml-64 p-4 lg:p-8">
-        <?php $logo_pulse_logo = '../uploads/images/tupi_supreme_logo.png'; $logo_pulse_mode = 'absolute'; include '../includes/logo_pulse_loader.php'; ?>
 
         <!-- Page Header -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -372,14 +371,14 @@ $view_url = '../products.php#applications';
                             <span class="text-xs text-gray-400 font-normal">(how this card looks on the products page)</span>
                         </p>
                         <!-- Approximation of the application cards on products.php -->
-                        <div class="rounded-lg p-6 bg-[#f0f4f1]">
-                            <div id="preview_card" class="rounded-2xl p-6 text-center <?php echo !empty($edit_app['is_primary']) ? 'bg-[#23332c] text-white' : 'bg-white border border-[#e6ece8]'; ?>">
+                        <div class="rounded-lg p-6 bg-[#f4f4f5]">
+                            <div id="preview_card" class="rounded-2xl p-6 text-center <?php echo !empty($edit_app['is_primary']) ? 'bg-[#18181b] text-white' : 'bg-white border border-[#e4e4e7]'; ?>">
                                 <div id="preview_icon_wrap" class="application-icon w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 <?php echo !empty($edit_app['is_primary']) ? 'bg-white' : ''; ?>">
-                                    <i id="preview_icon" class="<?php echo htmlspecialchars($edit_app['icon'] ?? '') ?: 'fas fa-th-large'; ?> text-2xl <?php echo !empty($edit_app['is_primary']) ? 'text-[#3d7a66]' : 'text-white'; ?>"></i>
+                                    <i id="preview_icon" class="<?php echo htmlspecialchars($edit_app['icon'] ?? '') ?: 'fas fa-th-large'; ?> text-2xl <?php echo !empty($edit_app['is_primary']) ? 'text-[#18181b]' : 'text-white'; ?>"></i>
                                 </div>
-                                <h5 id="preview_title" class="text-base font-semibold mb-2 <?php echo empty($edit_app['is_primary']) ? 'text-[#23332c]' : ''; ?>"><?php echo htmlspecialchars($edit_app['title'] ?? 'Application Title'); ?></h5>
-                                <span id="preview_badge" class="inline-block text-xs font-semibold bg-[#8bc34a] text-[#23332c] px-2.5 py-1 rounded-full mb-2 <?php echo !empty($edit_app['is_primary']) ? '' : 'hidden'; ?>">PRIMARY APPLICATION</span>
-                                <p id="preview_desc" class="text-sm <?php echo !empty($edit_app['is_primary']) ? 'text-white/70' : 'text-[#7d8b84]'; ?>"><?php echo htmlspecialchars($edit_app['description'] ?? 'Short description of this application.'); ?></p>
+                                <h5 id="preview_title" class="text-base font-semibold mb-2 <?php echo empty($edit_app['is_primary']) ? 'text-[#18181b]' : ''; ?>"><?php echo htmlspecialchars($edit_app['title'] ?? 'Application Title'); ?></h5>
+                                <span id="preview_badge" class="inline-block text-xs font-semibold bg-[#8bc34a] text-[#18181b] px-2.5 py-1 rounded-full mb-2 <?php echo !empty($edit_app['is_primary']) ? '' : 'hidden'; ?>">PRIMARY APPLICATION</span>
+                                <p id="preview_desc" class="text-sm <?php echo !empty($edit_app['is_primary']) ? 'text-white/70' : 'text-[#71717a]'; ?>"><?php echo htmlspecialchars($edit_app['description'] ?? 'Short description of this application.'); ?></p>
                             </div>
                         </div>
                         <p class="text-xs text-gray-400 mt-2">On the products page, cards appear in a 4-column grid. The primary card is dark with a badge.</p>
@@ -397,7 +396,7 @@ $view_url = '../products.php#applications';
                 document.getElementById('icon_preview').innerHTML = '<i class="' + cls + '"></i>';
                 var previewIcon = document.getElementById('preview_icon');
                 var primary = document.getElementById('is_primary_input').checked;
-                previewIcon.className = cls + ' text-2xl ' + (primary ? 'text-[#3d7a66]' : 'text-white');
+                previewIcon.className = cls + ' text-2xl ' + (primary ? 'text-[#18181b]' : 'text-white');
             }
 
             // Live preview of the application card
@@ -409,10 +408,10 @@ $view_url = '../products.php#applications';
                 document.getElementById('preview_title').textContent = title;
                 document.getElementById('preview_desc').textContent = desc;
                 document.getElementById('preview_badge').classList.toggle('hidden', !primary);
-                document.getElementById('preview_card').className = 'rounded-2xl p-6 text-center ' + (primary ? 'bg-[#23332c] text-white' : 'bg-white border border-[#e6ece8]');
+                document.getElementById('preview_card').className = 'rounded-2xl p-6 text-center ' + (primary ? 'bg-[#18181b] text-white' : 'bg-white border border-[#e4e4e7]');
                 document.getElementById('preview_icon_wrap').className = 'application-icon w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 ' + (primary ? 'bg-white' : '');
-                document.getElementById('preview_title').className = 'text-base font-semibold mb-2 ' + (primary ? '' : 'text-[#23332c]');
-                document.getElementById('preview_desc').className = 'text-sm ' + (primary ? 'text-white/70' : 'text-[#7d8b84]');
+                document.getElementById('preview_title').className = 'text-base font-semibold mb-2 ' + (primary ? '' : 'text-[#18181b]');
+                document.getElementById('preview_desc').className = 'text-sm ' + (primary ? 'text-white/70' : 'text-[#71717a]');
                 updateIconPreview(document.getElementById('icon_input').value);
             }
             </script>
@@ -491,7 +490,7 @@ $view_url = '../products.php#applications';
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <?php if ($app['is_primary']): ?>
-                                            <span class="px-2 py-1 text-xs rounded-full bg-[#8bc34a] text-[#23332c] font-semibold">Primary</span>
+                                            <span class="px-2 py-1 text-xs rounded-full bg-[#8bc34a] text-[#18181b] font-semibold">Primary</span>
                                         <?php else: ?>
                                             <span class="text-xs text-gray-400">—</span>
                                         <?php endif; ?>
@@ -537,15 +536,6 @@ $view_url = '../products.php#applications';
                     'base_query'    => $_GET,
                 ]);
                 ?>
-            </div>
-
-            <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 class="font-semibold text-blue-900 mb-2">Quick Links</h3>
-                <ul class="text-sm text-blue-800 space-y-1">
-                    <li><a href="<?php echo $view_url; ?>" target="_blank" class="hover:underline"><i class="fas fa-external-link-alt mr-1"></i>View Products Page (applications section)</a></li>
-                    <li><a href="pages.php" class="hover:underline"><i class="fas fa-file-alt mr-1"></i>Edit section title &amp; subtitle (Pages → products)</a></li>
-                    <li><a href="index.php" class="hover:underline"><i class="fas fa-home mr-1"></i>Back to Admin Dashboard</a></li>
-                </ul>
             </div>
         <?php endif; ?>
     </div>

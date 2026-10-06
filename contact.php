@@ -1,6 +1,11 @@
 <?php
 require_once 'includes/config.php';
 
+if (!isModuleEnabled('page_contact')) {
+    header('Location: index.php');
+    exit;
+}
+
 $current_page = 'contact';
 
 // Session needed for CSRF token + submission rate limiting
@@ -90,6 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Get dynamic content
 $page_header_title = getPageContent('contact', 'page_header_title', 'Contact Us');
 $page_header_subtitle = getPageContent('contact', 'page_header_subtitle', 'Get in touch with our team for all your activated carbon needs');
+$page_header_image = getPageHeaderImage('contact');
 $contact_section_title = getPageContent('contact', 'contact_section_title', 'Get In Touch');
 $contact_section_subtitle = getPageContent('contact', 'contact_section_subtitle', 'We\'re here to help with all your activated carbon requirements');
 $form_title = getPageContent('contact', 'form_title', 'Send Us a Message');
@@ -345,7 +351,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     <?php include 'includes/navbar.php'; ?>
     
     <!-- Page Header -->
-    <section id="page-header" class="page-header-gradient text-white relative overflow-hidden pt-24 pb-20">
+    <section id="page-header" class="page-header-gradient text-white relative overflow-hidden pt-24 pb-20"<?php if (!empty($page_header_image)) echo ' style="background-image: url(\'' . htmlspecialchars($page_header_image, ENT_QUOTES) . '\'); background-size: cover; background-position: center;"'; ?>>
+        <?php if (!empty($page_header_image)): ?>
+        <div class="absolute inset-0" style="background-color: rgba(12, 25, 14, 0.72);"></div>
+        <?php endif; ?>
         <div class="page-header-pattern absolute inset-0 opacity-30"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="text-center">

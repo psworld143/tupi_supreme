@@ -200,11 +200,11 @@ $view_url = '../contact.php#contact-section';
 
     <style>
         @media (min-width: 1024px) {
-            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #d2dcd5 transparent; }
+            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #e4e4e7 transparent; }
             .lg\:ml-64::-webkit-scrollbar { width: 8px; }
             .lg\:ml-64::-webkit-scrollbar-track { background: transparent; }
-            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #d2dcd5; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
-            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #c0ccc5; }
+            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #e4e4e7; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
+            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #d4d4d8; }
         }
         .quick-pick { padding: 3px 8px; font-size: 11px; border: 1px solid #d1d5db; background: #fff; border-radius: 4px; cursor: pointer; color: #4b5563; }
         .quick-pick:hover { background: #f3f4f6; border-color: #9ca3af; }
@@ -212,7 +212,6 @@ $view_url = '../contact.php#contact-section';
 
     <!-- Main Content -->
     <div class="relative lg:ml-64 p-4 lg:p-8">
-        <?php $logo_pulse_logo = '../uploads/images/tupi_supreme_logo.png'; $logo_pulse_mode = 'absolute'; include '../includes/logo_pulse_loader.php'; ?>
 
         <!-- Page Header -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -366,12 +365,12 @@ $view_url = '../contact.php#contact-section';
                             <i class="fas fa-eye text-gray-400"></i> Live Preview
                             <span class="text-xs text-gray-400 font-normal">(contact card)</span>
                         </p>
-                        <div class="bg-white border border-[#e6ece8] rounded-2xl p-8 text-center max-w-sm">
-                            <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style="background: #3d7a66;">
+                        <div class="bg-white border border-[#e4e4e7] rounded-2xl p-8 text-center max-w-sm">
+                            <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style="background: #18181b;">
                                 <i id="preview_icon" class="fas fa-map-marker-alt text-2xl text-white"></i>
                             </div>
-                            <h4 id="preview_heading" class="text-lg font-semibold text-[#23332c] mb-3">Visit Us</h4>
-                            <p id="preview_value" class="text-[#7d8b84] leading-relaxed text-sm"><?php echo nl2br(htmlspecialchars($edit_info['value'] ?? 'Value')); ?></p>
+                            <h4 id="preview_heading" class="text-lg font-semibold text-[#18181b] mb-3">Visit Us</h4>
+                            <p id="preview_value" class="text-[#71717a] leading-relaxed text-sm"><?php echo nl2br(htmlspecialchars($edit_info['value'] ?? 'Value')); ?></p>
                         </div>
                         <p class="text-xs text-gray-400 mt-2">Address entries preview as a full card; phone/email entries preview as a line inside their shared card.</p>
                     </div>
@@ -537,16 +536,6 @@ $view_url = '../contact.php#contact-section';
                     'base_query'    => $_GET,
                 ]);
                 ?>
-            </div>
-
-            <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 class="font-semibold text-blue-900 mb-2">Quick Links</h3>
-                <ul class="text-sm text-blue-800 space-y-1">
-                    <li><a href="<?php echo $view_url; ?>" target="_blank" class="hover:underline"><i class="fas fa-external-link-alt mr-1"></i>View Contact Page</a></li>
-                    <li><a href="office-hours.php" class="hover:underline"><i class="fas fa-clock mr-1"></i>Manage Office Hours</a></li>
-                    <li><a href="subject-options.php" class="hover:underline"><i class="fas fa-list-ul mr-1"></i>Manage Subject Options</a></li>
-                    <li><a href="index.php" class="hover:underline"><i class="fas fa-home mr-1"></i>Back to Admin Dashboard</a></li>
-                </ul>
             </div>
         <?php endif; ?>
     </div>

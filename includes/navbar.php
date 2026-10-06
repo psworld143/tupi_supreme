@@ -4,10 +4,10 @@ if (!isset($current_page)) {
 }
 $company_name = getSiteSetting('company_short_name', 'Tupi Supreme');
 ?>
-<!-- Poppins font — matches the admin console typeface -->
+<!-- Inter — modern geometric sans -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <!-- Offset anchored sections so they don't hide under the fixed navbar -->
 <style>
@@ -26,14 +26,14 @@ $company_name = getSiteSetting('company_short_name', 'Tupi Supreme');
             <div class="hidden md:block">
                 <div class="ml-10 flex items-center gap-1">
                     <a href="index.php" class="<?php echo $current_page === 'index' ? 'bg-[#e2eae4] text-[#23332c] font-medium' : 'text-[#66746c] hover:bg-[#eaf0ec] hover:text-[#23332c]'; ?> px-3.5 py-2 rounded-full text-sm transition-colors">Home</a>
-                    <a href="about.php" class="<?php echo $current_page === 'about' ? 'bg-[#e2eae4] text-[#23332c] font-medium' : 'text-[#66746c] hover:bg-[#eaf0ec] hover:text-[#23332c]'; ?> px-3.5 py-2 rounded-full text-sm transition-colors">About Us</a>
-                    <a href="products.php" class="<?php echo $current_page === 'products' ? 'bg-[#e2eae4] text-[#23332c] font-medium' : 'text-[#66746c] hover:bg-[#eaf0ec] hover:text-[#23332c]'; ?> px-3.5 py-2 rounded-full text-sm transition-colors">Products</a>
-                    <a href="services.php" class="<?php echo $current_page === 'services' ? 'bg-[#e2eae4] text-[#23332c] font-medium' : 'text-[#66746c] hover:bg-[#eaf0ec] hover:text-[#23332c]'; ?> px-3.5 py-2 rounded-full text-sm transition-colors">Services</a>
-                    <a href="case-studies.php" class="<?php echo $current_page === 'case-studies' ? 'bg-[#e2eae4] text-[#23332c] font-medium' : 'text-[#66746c] hover:bg-[#eaf0ec] hover:text-[#23332c]'; ?> px-3.5 py-2 rounded-full text-sm transition-colors">Case Studies</a>
-                    <a href="gallery.php" class="<?php echo $current_page === 'gallery' ? 'bg-[#e2eae4] text-[#23332c] font-medium' : 'text-[#66746c] hover:bg-[#eaf0ec] hover:text-[#23332c]'; ?> px-3.5 py-2 rounded-full text-sm transition-colors">Gallery</a>
-                    <a href="resources.php" class="<?php echo $current_page === 'resources' ? 'bg-[#e2eae4] text-[#23332c] font-medium' : 'text-[#66746c] hover:bg-[#eaf0ec] hover:text-[#23332c]'; ?> px-3.5 py-2 rounded-full text-sm transition-colors">Resources</a>
-                    <a href="certifications.php" class="<?php echo $current_page === 'certifications' ? 'bg-[#e2eae4] text-[#23332c] font-medium' : 'text-[#66746c] hover:bg-[#eaf0ec] hover:text-[#23332c]'; ?> px-3.5 py-2 rounded-full text-sm transition-colors">Certifications</a>
-                    <a href="contact.php" class="ml-2 bg-[#23332c] text-white hover:bg-[#3a4a41] px-4 py-2 rounded-full text-sm font-medium transition-colors">Contact</a>
+                    <?php foreach (getSiteModules()['pages'] as $slug => $meta): ?>
+                        <?php if (!isModuleEnabled('page_' . $slug)) continue; ?>
+                        <?php if ($slug === 'contact'): ?>
+                            <a href="<?php echo $meta[1]; ?>" class="ml-2 bg-[#23332c] text-white hover:bg-[#3a4a41] px-4 py-2 rounded-full text-sm font-medium transition-colors"><?php echo htmlspecialchars_safe($meta[0]); ?></a>
+                        <?php else: ?>
+                            <a href="<?php echo $meta[1]; ?>" class="<?php echo $current_page === $slug ? 'bg-[#e2eae4] text-[#23332c] font-medium' : 'text-[#66746c] hover:bg-[#eaf0ec] hover:text-[#23332c]'; ?> px-3.5 py-2 rounded-full text-sm transition-colors"><?php echo htmlspecialchars_safe($meta[0]); ?></a>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
                 </div>
             </div>
             <div class="md:hidden">
@@ -46,14 +46,14 @@ $company_name = getSiteSetting('company_short_name', 'Tupi Supreme');
         <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-[#e6ece8]">
             <div class="px-3 pt-3 pb-4 space-y-1">
                 <a href="index.php" class="block px-3.5 py-2.5 rounded-xl text-base font-medium <?php echo $current_page === 'index' ? 'bg-[#e2eae4] text-[#23332c]' : 'text-[#66746c] hover:bg-[#eaf0ec] hover:text-[#23332c]'; ?> transition-colors">Home</a>
-                <a href="about.php" class="block px-3.5 py-2.5 rounded-xl text-base font-medium <?php echo $current_page === 'about' ? 'bg-[#e2eae4] text-[#23332c]' : 'text-[#66746c] hover:bg-[#eaf0ec] hover:text-[#23332c]'; ?> transition-colors">About Us</a>
-                <a href="products.php" class="block px-3.5 py-2.5 rounded-xl text-base font-medium <?php echo $current_page === 'products' ? 'bg-[#e2eae4] text-[#23332c]' : 'text-[#66746c] hover:bg-[#eaf0ec] hover:text-[#23332c]'; ?> transition-colors">Products</a>
-                <a href="services.php" class="block px-3.5 py-2.5 rounded-xl text-base font-medium <?php echo $current_page === 'services' ? 'bg-[#e2eae4] text-[#23332c]' : 'text-[#66746c] hover:bg-[#eaf0ec] hover:text-[#23332c]'; ?> transition-colors">Services</a>
-                <a href="case-studies.php" class="block px-3.5 py-2.5 rounded-xl text-base font-medium <?php echo $current_page === 'case-studies' ? 'bg-[#e2eae4] text-[#23332c]' : 'text-[#66746c] hover:bg-[#eaf0ec] hover:text-[#23332c]'; ?> transition-colors">Case Studies</a>
-                <a href="gallery.php" class="block px-3.5 py-2.5 rounded-xl text-base font-medium <?php echo $current_page === 'gallery' ? 'bg-[#e2eae4] text-[#23332c]' : 'text-[#66746c] hover:bg-[#eaf0ec] hover:text-[#23332c]'; ?> transition-colors">Gallery</a>
-                <a href="resources.php" class="block px-3.5 py-2.5 rounded-xl text-base font-medium <?php echo $current_page === 'resources' ? 'bg-[#e2eae4] text-[#23332c]' : 'text-[#66746c] hover:bg-[#eaf0ec] hover:text-[#23332c]'; ?> transition-colors">Resources</a>
-                <a href="certifications.php" class="block px-3.5 py-2.5 rounded-xl text-base font-medium <?php echo $current_page === 'certifications' ? 'bg-[#e2eae4] text-[#23332c]' : 'text-[#66746c] hover:bg-[#eaf0ec] hover:text-[#23332c]'; ?> transition-colors">Certifications</a>
-                <a href="contact.php" class="block px-3.5 py-2.5 rounded-xl text-base font-medium bg-[#23332c] text-white hover:bg-[#3a4a41] transition-colors">Contact</a>
+                <?php foreach (getSiteModules()['pages'] as $slug => $meta): ?>
+                    <?php if (!isModuleEnabled('page_' . $slug)) continue; ?>
+                    <?php if ($slug === 'contact'): ?>
+                        <a href="<?php echo $meta[1]; ?>" class="block px-3.5 py-2.5 rounded-xl text-base font-medium bg-[#23332c] text-white hover:bg-[#3a4a41] transition-colors"><?php echo htmlspecialchars_safe($meta[0]); ?></a>
+                    <?php else: ?>
+                        <a href="<?php echo $meta[1]; ?>" class="block px-3.5 py-2.5 rounded-xl text-base font-medium <?php echo $current_page === $slug ? 'bg-[#e2eae4] text-[#23332c]' : 'text-[#66746c] hover:bg-[#eaf0ec] hover:text-[#23332c]'; ?> transition-colors"><?php echo htmlspecialchars_safe($meta[0]); ?></a>
+                    <?php endif; ?>
+                <?php endforeach; ?>
             </div>
         </div>
     </div>

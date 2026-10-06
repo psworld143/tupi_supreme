@@ -204,11 +204,11 @@ $view_url = '../index.php';
 
     <style>
         @media (min-width: 1024px) {
-            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #d2dcd5 transparent; }
+            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #e4e4e7 transparent; }
             .lg\:ml-64::-webkit-scrollbar { width: 8px; }
             .lg\:ml-64::-webkit-scrollbar-track { background: transparent; }
-            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #d2dcd5; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
-            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #c0ccc5; }
+            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #e4e4e7; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
+            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #d4d4d8; }
         }
         .quick-pick { padding: 3px 8px; font-size: 11px; border: 1px solid #d1d5db; background: #fff; border-radius: 4px; cursor: pointer; color: #4b5563; }
         .quick-pick:hover { background: #f3f4f6; border-color: #9ca3af; }
@@ -216,7 +216,6 @@ $view_url = '../index.php';
 
     <!-- Main Content -->
     <div class="relative lg:ml-64 p-4 lg:p-8">
-        <?php $logo_pulse_logo = '../uploads/images/tupi_supreme_logo.png'; $logo_pulse_mode = 'absolute'; include '../includes/logo_pulse_loader.php'; ?>
 
         <!-- Page Header -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -362,7 +361,7 @@ $view_url = '../index.php';
                             <i class="fas fa-eye text-gray-400"></i> Live Preview
                             <span class="text-xs text-gray-400 font-normal">(footer column)</span>
                         </p>
-                        <div class="rounded-2xl p-8" style="background: #23332c;">
+                        <div class="rounded-2xl p-8" style="background: #18181b;">
                             <h6 id="preview_heading" class="text-sm font-semibold uppercase tracking-wider mb-4" style="color: rgba(255,255,255,0.6);">Quick Links</h6>
                             <ul class="space-y-2.5">
                                 <li><a id="preview_link" class="text-sm transition-colors hover:text-[#8bc34a]" style="color: rgba(255,255,255,0.75);" onclick="return false;" href="#"><?php echo htmlspecialchars($edit_link['label'] ?? 'Link label'); ?></a></li>
@@ -508,16 +507,6 @@ $view_url = '../index.php';
                     'base_query'    => $_GET,
                 ]);
                 ?>
-            </div>
-
-            <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 class="font-semibold text-blue-900 mb-2">Quick Links</h3>
-                <ul class="text-sm text-blue-800 space-y-1">
-                    <li><a href="<?php echo $view_url; ?>" target="_blank" class="hover:underline"><i class="fas fa-external-link-alt mr-1"></i>View Homepage Footer</a></li>
-                    <li><a href="social-media.php" class="hover:underline"><i class="fas fa-share-alt mr-1"></i>Manage Social Media</a></li>
-                    <li><a href="site-settings.php" class="hover:underline"><i class="fas fa-sliders-h mr-1"></i>Site Settings</a></li>
-                    <li><a href="index.php" class="hover:underline"><i class="fas fa-home mr-1"></i>Back to Admin Dashboard</a></li>
-                </ul>
             </div>
         <?php endif; ?>
     </div>

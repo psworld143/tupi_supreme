@@ -1,10 +1,17 @@
 <?php
 require_once 'includes/config.php';
+
+if (!isModuleEnabled('page_products')) {
+    header('Location: index.php');
+    exit;
+}
+
 $current_page = 'products';
 
 // Get dynamic content
 $page_header_title = getPageContent('products', 'page_header_title', 'Our Products');
 $page_header_subtitle = getPageContent('products', 'page_header_subtitle', 'Premium activated carbon solutions for municipal water treatment and industrial applications');
+$page_header_image = getPageHeaderImage('products');
 $section_title = getPageContent('products', 'section_title', 'Our Products');
 $section_subtitle = getPageContent('products', 'section_subtitle', 'Premium activated carbon solutions and sustainable growing mediums');
 $specifications_title = getPageContent('products', 'specifications_title', 'Granulated Activated Carbon Specifications');
@@ -255,7 +262,10 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
     <?php include 'includes/navbar.php'; ?>
 
     <!-- Page Header -->
-    <section id="page-header" class="page-header-gradient text-white relative overflow-hidden pt-24 pb-20">
+    <section id="page-header" class="page-header-gradient text-white relative overflow-hidden pt-24 pb-20"<?php if (!empty($page_header_image)) echo ' style="background-image: url(\'' . htmlspecialchars($page_header_image, ENT_QUOTES) . '\'); background-size: cover; background-position: center;"'; ?>>
+        <?php if (!empty($page_header_image)): ?>
+        <div class="absolute inset-0" style="background-color: rgba(12, 25, 14, 0.72);"></div>
+        <?php endif; ?>
         <div class="page-header-pattern absolute inset-0 opacity-30"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="text-center">
@@ -908,13 +918,13 @@ $gac_product = !empty($granulated_products) ? reset($granulated_products) : null
             <h2 class="text-3xl lg:text-4xl font-bold mb-4 mt-4"><?php echo htmlspecialchars_safe($cta_title); ?></h2>
             <p class="text-lg mb-8 text-white/85 max-w-2xl mx-auto"><?php echo htmlspecialchars_safe($cta_description); ?></p>
             <div class="flex flex-col sm:flex-row justify-center gap-3">
-                <?php if ($cta_button_1_text): ?>
+                <?php if ($cta_button_1_text && isPageLinkEnabled($cta_button_1_link)): ?>
                     <a href="<?php echo htmlspecialchars_safe($cta_button_1_link); ?>" class="bg-white text-[#23332c] hover:bg-[#eff4f1] font-medium py-3 px-8 rounded-full transition-colors inline-flex items-center justify-center gap-2">
                         <?php echo htmlspecialchars_safe($cta_button_1_text); ?>
                         <i class="fas fa-arrow-right text-xs"></i>
                     </a>
                 <?php endif; ?>
-                <?php if ($cta_button_2_text): ?>
+                <?php if ($cta_button_2_text && isPageLinkEnabled($cta_button_2_link)): ?>
                     <a href="<?php echo htmlspecialchars_safe($cta_button_2_link); ?>" class="border-2 border-white/80 text-white hover:bg-white hover:text-[#23332c] font-medium py-3 px-8 rounded-full transition-colors inline-flex items-center justify-center gap-2">
                         <i class="fas fa-download text-xs"></i>
                         <?php echo htmlspecialchars_safe($cta_button_2_text); ?>

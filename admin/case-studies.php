@@ -213,17 +213,16 @@ $view_url = '../case-studies.php#main';
 
     <style>
         @media (min-width: 1024px) {
-            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #d2dcd5 transparent; }
+            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #e4e4e7 transparent; }
             .lg\:ml-64::-webkit-scrollbar { width: 8px; }
             .lg\:ml-64::-webkit-scrollbar-track { background: transparent; }
-            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #d2dcd5; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
-            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #c0ccc5; }
+            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #e4e4e7; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
+            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #d4d4d8; }
         }
     </style>
 
     <!-- Main Content -->
     <div class="relative lg:ml-64 p-4 lg:p-8">
-        <?php $logo_pulse_logo = '../uploads/images/tupi_supreme_logo.png'; $logo_pulse_mode = 'absolute'; include '../includes/logo_pulse_loader.php'; ?>
 
         <!-- Page Header -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -487,17 +486,17 @@ $view_url = '../case-studies.php#main';
                             <i class="fas fa-eye text-gray-400"></i> Live Preview
                             <span class="text-xs text-gray-400 font-normal">(case study card on the Case Studies page)</span>
                         </p>
-                        <div class="case-study-card bg-white border border-[#e6ece8] rounded-2xl overflow-hidden">
+                        <div class="case-study-card bg-white border border-[#e4e4e7] rounded-2xl overflow-hidden">
                             <div class="p-8">
                                 <div class="flex items-center gap-3 mb-5">
                                     <span id="preview_featured" class="eyebrow <?php echo ($edit_case && $edit_case['is_featured']) ? '' : 'hidden'; ?>">
                                         <i class="fas fa-star text-xs"></i> Featured
                                     </span>
-                                    <span id="preview_industry" class="text-[#8a978f] text-sm font-medium"><?php echo htmlspecialchars($edit_case['industry'] ?? ''); ?></span>
+                                    <span id="preview_industry" class="text-[#a1a1aa] text-sm font-medium"><?php echo htmlspecialchars($edit_case['industry'] ?? ''); ?></span>
                                 </div>
-                                <h3 id="preview_title" class="text-2xl font-bold text-[#23332c] mb-4 leading-tight"><?php echo htmlspecialchars($edit_case['title'] ?? 'Case study title'); ?></h3>
-                                <p id="preview_client" class="text-[#8a978f] mb-5 text-sm flex items-center <?php echo empty($edit_case['client_name'] ?? '') ? 'hidden' : ''; ?>">
-                                    <i class="fas fa-building text-[#3d7a66] mr-2"></i>
+                                <h3 id="preview_title" class="text-2xl font-bold text-[#18181b] mb-4 leading-tight"><?php echo htmlspecialchars($edit_case['title'] ?? 'Case study title'); ?></h3>
+                                <p id="preview_client" class="text-[#a1a1aa] mb-5 text-sm flex items-center <?php echo empty($edit_case['client_name'] ?? '') ? 'hidden' : ''; ?>">
+                                    <i class="fas fa-building text-[#18181b] mr-2"></i>
                                     <span id="preview_client_text"><?php echo htmlspecialchars($edit_case['client_name'] ?? ''); ?></span><?php if (!empty($edit_case['location'] ?? '')): ?> — <span id="preview_location"><?php echo htmlspecialchars($edit_case['location']); ?></span><?php endif; ?>
                                 </p>
 
@@ -505,20 +504,20 @@ $view_url = '../case-studies.php#main';
                                 <div id="preview_stats" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 <?php echo empty($edit_case['results'] ?? '') ? 'hidden' : ''; ?>"></div>
 
                                 <!-- Challenge -->
-                                <h4 id="preview_challenge_h" class="text-lg font-semibold text-[#23332c] mb-2 flex items-center <?php echo empty($edit_case['challenge'] ?? '') ? 'hidden' : ''; ?>">
-                                    <i class="fas fa-exclamation-circle text-[#3d7a66] mr-2"></i> Challenge
+                                <h4 id="preview_challenge_h" class="text-lg font-semibold text-[#18181b] mb-2 flex items-center <?php echo empty($edit_case['challenge'] ?? '') ? 'hidden' : ''; ?>">
+                                    <i class="fas fa-exclamation-circle text-[#18181b] mr-2"></i> Challenge
                                 </h4>
                                 <div id="preview_challenge" class="text-[#5a6b62] mb-6 leading-relaxed text-sm prose prose-sm max-w-none <?php echo empty($edit_case['challenge'] ?? '') ? 'hidden' : ''; ?>"><?php echo $edit_case['challenge'] ?? ''; ?></div>
 
                                 <!-- Solution -->
-                                <h4 id="preview_solution_h" class="text-lg font-semibold text-[#23332c] mb-2 flex items-center <?php echo empty($edit_case['solution'] ?? '') ? 'hidden' : ''; ?>">
-                                    <i class="fas fa-lightbulb text-[#3d7a66] mr-2"></i> Solution
+                                <h4 id="preview_solution_h" class="text-lg font-semibold text-[#18181b] mb-2 flex items-center <?php echo empty($edit_case['solution'] ?? '') ? 'hidden' : ''; ?>">
+                                    <i class="fas fa-lightbulb text-[#18181b] mr-2"></i> Solution
                                 </h4>
                                 <div id="preview_solution" class="text-[#5a6b62] mb-6 leading-relaxed text-sm prose prose-sm max-w-none <?php echo empty($edit_case['solution'] ?? '') ? 'hidden' : ''; ?>"><?php echo $edit_case['solution'] ?? ''; ?></div>
 
                                 <!-- Results -->
-                                <h4 id="preview_results_h" class="text-lg font-semibold text-[#23332c] mb-3 flex items-center <?php echo empty($edit_case['results'] ?? '') ? 'hidden' : ''; ?>">
-                                    <i class="fas fa-chart-line text-[#3d7a66] mr-2"></i> Results
+                                <h4 id="preview_results_h" class="text-lg font-semibold text-[#18181b] mb-3 flex items-center <?php echo empty($edit_case['results'] ?? '') ? 'hidden' : ''; ?>">
+                                    <i class="fas fa-chart-line text-[#18181b] mr-2"></i> Results
                                 </h4>
                                 <ul id="preview_results" class="text-[#5a6b62] space-y-2 mb-6 <?php echo empty($edit_case['results'] ?? '') ? 'hidden' : ''; ?>"></ul>
 
@@ -663,7 +662,7 @@ $view_url = '../case-studies.php#main';
                     if (statCards.length > 0) {
                         statsBox.classList.remove('hidden');
                         statsBox.innerHTML = statCards.map(function(s) {
-                            return '<div class="result-stat bg-[#f5f7f5] border border-[#e6ece8] p-4 rounded-2xl text-center"><div class="text-3xl font-bold text-[#23332c] mb-1">' + escapeHtml(s.value) + '</div><div class="text-xs text-[#7d8b84]">' + escapeHtml(s.label) + '</div></div>';
+                            return '<div class="result-stat bg-[#f4f4f5] border border-[#e4e4e7] p-4 rounded-2xl text-center"><div class="text-3xl font-bold text-[#18181b] mb-1">' + escapeHtml(s.value) + '</div><div class="text-xs text-[#71717a]">' + escapeHtml(s.label) + '</div></div>';
                         }).join('');
                     } else {
                         statsBox.classList.add('hidden');
@@ -672,7 +671,7 @@ $view_url = '../case-studies.php#main';
                     // Checklist: stat card lines + checklist items (matches public page behavior)
                     var allLines = statCards.map(function(s) { return s.value + ' ' + s.label; }).concat(checklistItems);
                     resList.innerHTML = allLines.map(function(l) {
-                        return '<li class="flex items-start text-[#5a6b62] text-sm"><i class="fas fa-check text-[#3d7a66] mr-3 mt-1"></i>' + escapeHtml(l) + '</li>';
+                        return '<li class="flex items-start text-[#5a6b62] text-sm"><i class="fas fa-check text-[#18181b] mr-3 mt-1"></i>' + escapeHtml(l) + '</li>';
                     }).join('');
                 } else {
                     statsBox.classList.add('hidden');
@@ -761,7 +760,7 @@ $view_url = '../case-studies.php#main';
                 var row = document.createElement('div');
                 row.className = 'checklist-row flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg p-2';
                 row.innerHTML =
-                    '<i class="fas fa-check text-[#3d7a66] ml-1"></i>' +
+                    '<i class="fas fa-check text-[#18181b] ml-1"></i>' +
                     '<input type="text" class="checklist-text flex-1 px-2 py-1.5 border border-gray-300 rounded-md text-sm" placeholder="Met all compliance standards" value="' + escapeAttr(text || '') + '" oninput="serializeResults(); updatePreview(); updateResultsEmptyStates();">' +
                     '<button type="button" onclick="this.closest(\'.checklist-row\').remove(); serializeResults(); updatePreview(); updateResultsEmptyStates();" class="text-red-500 hover:text-red-700 px-2"><i class="fas fa-trash-alt"></i></button>';
                 list.appendChild(row);
@@ -1022,14 +1021,6 @@ $view_url = '../case-studies.php#main';
                     'base_query'    => $_GET,
                 ]);
                 ?>
-            </div>
-
-            <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 class="font-semibold text-blue-900 mb-2">Quick Links</h3>
-                <ul class="text-sm text-blue-800 space-y-1">
-                    <li><a href="<?php echo $view_url; ?>" target="_blank" class="hover:underline"><i class="fas fa-external-link-alt mr-1"></i>View Case Studies Page</a></li>
-                    <li><a href="index.php" class="hover:underline"><i class="fas fa-home mr-1"></i>Back to Admin Dashboard</a></li>
-                </ul>
             </div>
         <?php endif; ?>
     </div>

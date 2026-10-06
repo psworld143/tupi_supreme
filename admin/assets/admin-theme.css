@@ -1,0 +1,440 @@
+/* ==========================================================================
+   TSACI Admin — shadcn-inspired theme (zinc, light)
+   Loaded once from includes/sidebar.php on every authenticated page.
+   Replicates shadcn/ui's visual language for plain PHP + Tailwind CDN:
+   neutral surfaces, hairline borders, rounded-md/lg, restrained shadows.
+   Brand green (#2c5530) is reserved for sparse accents only.
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+    --background: #ffffff;
+    --foreground: #09090b;
+    --muted: #f4f4f5;
+    --muted-foreground: #71717a;
+    --border: #e4e4e7;
+    --primary: #2c5530;          /* brand green — primary actions + accents */
+    --primary-hover: #22402a;
+    --primary-foreground: #fafafa;
+    --primary-muted: #e9f1ea;    /* green-tinted fill: active nav, icon chips */
+    --destructive: #dc2626;
+    --ring: rgba(44, 85, 48, 0.15);
+    --radius: 0.5rem;
+}
+
+/* ── Base ──────────────────────────────────────────────────────────────── */
+body {
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    background-color: var(--background) !important;
+    color: var(--foreground);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Thin neutral scrollbars */
+html { scrollbar-width: thin; scrollbar-color: #d4d4d8 transparent; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background-color: #d4d4d8; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background-color: #a1a1aa; }
+
+::selection { background: #e4e4e7; }
+
+/* ── Old olive palette → zinc remapping ──────────────────────────────────
+   Admin pages use Tailwind arbitrary-value classes like bg-[#23332c].
+   These attribute-substring shims retarget them so every page inherits
+   the new theme without per-page edits. Hover variants come last and win
+   via the extra :hover specificity. */
+
+/* Foreground / text */
+[class*="text-[#23332c]"] { color: var(--foreground) !important; }
+[class*="text-[#45524b]"] { color: #3f3f46 !important; }
+[class*="text-[#3d7a66]"], [class*="text-[#18181b]"][class*="accent"] { color: var(--primary) !important; }
+[class*="text-[#60796c]"], [class*="text-[#60796e]"],
+[class*="text-[#66746c]"], [class*="text-[#7d8b84]"] { color: var(--muted-foreground) !important; }
+[class*="text-[#8a978f]"], [class*="text-[#96a39b]"],
+[class*="text-[#c0ccc5]"] { color: #a1a1aa !important; }
+[class*="hover:text-[#23332c]"]:hover { color: var(--foreground) !important; }
+[class*="hover:text-[#3d7a66]"]:hover,
+[class*="hover:text-[#66746c]"]:hover { color: var(--foreground) !important; }
+
+/* Backgrounds — old dark/olive fills become brand green */
+[class*="bg-[#23332c]"], [class*="bg-[#3a4a41]"],
+[class*="bg-[#18181b]"], [class*="bg-[#27272a]"],
+[class*="bg-[#3d7a66]"], [class*="bg-[#2f6351]"] { background-color: var(--primary) !important; }
+[class*="bg-[#f5f7f5]"], [class*="bg-[#f1f5f2]"],
+[class*="bg-[#eff4f1]"], [class*="bg-[#eef3f0]"],
+[class*="bg-[#eaf0ec]"], [class*="bg-[#f0f4f1]"] { background-color: var(--muted) !important; }
+[class*="bg-[#f7faf8]"], [class*="bg-[#f9fafb]"] { background-color: #fafafa !important; }
+[class*="bg-[#e2eae4]"] { background-color: #e4e4e7 !important; }
+[class*="bg-[#e6ece8]"], [class*="bg-[#d6ded9]"],
+[class*="bg-[#d2dcd5]"] { background-color: var(--border) !important; }
+[class*="hover:bg-[#eff4f1]"]:hover, [class*="hover:bg-[#eaf0ec]"]:hover,
+[class*="hover:bg-[#eef3f0]"]:hover { background-color: var(--muted) !important; }
+[class*="hover:bg-[#f7faf8]"]:hover { background-color: #fafafa !important; }
+[class*="hover:bg-[#2f6351]"]:hover, [class*="hover:bg-[#3a4a41]"]:hover,
+[class*="hover:bg-[#23332c]"]:hover, [class*="hover:bg-[#18181b]"]:hover,
+[class*="hover:bg-[#27272a]"]:hover { background-color: var(--primary-hover) !important; }
+
+/* Borders */
+[class*="border-[#e6ece8]"], [class*="border-[#d6ded9]"],
+[class*="border-[#d2dcd5]"], [class*="border-[#eef3f0]"],
+[class*="border-[#f0f4f1]"], [class*="border-[#e2eae4]"] { border-color: var(--border) !important; }
+[class*="border-[#3d7a66]"], [class*="border-[#23332c]"],
+[class*="border-[#18181b]"] { border-color: var(--primary) !important; }
+[class*="divide-[#e6ece8]"] > * + *, [class*="divide-[#eef3f0]"] > * + *,
+[class*="divide-[#f0f4f1]"] > * + * { border-color: var(--border) !important; }
+
+/* ── Tailwind brand color shims (primary/secondary/accent in tailwind.config) */
+.bg-primary, .bg-secondary { background-color: var(--primary) !important; }
+.hover\:bg-primary:hover, .hover\:bg-secondary:hover { background-color: var(--primary-hover) !important; }
+.text-primary, .text-secondary { color: var(--primary) !important; }
+.border-primary, .border-secondary { border-color: var(--primary) !important; }
+.bg-accent { background-color: #8bc34a !important; }
+.text-accent { color: #4a7c59 !important; }
+.bg-dark { background-color: var(--primary) !important; }
+.bg-light { background-color: var(--muted) !important; }
+
+/* ── Cards: flat surfaces, hairline borders, shadcn radius ─────────────── */
+.lg\:ml-64 .shadow-md, .lg\:ml-64 .shadow-lg, .lg\:ml-64 .shadow,
+.lg\:ml-64 .shadow-sm, .lg\:ml-64 .shadow-xl {
+    box-shadow: none !important;
+    border: 1px solid var(--border);
+}
+.lg\:ml-64 .rounded-2xl, .lg\:ml-64 .rounded-3xl { border-radius: var(--radius) !important; }
+
+/* ── Tables (.min-w-full) ──────────────────────────────────────────────── */
+table.min-w-full { border-collapse: separate; border-spacing: 0; font-size: 0.875rem; }
+table.min-w-full thead { background: #fafafa; }
+.lv-frame table.min-w-full { width: 100%; }
+.lv-frame table.min-w-full tbody { background: #fff; }
+.lv-frame table.min-w-full tbody tr:hover { background-color: #f8faf8; }
+.lv-frame table.min-w-full tbody tr:has(.lv-row-check:checked) { background-color: #f0f7f1; }
+.lv-frame table.min-w-full tbody tr:has(.lv-row-check:checked):hover { background-color: #e9f1ea; }
+.lv-frame table.min-w-full tbody tr td { background: transparent; }
+.lv-frame .lv-list tbody tr td:first-child { background: #fff; }
+.lv-frame .lv-list tbody tr:hover td:first-child { background: #f8faf8; }
+.lv-frame .lv-list tbody tr:has(.lv-row-check:checked) td:first-child { background: #f0f7f1; }
+.lv-frame table.min-w-full tbody tr td.lv-title .item-icon {
+    border-radius: 9999px;
+    background: #e9f1ea;
+    color: #2c5530;
+}
+.lv-frame table.min-w-full tbody tr td.lv-title .item-icon i { color: #2c5530 !important; }
+table.min-w-full thead th,
+table.min-w-full thead td {
+    padding: 0.625rem 1rem !important;
+    font-size: 0.6875rem !important;
+    font-weight: 500 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #a1a1aa !important;
+    border-bottom: 1px solid var(--border) !important;
+    white-space: nowrap;
+}
+table.min-w-full tbody td {
+    padding: 0.875rem 1rem !important;
+    font-size: 0.875rem;
+    color: #52525b;
+    border-bottom: 1px solid #f4f4f5 !important;
+    vertical-align: middle;
+}
+/* Actions column centers its icons */
+table.min-w-full th.lv-actions-head,
+table.min-w-full td.lv-actions { text-align: center; white-space: nowrap; }
+table.min-w-full td.lv-actions > * { justify-content: center; }
+table.min-w-full tbody tr:last-child td { border-bottom: 0; }
+table.min-w-full tbody tr { transition: background-color 0.15s ease; }
+table.min-w-full tbody tr:hover { background-color: #fafafa; }
+/* Selected rows get a soft brand-green tint */
+table.min-w-full tbody tr:has(.lv-row-check:checked) { background-color: #f0f7f1; }
+table.min-w-full tbody tr:has(.lv-row-check:checked):hover { background-color: #e9f1ea; }
+/* First content cell reads as the row title */
+table.min-w-full tbody td.lv-title { font-weight: 500; color: #18181b; }
+/* Tabular numbers on numeric/date columns */
+table.min-w-full td[data-label="ID"],
+table.min-w-full td[data-label="Order"],
+table.min-w-full td[data-label="Ordering"],
+table.min-w-full td[data-label="Price"],
+table.min-w-full td[data-label="Year"],
+table.min-w-full td[data-label="Date"] {
+    font-variant-numeric: tabular-nums;
+    color: var(--muted-foreground);
+}
+/* Action links/buttons inside rows → plain muted icon, no boxes —
+   !important on the chrome so Tailwind utilities (bg-*, hover:bg-*,
+   border, shadow, rounded) can't repaint them. */
+table.min-w-full td a,
+table.min-w-full td button {
+    font-size: 0.8125rem;
+    color: var(--muted-foreground) !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    padding: 0.25rem;
+    cursor: pointer;
+    transition: color 0.15s ease;
+    white-space: nowrap;
+}
+table.min-w-full td a:hover,
+table.min-w-full td button:hover {
+    background: transparent !important;
+    box-shadow: none !important;
+}
+table.min-w-full td a i,
+table.min-w-full td button i { margin-right: 0.25rem; }
+.lv-frame table.min-w-full td.lv-actions a,
+.lv-frame table.min-w-full td.lv-actions button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0 !important;
+    border-radius: 0;
+    box-shadow: none !important;
+    background: transparent !important;
+    padding: 0.25rem !important;
+    color: #71717a !important;
+}
+.lv-frame table.min-w-full td.lv-actions a:hover,
+.lv-frame table.min-w-full td.lv-actions button:hover { color: #2c5530 !important; }
+.lv-frame table.min-w-full td.lv-actions button[class*="red"]:hover,
+.lv-frame table.min-w-full td.lv-actions button.lv-del:hover,
+.lv-frame table.min-w-full td.lv-actions form[onsubmit*="elete"] button:hover,
+.lv-frame table.min-w-full td.lv-actions a[href*="action=delete"]:hover { color: var(--destructive) !important; }
+.lv-frame table.min-w-full td.lv-actions i { margin: 0; }
+table.min-w-full td a + a,
+table.min-w-full td a + form,
+table.min-w-full td form + a,
+table.min-w-full td form + form,
+table.min-w-full td button + a,
+table.min-w-full td a + button,
+table.min-w-full td button + button {
+    margin-left: 0.75rem;
+}
+table.min-w-full td a:hover, table.min-w-full td button:hover {
+    color: var(--foreground) !important;
+}
+/* Destructive actions tint red on hover */
+table.min-w-full td a[class*="red"],
+table.min-w-full td button[class*="red"],
+table.min-w-full td a[href*="action=delete"],
+table.min-w-full td form[onsubmit*="elete"] button {
+    color: var(--muted-foreground) !important;
+}
+table.min-w-full td a[class*="red"]:hover,
+table.min-w-full td button[class*="red"]:hover,
+table.min-w-full td a[href*="action=delete"]:hover,
+table.min-w-full td form[onsubmit*="elete"] button:hover,
+table.min-w-full td button.lv-del:hover {
+    color: var(--destructive) !important;
+}
+table.min-w-full td form { display: inline; }
+
+/* ── Form controls ─────────────────────────────────────────────────────── */
+.lg\:ml-64 input[type="text"], .lg\:ml-64 input[type="email"],
+.lg\:ml-64 input[type="password"], .lg\:ml-64 input[type="number"],
+.lg\:ml-64 input[type="url"], .lg\:ml-64 input[type="date"],
+.lg\:ml-64 input[type="time"], .lg\:ml-64 input[type="datetime-local"],
+.lg\:ml-64 input[type="search"], .lg\:ml-64 input[type="tel"],
+.lg\:ml-64 select, .lg\:ml-64 textarea,
+.login-card input[type="text"], .login-card input[type="password"] {
+    height: 2.25rem;
+    width: 100%;
+    border-radius: var(--radius) !important;
+    border: 1px solid var(--border) !important;
+    background-color: #fff !important;
+    padding: 0 0.75rem;
+    font-size: 0.875rem;
+    color: var(--foreground);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.lg\:ml-64 textarea { height: auto; padding-top: 0.5rem; padding-bottom: 0.5rem; }
+.lg\:ml-64 input::placeholder, .lg\:ml-64 textarea::placeholder { color: #a1a1aa; }
+.lg\:ml-64 input:focus, .lg\:ml-64 select:focus, .lg\:ml-64 textarea:focus {
+    outline: none;
+    border-color: #a1a1aa !important;
+    box-shadow: 0 0 0 2px var(--ring) !important;
+}
+.lg\:ml-64 label { font-size: 0.875rem; font-weight: 500; color: #3f3f46; }
+.lg\:ml-64 input[type="checkbox"], .lg\:ml-64 input[type="radio"] {
+    accent-color: var(--primary);
+}
+.lg\:ml-64 input:focus, .lg\:ml-64 select:focus, .lg\:ml-64 textarea:focus {
+    border-color: var(--primary) !important;
+}
+
+/* ── Buttons ───────────────────────────────────────────────────────────── */
+/* Legacy .btn-* helpers and common button patterns → shadcn hierarchy */
+.btn-primary, button[class*="bg-[#23332c]"], button[class*="bg-[#3d7a66]"],
+a[class*="bg-[#23332c]"], a[class*="bg-[#3d7a66]"],
+button.bg-primary, a.bg-primary, input[type="submit"].bg-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 2.25rem;
+    padding: 0 1rem !important;
+    border-radius: var(--radius) !important;
+    background-color: var(--primary) !important;
+    color: var(--primary-foreground) !important;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border: 1px solid transparent !important;
+    transition: background-color 0.15s ease;
+}
+.btn-primary:hover, button[class*="bg-[#23332c]"]:hover, button[class*="bg-[#3d7a66]"]:hover,
+a[class*="bg-[#23332c]"]:hover, a[class*="bg-[#3d7a66]"]:hover,
+a[class*="bg-[#18181b]"]:hover, button[class*="bg-[#18181b]"]:hover,
+button.bg-primary:hover, a.bg-primary:hover {
+    background-color: var(--primary-hover) !important;
+}
+.btn-secondary, .btn-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 2.25rem;
+    padding: 0 1rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border) !important;
+    background-color: #fff !important;
+    color: var(--foreground) !important;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: background-color 0.15s ease;
+}
+.btn-secondary:hover, .btn-outline:hover { background-color: var(--muted) !important; }
+.btn-danger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 2.25rem;
+    padding: 0 1rem;
+    border-radius: var(--radius);
+    background-color: var(--destructive) !important;
+    color: #fff !important;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border: 0 !important;
+    transition: background-color 0.15s ease;
+}
+.btn-danger:hover { background-color: #b91c1c !important; }
+
+/* Generic submit buttons in forms get the primary treatment */
+.lg\:ml-64 form button[type="submit"]:not([class*="border"]):not(.lv-btn),
+.lg\:ml-64 form input[type="submit"] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 2.25rem;
+    padding: 0 1rem !important;
+    border-radius: var(--radius) !important;
+    background-color: var(--primary) !important;
+    color: var(--primary-foreground) !important;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border: 0 !important;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+.lg\:ml-64 form button[type="submit"]:not([class*="border"]):not(.lv-btn):hover,
+.lg\:ml-64 form input[type="submit"]:hover { background-color: var(--primary-hover) !important; }
+
+/* Row-action submit buttons (archive/delete forms) stay plain icon+text —
+   must beat the generic submit rule above (its :not() clauses give it
+   high specificity, so this selector is deliberately heavier). */
+/* :not(.lv-keep) lifts this past the generic submit rule's :not() specificity */
+.lg\:ml-64 form table.min-w-full td button[type="submit"]:not(.lv-keep),
+.lg\:ml-64 form table.min-w-full td input[type="submit"]:not(.lv-keep) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: auto;
+    padding: 0.25rem !important;
+    border-radius: 0;
+    background: transparent !important;
+    color: #71717a !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    font-size: 0.8125rem;
+}
+.lg\:ml-64 form table.min-w-full td button[type="submit"]:not(.lv-keep):hover {
+    background: transparent !important;
+    color: #2c5530 !important;
+}
+.lg\:ml-64 form table.min-w-full td form[onsubmit*="elete"] button[type="submit"]:not(.lv-keep):hover,
+.lg\:ml-64 form table.min-w-full td button[type="submit"][class*="red"]:not(.lv-keep):hover {
+    color: var(--destructive) !important;
+}
+
+/* Success badges/alerts lean on the brand green */
+.lg\:ml-64 span[class*="bg-green-100"], .lg\:ml-64 span[class*="bg-emerald-100"] {
+    background-color: var(--primary-muted) !important; color: var(--primary) !important;
+}
+
+/* ── Badges / pills already using bg-*-100 utilities → shadcn badge ────── */
+.lg\:ml-64 span[class*="bg-green-100"], .lg\:ml-64 span[class*="bg-emerald-100"] {
+    border-radius: 9999px; font-weight: 500;
+}
+.lg\:ml-64 span[class*="bg-red-100"] {
+    background-color: #fef2f2 !important; color: #b91c1c !important;
+    border-radius: 9999px; font-weight: 500;
+}
+.lg\:ml-64 span[class*="bg-gray-100"], .lg\:ml-64 span[class*="bg-zinc-100"],
+.lg\:ml-64 span[class*="bg-blue-100"], .lg\:ml-64 span[class*="bg-yellow-100"] {
+    background-color: var(--muted) !important; color: #3f3f46 !important;
+    border-radius: 9999px; font-weight: 500;
+}
+
+/* ── Flash / status banners ────────────────────────────────────────────── */
+.lg\:ml-64 [class*="bg-green-50"], .lg\:ml-64 [class*="bg-emerald-50"]:not(span) {
+    background-color: #ecfdf5 !important;
+    border-color: #a7f3d0 !important;
+    color: #065f46 !important;
+    border-radius: var(--radius) !important;
+}
+.lg\:ml-64 [class*="bg-red-50"]:not(span):not(a):not(button) {
+    background-color: #fef2f2 !important;
+    border-color: #fecaca !important;
+    color: #991b1b !important;
+    border-radius: var(--radius) !important;
+}
+.lg\:ml-64 [class*="bg-yellow-50"] {
+    background-color: #fefce8 !important;
+    border-color: #fde68a !important;
+    color: #854d0e !important;
+    border-radius: var(--radius) !important;
+}
+.lg\:ml-64 [class*="bg-blue-50"]:not(span) {
+    background-color: #eff6ff !important;
+    border-color: #bfdbfe !important;
+    color: #1e40af !important;
+    border-radius: var(--radius) !important;
+}
+
+/* ── Pagination hooks (includes/pagination.php uses gray-* classes) ────── */
+.bg-gray-50 { background-color: #fafafa !important; }
+.hover\:bg-gray-200:hover { background-color: var(--muted) !important; }
+.border-gray-300 { border-color: var(--border) !important; }
+.border-gray-200 { border-color: var(--border) !important; }
+.text-gray-600 { color: var(--muted-foreground) !important; }
+.text-gray-400 { color: #a1a1aa !important; }
+.text-gray-500 { color: var(--muted-foreground) !important; }
+.text-gray-700 { color: #3f3f46 !important; }
+.text-gray-900 { color: var(--foreground) !important; }
+.bg-gray-100 { background-color: var(--muted) !important; }
+.hover\:bg-gray-50:hover { background-color: #fafafa !important; }
+.hover\:bg-gray-100:hover { background-color: var(--muted) !important; }
+.divide-gray-200 > * + * { border-color: var(--border) !important; }
+
+/* Rounded-full pills in content areas → shadcn radius (sidebar excluded) */
+.lg\:ml-64 a.rounded-full, .lg\:ml-64 button.rounded-full,
+.lg\:ml-64 span.rounded-full:not([class*="w-"]):not([class*="h-"]) {
+    border-radius: var(--radius) !important;
+}
+
+/* Headings tighten up slightly like shadcn */
+.lg\:ml-64 h1, .lg\:ml-64 h2, .lg\:ml-64 h3 { letter-spacing: -0.01em; }
+
+@media (prefers-reduced-motion: reduce) {
+    .lg\:ml-64 * { transition: none !important; }
+}

@@ -192,17 +192,16 @@ $view_url = '../about.php#team';
 
     <style>
         @media (min-width: 1024px) {
-            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #d2dcd5 transparent; }
+            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #e4e4e7 transparent; }
             .lg\:ml-64::-webkit-scrollbar { width: 8px; }
             .lg\:ml-64::-webkit-scrollbar-track { background: transparent; }
-            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #d2dcd5; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
-            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #c0ccc5; }
+            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #e4e4e7; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
+            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #d4d4d8; }
         }
     </style>
 
     <!-- Main Content -->
     <div class="relative lg:ml-64 p-4 lg:p-8">
-        <?php $logo_pulse_logo = '../uploads/images/tupi_supreme_logo.png'; $logo_pulse_mode = 'absolute'; include '../includes/logo_pulse_loader.php'; ?>
 
         <!-- Page Header -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -297,7 +296,7 @@ $view_url = '../about.php#team';
                                     </div>
 
                                     <div id="image-preview-container" class="mb-3 <?php echo empty($edit_member['photo_url'] ?? '') ? 'hidden' : ''; ?>">
-                                        <img id="image-preview" src="<?php echo htmlspecialchars($edit_member['photo_url'] ?? ''); ?>" alt="Preview" class="w-28 h-28 object-cover border-4 border-[#eef3f0] rounded-full bg-gray-50">
+                                        <img id="image-preview" src="<?php echo htmlspecialchars($edit_member['photo_url'] ?? ''); ?>" alt="Preview" class="w-28 h-28 object-cover border-4 border-[#f4f4f5] rounded-full bg-gray-50">
                                         <button type="button" onclick="clearImagePreview()" class="mt-2 text-sm text-red-600 hover:text-red-800 block"><i class="fas fa-times mr-1"></i>Remove Photo</button>
                                     </div>
 
@@ -389,19 +388,19 @@ $view_url = '../about.php#team';
                             <i class="fas fa-eye text-gray-400"></i> Live Preview
                             <span class="text-xs text-gray-400 font-normal">(team card)</span>
                         </p>
-                        <div class="bg-white border border-[#e6ece8] rounded-2xl p-8 text-center max-w-sm">
-                            <img id="preview_photo" src="<?php echo htmlspecialchars($edit_member['photo_url'] ?? ''); ?>" alt="" class="w-28 h-28 rounded-full mx-auto mb-6 object-cover border-4 border-[#eef3f0] <?php echo empty($edit_member['photo_url'] ?? '') ? 'hidden' : ''; ?>">
-                            <div id="preview_photo_fallback" class="w-28 h-28 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-[#eef3f0] <?php echo empty($edit_member['photo_url'] ?? '') ? '' : 'hidden'; ?>" style="background: #3d7a66;">
+                        <div class="bg-white border border-[#e4e4e7] rounded-2xl p-8 text-center max-w-sm">
+                            <img id="preview_photo" src="<?php echo htmlspecialchars($edit_member['photo_url'] ?? ''); ?>" alt="" class="w-28 h-28 rounded-full mx-auto mb-6 object-cover border-4 border-[#f4f4f5] <?php echo empty($edit_member['photo_url'] ?? '') ? 'hidden' : ''; ?>">
+                            <div id="preview_photo_fallback" class="w-28 h-28 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-[#f4f4f5] <?php echo empty($edit_member['photo_url'] ?? '') ? '' : 'hidden'; ?>" style="background: #18181b;">
                                 <i class="fas fa-user text-4xl text-white"></i>
                             </div>
-                            <h5 id="preview_name" class="text-xl font-semibold text-[#23332c] mb-1"><?php echo htmlspecialchars($edit_member['name'] ?? 'Member name'); ?></h5>
-                            <p id="preview_position" class="text-[#3d7a66] font-medium text-sm mb-4 <?php echo empty($edit_member['position'] ?? '') ? 'hidden' : ''; ?>"><?php echo htmlspecialchars($edit_member['position'] ?? ''); ?></p>
-                            <p id="preview_bio" class="text-[#7d8b84] leading-relaxed text-sm mb-4 <?php echo empty($edit_member['bio'] ?? '') ? 'hidden' : ''; ?>"><?php echo htmlspecialchars($edit_member['bio'] ?? ''); ?></p>
+                            <h5 id="preview_name" class="text-xl font-semibold text-[#18181b] mb-1"><?php echo htmlspecialchars($edit_member['name'] ?? 'Member name'); ?></h5>
+                            <p id="preview_position" class="text-[#18181b] font-medium text-sm mb-4 <?php echo empty($edit_member['position'] ?? '') ? 'hidden' : ''; ?>"><?php echo htmlspecialchars($edit_member['position'] ?? ''); ?></p>
+                            <p id="preview_bio" class="text-[#71717a] leading-relaxed text-sm mb-4 <?php echo empty($edit_member['bio'] ?? '') ? 'hidden' : ''; ?>"><?php echo htmlspecialchars($edit_member['bio'] ?? ''); ?></p>
                             <div id="preview_links" class="flex items-center justify-center gap-4 <?php echo empty($edit_member['email'] ?? '') && empty($edit_member['linkedin_url'] ?? '') ? 'hidden' : ''; ?>">
-                                <span id="preview_email" class="inline-flex items-center gap-2 text-[#3d7a66] text-sm font-medium <?php echo empty($edit_member['email'] ?? '') ? 'hidden' : ''; ?>">
+                                <span id="preview_email" class="inline-flex items-center gap-2 text-[#18181b] text-sm font-medium <?php echo empty($edit_member['email'] ?? '') ? 'hidden' : ''; ?>">
                                     <i class="fas fa-envelope text-xs"></i> Email
                                 </span>
-                                <span id="preview_linkedin" class="inline-flex items-center gap-2 text-[#3d7a66] text-sm font-medium <?php echo empty($edit_member['linkedin_url'] ?? '') ? 'hidden' : ''; ?>">
+                                <span id="preview_linkedin" class="inline-flex items-center gap-2 text-[#18181b] text-sm font-medium <?php echo empty($edit_member['linkedin_url'] ?? '') ? 'hidden' : ''; ?>">
                                     <i class="fab fa-linkedin text-xs"></i> LinkedIn
                                 </span>
                             </div>
@@ -622,9 +621,9 @@ $view_url = '../about.php#team';
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-3">
                                             <?php if ($member['photo_url']): ?>
-                                                <img src="<?php echo htmlspecialchars($member['photo_url']); ?>" alt="" class="w-10 h-10 rounded-full object-cover border-2 border-[#eef3f0]">
+                                                <img src="<?php echo htmlspecialchars($member['photo_url']); ?>" alt="" class="w-10 h-10 rounded-full object-cover border-2 border-[#f4f4f5]">
                                             <?php else: ?>
-                                                <div class="w-10 h-10 rounded-full flex items-center justify-center border-2 border-[#eef3f0]" style="background: #3d7a66;">
+                                                <div class="w-10 h-10 rounded-full flex items-center justify-center border-2 border-[#f4f4f5]" style="background: #18181b;">
                                                     <i class="fas fa-user text-white text-sm"></i>
                                                 </div>
                                             <?php endif; ?>
@@ -635,10 +634,10 @@ $view_url = '../about.php#team';
                                     <td class="px-6 py-4 text-sm text-gray-500">
                                         <div class="flex items-center gap-2">
                                             <?php if ($member['email']): ?>
-                                                <i class="fas fa-envelope text-[#3d7a66]" title="<?php echo htmlspecialchars($member['email']); ?>"></i>
+                                                <i class="fas fa-envelope text-[#18181b]" title="<?php echo htmlspecialchars($member['email']); ?>"></i>
                                             <?php endif; ?>
                                             <?php if ($member['linkedin_url']): ?>
-                                                <i class="fab fa-linkedin text-[#3d7a66]" title="LinkedIn"></i>
+                                                <i class="fab fa-linkedin text-[#18181b]" title="LinkedIn"></i>
                                             <?php endif; ?>
                                             <?php if (!$member['email'] && !$member['linkedin_url']): ?>
                                                 <span class="text-gray-400">—</span>
@@ -684,15 +683,6 @@ $view_url = '../about.php#team';
                     'base_query'    => $_GET,
                 ]);
                 ?>
-            </div>
-
-            <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 class="font-semibold text-blue-900 mb-2">Quick Links</h3>
-                <ul class="text-sm text-blue-800 space-y-1">
-                    <li><a href="<?php echo $view_url; ?>" target="_blank" class="hover:underline"><i class="fas fa-external-link-alt mr-1"></i>View Team on About Page</a></li>
-                    <li><a href="about.php" class="hover:underline"><i class="fas fa-info-circle mr-1"></i>Edit About Page Sections</a></li>
-                    <li><a href="index.php" class="hover:underline"><i class="fas fa-home mr-1"></i>Back to Admin Dashboard</a></li>
-                </ul>
             </div>
         <?php endif; ?>
     </div>

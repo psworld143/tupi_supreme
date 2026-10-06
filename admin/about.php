@@ -18,6 +18,7 @@ if ($status_param === 'seeded')  $success = 'Default sections seeded successfull
 $about_sections = [
     'page_header_title'       => ['Page Header Title',       'page-header'],
     'page_header_subtitle'    => ['Page Header Subtitle',    'page-header'],
+    'page_header_image'       => ['Page Header Image',       'page-header'],
     'company_story_title'     => ['Company Story Title',      'company-story'],
     'company_story_content'   => ['Company Story Content',   'company-story'],
     'company_story_icon'      => ['Company Story Icon',       'company-story'],
@@ -40,6 +41,7 @@ $about_sections = [
 $section_types = [
     'page_header_title'       => ['type' => 'title',   'desc' => 'The large heading at the very top of the About page.'],
     'page_header_subtitle'    => ['type' => 'subtitle', 'desc' => 'A short tagline below the page header title.'],
+    'page_header_image'       => ['type' => 'image',   'desc' => 'Optional background photo shown behind the page header. Title and subtitle stay readable on a dark overlay.'],
     'company_story_title'     => ['type' => 'title',   'desc' => 'Heading for the "Our Story" section.'],
     'company_story_content'   => ['type' => 'content', 'desc' => 'The main paragraph(s) telling the company\'s story. Supports rich formatting.'],
     'company_story_icon'      => ['type' => 'icon',    'desc' => 'A Font Awesome icon class shown next to the story section.'],
@@ -59,7 +61,7 @@ $section_types = [
 
 // Group sections by area for the list-view filter dropdown
 $section_groups = [
-    'Page Header'    => ['page_header_title', 'page_header_subtitle'],
+    'Page Header'    => ['page_header_title', 'page_header_subtitle', 'page_header_image'],
     'Company Story'  => ['company_story_title', 'company_story_content', 'company_story_icon'],
     'Mission/Vision' => ['mission_title', 'mission_content', 'mission_icon', 'vision_title', 'vision_content', 'vision_icon'],
     'Timeline'       => ['timeline_title', 'timeline_subtitle'],
@@ -316,17 +318,16 @@ if ($action === 'list') {
 
     <style>
         @media (min-width: 1024px) {
-            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #d2dcd5 transparent; }
+            .lg\:ml-64 { scrollbar-width: thin; scrollbar-color: #e4e4e7 transparent; }
             .lg\:ml-64::-webkit-scrollbar { width: 8px; }
             .lg\:ml-64::-webkit-scrollbar-track { background: transparent; }
-            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #d2dcd5; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
-            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #c0ccc5; }
+            .lg\:ml-64::-webkit-scrollbar-thumb { background-color: #e4e4e7; border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
+            .lg\:ml-64::-webkit-scrollbar-thumb:hover { background-color: #d4d4d8; }
         }
     </style>
 
     <!-- Main Content -->
     <div class="relative lg:ml-64 p-4 lg:p-8">
-        <?php $logo_pulse_logo = '../uploads/images/tupi_supreme_logo.png'; $logo_pulse_mode = 'absolute'; include '../includes/logo_pulse_loader.php'; ?>
 
         <!-- Page Header -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -603,6 +604,13 @@ if ($action === 'list') {
                     descHint.textContent = 'Use the rich text editor below. Supports formatting (bold, lists, links, etc.).';
                     titleWrap.classList.add('hidden');
                     richWrap.classList.remove('hidden');
+                    plainWrap.classList.add('hidden');
+                    iconWrap.classList.add('hidden');
+                    imageWrap.classList.remove('hidden');
+                } else if (type === 'image') {
+                    descHint.textContent = 'Upload or paste an image — it is used as the header background photo.';
+                    titleWrap.classList.add('hidden');
+                    richWrap.classList.add('hidden');
                     plainWrap.classList.add('hidden');
                     iconWrap.classList.add('hidden');
                     imageWrap.classList.remove('hidden');
@@ -951,15 +959,6 @@ if ($action === 'list') {
                     'base_query'    => $_GET,
                 ]);
                 ?>
-            </div>
-
-            <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 class="font-semibold text-blue-900 mb-2">Quick Links</h3>
-                <ul class="text-sm text-blue-800 space-y-1">
-                    <li><a href="../about.php" target="_blank" class="hover:underline"><i class="fas fa-external-link-alt mr-1"></i>View About Page</a></li>
-                    <li><a href="pages.php" class="hover:underline"><i class="fas fa-file-alt mr-1"></i>Manage General Page Content</a></li>
-                    <li><a href="index.php" class="hover:underline"><i class="fas fa-home mr-1"></i>Back to Admin Dashboard</a></li>
-                </ul>
             </div>
         <?php endif; ?>
     </div>

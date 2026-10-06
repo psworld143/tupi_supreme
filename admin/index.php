@@ -5,47 +5,76 @@ requireLogin();
 $user = getCurrentUser();
 $db = getDB();
 
-// Get statistics
+// KPI counts
 $stats = [];
-
-// Total pages content
 $result = $db->query("SELECT COUNT(*) as count FROM page_content WHERE is_active = 1");
 $stats['pages'] = $result->fetch_assoc()['count'];
-
-// Total products
 $result = $db->query("SELECT COUNT(*) as count FROM products WHERE is_active = 1");
 $stats['products'] = $result->fetch_assoc()['count'];
-
-// Total services
 $result = $db->query("SELECT COUNT(*) as count FROM services WHERE is_active = 1");
 $stats['services'] = $result->fetch_assoc()['count'];
-
-// Total case studies
 $result = $db->query("SELECT COUNT(*) as count FROM case_studies WHERE is_active = 1");
 $stats['case_studies'] = $result->fetch_assoc()['count'];
-
-// Total gallery images
 $result = $db->query("SELECT COUNT(*) as count FROM gallery_images WHERE is_active = 1");
 $stats['gallery'] = $result->fetch_assoc()['count'];
-
-// Total resources
 $result = $db->query("SELECT COUNT(*) as count FROM resources WHERE is_active = 1");
 $stats['resources'] = $result->fetch_assoc()['count'];
-
-// Total certifications
 $result = $db->query("SELECT COUNT(*) as count FROM certifications WHERE is_active = 1");
 $stats['certifications'] = $result->fetch_assoc()['count'];
-
-// Unread messages
 $result = $db->query("SELECT COUNT(*) as count FROM contact_messages WHERE is_read = 0 AND is_archived = 0");
 $stats['messages'] = $result->fetch_assoc()['count'];
 
-// Recent activity
+// This-month deltas for the trend chips
+$this_month = [];
+$result = $db->query("SELECT COUNT(*) as count FROM contact_messages WHERE created_at >= DATE_FORMAT(CURDATE(), '%Y-%m-01')");
+$this_month['messages'] = $result->fetch_assoc()['count'];
+$result = $db->query("SELECT COUNT(*) as count FROM products WHERE is_active = 1 AND created_at >= DATE_FORMAT(CURDATE(), '%Y-%m-01')");
+$this_month['products'] = ($result && ($r = $result->fetch_assoc())) ? $r['count'] : 0;
+
+// Chart data: admin activity per day over the selected range
+$range = intval($_GET['range'] ?? 30);
+if (!in_array($range, [7, 30, 90], true)) $range = 30;
+$daily = array_fill(0, $range, 0);
+$res = $db->query("SELECT DATE(created_at) d, COUNT(*) c FROM activity_logs WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL " . ($range - 1) . " DAY) GROUP BY DATE(created_at)");
+if ($res) {
+    $first = strtotime("-{$range} days +1 day");
+    while ($row = $res->fetch_assoc()) {
+        $idx = (int) floor((strtotime($row['d']) - $first) / 86400);
+        if ($idx >= 0 && $idx < $range) $daily[$idx] = (int) $row['c'];
+    }
+}
+$total_actions = array_sum($daily);
+
+// Build a smooth SVG area chart from the daily series
+$chartW = 800; $chartH = 220; $pad = 4;
+$max = max(1, max($daily));
+$stepX = ($chartW - $pad * 2) / max(1, $range - 1);
+$pts = [];
+foreach ($daily as $i => $v) {
+    $pts[] = [$pad + $i * $stepX, $chartH - $pad - ($v / $max) * ($chartH - $pad * 2 - 20)];
+}
+$line = '';
+foreach ($pts as $i => $p) {
+    if ($i === 0) { $line = "M {$p[0]} {$p[1]}"; continue; }
+    $prev = $pts[$i - 1];
+    $cx = ($prev[0] + $p[0]) / 2;
+    $line .= " C {$cx} {$prev[1]}, {$cx} {$p[1]}, {$p[0]} {$p[1]}";
+}
+$area = $line . " L " . ($pad + ($range - 1) * $stepX) . " {$chartH} L {$pad} {$chartH} Z";
+
+// Recent activity table
 $result = $db->query("SELECT al.*, au.username, au.full_name FROM activity_logs al LEFT JOIN admin_users au ON al.user_id = au.id ORDER BY al.created_at DESC LIMIT 10");
 $recent_activity = [];
 while ($row = $result->fetch_assoc()) {
     $recent_activity[] = $row;
 }
+
+$cards = [
+    ['Pages',         $stats['pages'],    'Content sections live on the site', 'fa-file-alt',       'pages.php'],
+    ['Products',      $stats['products'], 'Active in the catalog',             'fa-cube',           'products.php'],
+    ['Services',      $stats['services'], 'Published service offerings',       'fa-concierge-bell', 'services.php'],
+    ['Unread Inbox',  $stats['messages'], 'Contact form messages',             'fa-envelope',       'messages.php'],
+];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -72,203 +101,167 @@ while ($row = $result->fetch_assoc()) {
         }
     </script>
 </head>
-<body class="bg-gray-100">
-    <!-- Sidebar -->
+<body class="bg-white">
     <?php include 'includes/sidebar.php'; ?>
 
-    <!-- Page-scoped alignment: keep the main content card the exact same
-         height as the fixed sidebar so both panels align top/bottom. -->
     <style>
-        @media (min-width: 1024px) {
-            /* Thin, themed scrollbar for the in-card scroll area */
-            .lg\:ml-64 {
-                scrollbar-width: thin;
-                scrollbar-color: #d2dcd5 transparent;
-            }
-            .lg\:ml-64::-webkit-scrollbar {
-                width: 8px;
-            }
-            .lg\:ml-64::-webkit-scrollbar-track {
-                background: transparent;
-            }
-            .lg\:ml-64::-webkit-scrollbar-thumb {
-                background-color: #d2dcd5;
-                border-radius: 4px;
-                border: 2px solid transparent;
-                background-clip: padding-box;
-            }
-            .lg\:ml-64::-webkit-scrollbar-thumb:hover {
-                background-color: #c0ccc5;
-            }
-        }
-
-        /* Fade-in animation for dashboard content */
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(12px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-
-        .fade-in {
-            opacity: 0;
-            animation: fadeInUp 0.5s ease-out forwards;
-        }
-
-        /* Staggered delays for a cascading reveal */
+        .fade-in { opacity: 0; animation: fadeInUp 0.5s ease-out forwards; }
         .fade-in-delay-1 { animation-delay: 0.05s; }
         .fade-in-delay-2 { animation-delay: 0.15s; }
         .fade-in-delay-3 { animation-delay: 0.25s; }
         .fade-in-delay-4 { animation-delay: 0.35s; }
-        .fade-in-delay-5 { animation-delay: 0.45s; }
-
-        /* Respect reduced-motion preference */
         @media (prefers-reduced-motion: reduce) {
-            .fade-in {
-                opacity: 1;
-                animation: none;
-            }
+            .fade-in { opacity: 1; animation: none; }
         }
+        .chart-tip { opacity: 0; transition: opacity .15s ease; }
+        .chart-dot:hover + .chart-tip, .chart-hit:hover .chart-tip { opacity: 1; }
     </style>
 
     <!-- Main Content -->
-    <div class="lg:ml-64 p-6 lg:p-12">
-        <!-- Hero / Welcome -->
-        <div class="mb-12 fade-in fade-in-delay-1">
-            <h1 class="text-3xl lg:text-4xl font-bold text-[#23332c]">Hello! I'm <?php echo htmlspecialchars($user['full_name'] ?: $user['username']); ?></h1>
-            <div class="flex flex-wrap items-center gap-x-5 gap-y-2 mt-2">
-                <span class="text-[#3d7a66] font-medium text-lg"><?php echo htmlspecialchars(ucwords(str_replace('_', ' ', $user['role'] ?? 'Administrator'))); ?></span>
-                <span class="inline-flex items-center gap-1.5 text-sm text-[#66746c]">
-                    <i class="fas fa-globe"></i> <?php echo SITE_NAME; ?>
-                </span>
+    <div class="lg:ml-64 p-6 lg:p-8">
+        <!-- Page heading row -->
+        <div class="flex items-center justify-between mb-6 fade-in fade-in-delay-1">
+            <div>
+                <h1 class="text-xl font-semibold text-zinc-900">Dashboard</h1>
+                <p class="text-sm text-zinc-500 mt-0.5">Welcome back, <?php echo htmlspecialchars($user['full_name'] ?: $user['username']); ?></p>
             </div>
-            <p class="text-[#7d8b84] mt-5 max-w-xl text-sm leading-relaxed">
-                Manage your website content, products, services and messages from this admin console.
-            </p>
-            <div class="flex flex-wrap gap-3 mt-6">
-                <a href="../index.php" target="_blank" class="px-5 py-2.5 rounded-full bg-[#3d7a66] text-white text-sm font-medium hover:bg-[#2f6351] transition-colors">View Website</a>
-                <a href="messages.php" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-[#d6ded9] text-sm font-medium text-[#23332c] hover:bg-[#eff4f1] transition-colors">
-                    <i class="far fa-envelope"></i> Messages
+            <div class="flex items-center gap-2">
+                <a href="../index.php" target="_blank" class="inline-flex items-center gap-2 h-9 px-4 rounded-md border border-zinc-200 bg-white text-sm font-medium text-zinc-900 hover:bg-zinc-100 transition-colors">
+                    <i class="fas fa-globe text-xs"></i> View Website
+                </a>
+                <a href="pages.php?action=add" class="inline-flex items-center gap-2 h-9 px-4 rounded-md bg-[#2c5530] text-sm font-medium text-white hover:bg-[#22402a] transition-colors">
+                    <i class="fas fa-plus text-xs"></i> Quick Create
                 </a>
             </div>
         </div>
 
-        <!-- Overview -->
-        <div class="flex items-center justify-between mb-5 fade-in fade-in-delay-2">
-            <h2 class="text-xl font-bold text-[#23332c]">Overview</h2>
-            <a href="statistics.php" class="text-sm text-[#7d8b84] hover:text-[#23332c] transition-colors">View All <i class="fas fa-arrow-right text-xs"></i></a>
-        </div>
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12 fade-in fade-in-delay-2">
-            <a href="pages.php" class="border border-[#e6ece8] rounded-2xl p-5 hover:bg-[#f7faf8] transition-colors">
-                <div class="w-10 h-10 rounded-full bg-[#eef3f0] flex items-center justify-center mb-4">
-                    <i class="fas fa-file-alt text-[#60796e]"></i>
-                </div>
-                <p class="text-3xl font-semibold text-[#23332c]"><?php echo $stats['pages']; ?></p>
-                <p class="text-xs text-[#8a978f] mt-1">Page Content</p>
-            </a>
-
-            <a href="products.php" class="border border-[#e6ece8] rounded-2xl p-5 hover:bg-[#f7faf8] transition-colors">
-                <div class="w-10 h-10 rounded-full bg-[#eef3f0] flex items-center justify-center mb-4">
-                    <i class="fas fa-cube text-[#60796e]"></i>
-                </div>
-                <p class="text-3xl font-semibold text-[#23332c]"><?php echo $stats['products']; ?></p>
-                <p class="text-xs text-[#8a978f] mt-1">Products</p>
-            </a>
-
-            <a href="services.php" class="border border-[#e6ece8] rounded-2xl p-5 hover:bg-[#f7faf8] transition-colors">
-                <div class="w-10 h-10 rounded-full bg-[#eef3f0] flex items-center justify-center mb-4">
-                    <i class="fas fa-concierge-bell text-[#60796e]"></i>
-                </div>
-                <p class="text-3xl font-semibold text-[#23332c]"><?php echo $stats['services']; ?></p>
-                <p class="text-xs text-[#8a978f] mt-1">Services</p>
-            </a>
-
-            <a href="messages.php" class="border border-[#e6ece8] rounded-2xl p-5 hover:bg-[#f7faf8] transition-colors">
-                <div class="w-10 h-10 rounded-full bg-[#eef3f0] flex items-center justify-center mb-4">
-                    <i class="fas fa-envelope text-[#60796e]"></i>
-                </div>
-                <p id="stat-messages-count" class="text-3xl font-semibold <?php echo $stats['messages'] > 0 ? 'text-red-500' : 'text-[#23332c]'; ?>"><?php echo $stats['messages']; ?></p>
-                <p class="text-xs text-[#8a978f] mt-1">Unread Messages</p>
-            </a>
+        <!-- KPI cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6 fade-in fade-in-delay-2">
+            <?php foreach ($cards as $c): ?>
+                <a href="<?php echo $c[4]; ?>" class="group rounded-lg border border-zinc-200 bg-white p-5 hover:border-zinc-300 transition-colors">
+                    <div class="flex items-center justify-between">
+                        <p class="text-sm text-zinc-500"><?php echo $c[0]; ?></p>
+                        <span class="inline-flex items-center gap-1 rounded-md border border-zinc-200 px-1.5 py-0.5 text-[11px] font-medium text-zinc-600">
+                            <i class="fas <?php echo $c[3]; ?> text-[9px]"></i>
+                            <?php echo $c[0] === 'Unread Inbox' ? ($c[1] > 0 ? 'new' : 'clear') : 'active'; ?>
+                        </span>
+                    </div>
+                    <p class="mt-2 text-2xl font-semibold text-zinc-900 tabular-nums"><?php echo number_format($c[1]); ?></p>
+                    <div class="mt-2 flex items-center justify-between">
+                        <p class="text-xs text-zinc-500 truncate"><?php echo $c[2]; ?></p>
+                        <i class="fas fa-arrow-trend-up text-[10px] text-zinc-300 group-hover:text-[#2c5530] transition-colors"></i>
+                    </div>
+                </a>
+            <?php endforeach; ?>
         </div>
 
-        <!-- Quick Actions -->
-        <h2 class="text-xl font-bold text-[#23332c] mb-5 fade-in fade-in-delay-3">Quick Actions</h2>
-        <div class="flex flex-wrap gap-3 mb-12 fade-in fade-in-delay-3">
-            <a href="pages.php?action=add" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#23332c] text-white text-sm font-medium hover:bg-[#3a4a41] transition-colors">
-                <i class="fas fa-plus text-xs"></i> Page Content
-            </a>
-            <a href="products.php?action=add" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-[#d6ded9] text-sm font-medium text-[#23332c] hover:bg-[#eff4f1] transition-colors">
-                <i class="fas fa-plus text-xs"></i> Product
-            </a>
-            <a href="case-studies.php?action=add" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-[#d6ded9] text-sm font-medium text-[#23332c] hover:bg-[#eff4f1] transition-colors">
-                <i class="fas fa-plus text-xs"></i> Case Study
-            </a>
-            <a href="gallery.php?action=add" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-[#d6ded9] text-sm font-medium text-[#23332c] hover:bg-[#eff4f1] transition-colors">
-                <i class="fas fa-plus text-xs"></i> Gallery Image
-            </a>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 fade-in fade-in-delay-4">
-            <!-- Content Management -->
-            <div>
-                <h2 class="text-xl font-bold text-[#23332c] mb-5">Content Management</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <?php
-                    $content_links = [
-                        ['pages.php',          'fa-file-alt',      'Page Content',   'Manage page sections'],
-                        ['products.php',       'fa-cube',          'Products',       'Manage products'],
-                        ['services.php',       'fa-concierge-bell','Services',       'Manage services'],
-                        ['case-studies.php',   'fa-book',          'Case Studies',   'Manage case studies'],
-                        ['gallery.php',        'fa-photo-video',   'Gallery',        'Manage images'],
-                        ['resources.php',      'fa-file-download', 'Resources',      'Manage documents'],
-                        ['certifications.php', 'fa-certificate',   'Certifications', 'Manage certifications'],
-                        ['messages.php',       'fa-envelope',      'Messages',       'View contact messages'],
-                    ];
-                    foreach ($content_links as $link):
-                    ?>
-                        <a href="<?php echo $link[0]; ?>" class="flex items-center gap-3 p-4 border border-[#e6ece8] rounded-2xl hover:bg-[#f7faf8] transition-colors">
-                            <div class="w-9 h-9 rounded-full bg-[#eef3f0] flex items-center justify-center flex-shrink-0">
-                                <i class="fas <?php echo $link[1]; ?> text-[#60796e] text-sm"></i>
-                            </div>
-                            <div class="min-w-0">
-                                <p class="font-medium text-sm text-[#23332c]"><?php echo $link[2]; ?></p>
-                                <p class="text-xs text-[#8a978f] truncate"><?php echo $link[3]; ?></p>
-                            </div>
-                        </a>
+        <!-- Activity chart card -->
+        <div class="rounded-lg border border-zinc-200 bg-white mb-6 fade-in fade-in-delay-3">
+            <div class="flex flex-wrap items-center justify-between gap-3 px-5 pt-5 pb-4">
+                <div>
+                    <h2 class="text-sm font-semibold text-zinc-900">Admin Activity</h2>
+                    <p class="text-xs text-zinc-500 mt-0.5"><?php echo number_format($total_actions); ?> actions in the last <?php echo $range; ?> days</p>
+                </div>
+                <div class="inline-flex items-center gap-1 rounded-lg bg-zinc-100 p-1">
+                    <?php foreach ([90 => 'Last 3 months', 30 => 'Last 30 days', 7 => 'Last 7 days'] as $r => $label): ?>
+                        <a href="?range=<?php echo $r; ?>" class="px-3 py-1 rounded-md text-xs font-medium transition-colors <?php echo $range === $r ? 'bg-white text-zinc-900 shadow-sm border border-zinc-200' : 'text-zinc-500 hover:text-zinc-900'; ?>"><?php echo $label; ?></a>
                     <?php endforeach; ?>
                 </div>
             </div>
+            <div class="px-5 pb-5">
+                <svg viewBox="0 0 <?php echo $chartW; ?> <?php echo $chartH; ?>" class="w-full h-56" preserveAspectRatio="none">
+                    <defs>
+                        <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#2c5530" stop-opacity="0.18" />
+                            <stop offset="100%" stop-color="#2c5530" stop-opacity="0" />
+                        </linearGradient>
+                    </defs>
+                    <?php for ($g = 1; $g <= 3; $g++): ?>
+                        <line x1="0" y1="<?php echo $chartH * $g / 4; ?>" x2="<?php echo $chartW; ?>" y2="<?php echo $chartH * $g / 4; ?>" stroke="#f4f4f5" stroke-width="1" />
+                    <?php endfor; ?>
+                    <path d="<?php echo $area; ?>" fill="url(#areaFill)" />
+                    <path d="<?php echo $line; ?>" fill="none" stroke="#2c5530" stroke-width="1.5" stroke-linecap="round" />
+                    <?php foreach ($pts as $i => $p): ?>
+                        <?php if ($daily[$i] > 0): ?>
+                            <circle cx="<?php echo $p[0]; ?>" cy="<?php echo $p[1]; ?>" r="3" fill="#2c5530" opacity="0" class="chart-hit" />
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </svg>
+                <div class="flex justify-between text-[10px] text-zinc-400 mt-1 px-1">
+                    <span><?php echo date('M j', strtotime("-{$range} days +1 day")); ?></span>
+                    <span><?php echo date('M j', strtotime('-' . floor($range / 2) . ' days')); ?></span>
+                    <span><?php echo date('M j'); ?></span>
+                </div>
+            </div>
+        </div>
 
-            <!-- Recent Activity -->
-            <div>
-                <h2 class="text-xl font-bold text-[#23332c] mb-5">Recent Activity</h2>
-                <div class="space-y-3 max-h-96 overflow-y-auto pr-2">
-                    <?php if (empty($recent_activity)): ?>
-                        <p class="text-[#8a978f] text-sm py-4">No recent activity</p>
-                    <?php else: ?>
-                        <?php foreach ($recent_activity as $activity): ?>
-                            <div class="border-l-2 border-[#3d7a66] pl-4 py-1.5">
-                                <p class="text-sm text-[#23332c]">
-                                    <span class="font-semibold"><?php echo htmlspecialchars($activity['username']); ?></span>
-                                    <?php echo htmlspecialchars($activity['action']); ?>
-                                    <?php if ($activity['table_name']): ?>
-                                        <span class="text-[#8a978f]">in <?php echo htmlspecialchars($activity['table_name']); ?></span>
-                                    <?php endif; ?>
-                                </p>
-                                <p class="text-xs text-[#8a978f]"><?php echo formatDate($activity['created_at'], 'M d, Y H:i'); ?></p>
-                            </div>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
+        <!-- Recent activity table -->
+        <div class="rounded-lg border border-zinc-200 bg-white overflow-hidden fade-in fade-in-delay-4">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-zinc-200">
+                <div>
+                    <h2 class="text-sm font-semibold text-zinc-900">Recent Activity</h2>
+                    <p class="text-xs text-zinc-500 mt-0.5">Latest actions across the admin console</p>
+                </div>
+                <a href="settings.php" class="inline-flex items-center gap-2 h-8 px-3 rounded-md border border-zinc-200 bg-white text-xs font-medium text-zinc-900 hover:bg-zinc-100 transition-colors">
+                    <i class="fas fa-gear text-[10px]"></i> Customize
+                </a>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead>
+                        <tr>
+                            <th class="text-left">User</th>
+                            <th class="text-left">Action</th>
+                            <th class="text-left">Section</th>
+                            <th class="text-left">Record</th>
+                            <th class="text-left">When</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($recent_activity)): ?>
+                            <tr><td colspan="5" class="text-center py-10">
+                                <i class="far fa-clock text-zinc-300 text-2xl"></i>
+                                <p class="text-sm text-zinc-500 mt-2">No activity recorded yet</p>
+                            </td></tr>
+                        <?php else: ?>
+                            <?php foreach ($recent_activity as $activity): ?>
+                                <tr>
+                                    <td>
+                                        <div class="flex items-center gap-2.5">
+                                            <span class="w-6 h-6 rounded-full bg-[#e9f1ea] text-[#2c5530] flex items-center justify-center text-[10px] font-medium flex-shrink-0">
+                                                <?php echo strtoupper(substr($activity['username'] ?? '?', 0, 1)); ?>
+                                            </span>
+                                            <span class="font-medium text-zinc-900"><?php echo htmlspecialchars($activity['full_name'] ?: $activity['username']); ?></span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="inline-flex items-center rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-700">
+                                            <?php echo htmlspecialchars($activity['action']); ?>
+                                        </span>
+                                    </td>
+                                    <td class="text-zinc-500"><?php echo htmlspecialchars($activity['table_name'] ?: '—'); ?></td>
+                                    <td class="text-zinc-500 tabular-nums"><?php echo $activity['record_id'] ? '#' . (int) $activity['record_id'] : '—'; ?></td>
+                                    <td class="text-zinc-500 whitespace-nowrap"><?php echo formatDate($activity['created_at'], 'M d, g:i A'); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex items-center justify-between px-5 py-3 border-t border-zinc-200">
+                <p class="text-xs text-zinc-500">0 of <?php echo count($recent_activity); ?> row(s) selected.</p>
+                <div class="flex items-center gap-4">
+                    <span class="text-xs text-zinc-500">Rows per page <span class="font-medium text-zinc-900">10</span></span>
+                    <span class="text-xs text-zinc-500">Page 1 of 1</span>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <script>
         // Auto-refresh messages count every 30 seconds
         setInterval(function() {
@@ -279,7 +272,6 @@ while ($row = $result->fetch_assoc()) {
                         const messagesEl = document.getElementById('stat-messages-count');
                         if (messagesEl) {
                             messagesEl.textContent = data.messages;
-                            messagesEl.className = data.messages > 0 ? 'text-3xl font-semibold text-red-500' : 'text-3xl font-semibold text-[#23332c]';
                         }
                     }
                 })
@@ -288,4 +280,3 @@ while ($row = $result->fetch_assoc()) {
     </script>
 </body>
 </html>
-
