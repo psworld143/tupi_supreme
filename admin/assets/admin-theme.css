@@ -435,6 +435,36 @@ button.bg-primary:hover, a.bg-primary:hover {
 /* Headings tighten up slightly like shadcn */
 .lg\:ml-64 h1, .lg\:ml-64 h2, .lg\:ml-64 h3 { letter-spacing: -0.01em; }
 
+/* ── Anti-slop pass ──────────────────────────────────────────────────────
+   Normalize generic admin-template tells across every page: oversized
+   bold titles, decorative icons inside headings, giant empty-state icons,
+   and over-rounded corners. */
+
+/* "X Management" page titles: text-3xl bold + icon → text-xl semibold, no icon */
+.lg\:ml-64 h1.text-3xl {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--foreground);
+}
+.lg\:ml-64 h1.text-3xl i { display: none; }
+
+/* "Add New / Edit X" form titles: text-2xl bold → text-lg semibold */
+.lg\:ml-64 h2.text-2xl {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--foreground);
+}
+
+/* Oversized empty-state icons in table rows → modest size + zinc tint */
+table.min-w-full td i[class*="text-4xl"],
+table.min-w-full td i[class*="text-5xl"] {
+    font-size: 1.25rem;
+    color: #d4d4d8 !important;
+}
+
+/* rounded-xl joins the radius shim (2xl/3xl already covered above) */
+.lg\:ml-64 [class*="rounded-xl"] { border-radius: var(--radius) !important; }
+
 @media (prefers-reduced-motion: reduce) {
     .lg\:ml-64 * { transition: none !important; }
 }
